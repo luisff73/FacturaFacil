@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@tailwind base; /*Importa las directivas de tailwind por defecto*/
+@tailwind components; /* importa elementos prededifinos de tailwindo como los botones y formularios */
+@tailwind utilities; /* importa las clases personalizadas de tailwind .. margin, color.. etc... */ 
 
 input[type='number'] {
   -moz-appearance: textfield;

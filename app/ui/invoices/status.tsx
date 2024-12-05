@@ -1,5 +1,5 @@
 import { CheckIcon, ClockIcon } from '@heroicons/react/24/outline';
-import clsx from 'clsx';
+import clsx from 'clsx';  /* importamos el fichero para aplicar las clases condicionalmente dependiendo de su estado */
 
 export default function InvoiceStatus({ status }: { status: string }) {
   return (
@@ -7,7 +7,7 @@ export default function InvoiceStatus({ status }: { status: string }) {
       className={clsx(
         'inline-flex items-center rounded-full px-2 py-1 text-xs',
         {
-          'bg-gray-100 text-gray-500': status === 'pending',
+          'bg-gray-100 text-gray-500': status === 'pending', /*aqui el estado pendiente/pagado*/
           'bg-green-500 text-white': status === 'paid',
         },
       )}
