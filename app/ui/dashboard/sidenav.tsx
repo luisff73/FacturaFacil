@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import NavLinks from '@/app/ui/dashboard/nav-links';
-import FacturaFacilLogo from '@/app/ui/factura-facil-';
+import FacturaFacilLogo from '@/app/ui/factura-facil';
 import { PowerIcon } from '@heroicons/react/24/outline';
 
 export default function SideNav() {
