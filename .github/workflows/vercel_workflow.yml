@@ -1,0 +1,108 @@
+name: nodejs_blog_practica
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  linter_job:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+
+      - name: Clean npm cache
+        run: npm cache clean --force
+
+      - name: Set npm registry
+        run: npm set registry https://registry.npmjs.org/
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run linter
+        run: npm run lint
+
+  Cypress_job:
+    needs: linter_job
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm run start
+          wait-on: "http://localhost:3000"
+          wait-on-timeout: 60
+        continue-on-error: true
+
+      - name: Save Cypress test results
+        run: |
+          if [ $? -eq 0 ]; then 
+          echo "success" > result.txt
+          else
+          echo "failure" > result.txt
+          ls -l
+          cp cypress/videos/*.mp4 . || true
+          fi
+          cat result.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-results
+          path: result.txt
+
+  
+
+  Deploy_job_to_vercel:
+    runs-on: ubuntu-24.04
+    needs: Cypress_job # Depende del Cypress_job
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }} # Configura el token a secrets
+          vercel-args: "--prod"
+          working-directory: ./
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }} # Configura el ID de la organización a secrets
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }} # Configura el ID del proyecto a secrets
+
+  Notification_job:
+    runs-on: ubuntu-24.04
+    needs: [linter_job, Cypress_job, Add_badge_job, Deploy_job] # Depende de todos los trabajos anteriores
+    if: always()
+    steps:
+      - name: Send notification email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.GMAIL_USERNAME }}
+          password: ${{ secrets.GMAIL_PASSWORD }}
+          subject: "Resultat del workflow executat"
+          to: ${{ secrets.PERSONAL_EMAIL }}
+          from: "GitHub Actions <actions@example.com>"
+          body: |
+            S'ha realitzat un push en la branca main que ha provocat l'execució del workflow nodejs_blog_practica amb els següents resultats:
+
+            - linter_job: ${{ needs.linter_job.result }}
+            - cypress_job: ${{ needs.Cypress_job.result }}
+            - add_badge_job: ${{ needs.Add_badge_job.result }}
+            - deploy_job: ${{ needs.Deploy_job.result }}
+
+  
