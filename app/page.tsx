@@ -9,6 +9,8 @@ export default function Page() {
   return (
     <main className="flex min-h-screen flex-col p-6">
       {/* <div className={styles.shape}  ejemplo de utilizacion de css personalizado esta clase esta en home.module.css/>  */}
+      
+      {/* ahora este componente esta en el layout */}
       <div className="flex h-auto w-full shrink-0 items-end rounded-lg bg-green-500 p-4 md:h-50 md:w-full">
         <FacturaFacilLogo />
       </div>
