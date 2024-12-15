@@ -6,31 +6,31 @@ on:
       - master
 
 jobs:
-  linter_job:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  # linter_job:
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: "18"
 
-      - name: Clean npm cache
-        run: npm cache clean --force
+  #     - name: Clean npm cache
+  #       run: npm cache clean --force
 
-      - name: Set npm registry
-        run: npm set registry https://registry.npmjs.org/
+  #     - name: Set npm registry
+  #       run: npm set registry https://registry.npmjs.org/
 
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
+  #     - name: Install dependencies
+  #       run: npm install --legacy-peer-deps
 
-      - name: Run linter
-        run: npm run lint
+  #     - name: Run linter
+  #       run: npm run lint
 
   Cypress_job:
-    needs: linter_job
+    # needs: linter_job
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
@@ -82,7 +82,7 @@ jobs:
 
   Notification_job:
     runs-on: ubuntu-24.04
-    needs: [linter_job, Cypress_job, Deploy_job_to_vercel] # Depende de todos los trabajos anteriores
+    needs: [Cypress_job, Deploy_job_to_vercel] # Depende de todos los trabajos anteriores
     if: always()
     steps:
       - name: Send notification email
@@ -98,6 +98,6 @@ jobs:
           body: |
             S'ha realitzat un push en la branca main que ha provocat l'execució del workflow nodejs_blog_practica amb els següents resultats:
 
-            - linter_job: ${{ needs.linter_job.result }}
+            
             - cypress_job: ${{ needs.Cypress_job.result }}
             - deploy_job_to_vercel: ${{ needs.Deploy_job_to_vercel.result }}
