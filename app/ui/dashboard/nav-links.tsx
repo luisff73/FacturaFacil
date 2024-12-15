@@ -40,7 +40,7 @@ export default function NavLinks() {
             )}
           >
             <LinkIcon className="w-6" />
-            <p className="hidden md:block">{link.name}</p> // este parrafo solo se muestra en pantallas grandes
+            <p className="hidden md:block">{link.name}</p> {/*este parrafo solo se muestra en pantallas grandes*/}
           </Link>
         );
       })}
