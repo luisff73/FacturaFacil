@@ -1,4 +1,12 @@
+ 
+// Importamos la función sql de la librería @vercel/postgres
+// sql: Esta es una función proporcionada por la librería @vercel/postgres. 
+// Se utiliza para interactuar con una base de datos PostgreSQL. 
+// Permite ejecutar consultas SQL de manera segura y eficiente.
 import { sql } from '@vercel/postgres';
+
+
+// Importación de tipos y definiciones desde ./definitions:
 import {
   CustomerField,
   CustomersTableType,
@@ -7,9 +15,14 @@ import {
   LatestInvoiceRaw,
   Revenue,
 } from './definitions';
+
+
+
+
 import { formatCurrency } from './utils';
 
 export async function fetchRevenue() {
+  
   try {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
