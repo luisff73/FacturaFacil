@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: "18"
 
       - name: Clean npm cache
         run: npm cache clean --force
@@ -24,7 +24,7 @@ jobs:
         run: npm set registry https://registry.npmjs.org/
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Run linter
         run: npm run lint
