@@ -14,6 +14,7 @@ export default function FacturaFacilLogo() {
         height={140}
         alt="Logo Factura Fácil"
         className="h-20 w-20 md:h-36 md:w-36 self-start"
+        priority
       />
       <div className="flex flex-col md:flex-row ml-4 items-start">
         <p className="text-[15px] md:text-[30px] self-start mr-4">Tu programa de gestión</p>

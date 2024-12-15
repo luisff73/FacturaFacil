@@ -82,7 +82,7 @@ export function LatestInvoicesSkeleton() {
   );
 }
 
-export default function DashboardSkeleton() {
+export default function DashboardSkeleton() {  // esto crea un esqueleto de la pagina mientras se resuelven las promesas
   return (
     <>
       <div
