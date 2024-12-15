@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
+import NextImage from 'next/image';
 
 interface ImageProps {
     src: string;
@@ -11,7 +12,7 @@ interface ImageProps {
 
 const Image: React.FC<ImageProps> = ({ src, width, height, className, alt }) => {
     return (
-        <img src={src} width={width} height={height} className={className} alt={alt} />
+        <NextImage src={src} width={width} height={height} className={className} alt={alt} />
     );
 };
 
