@@ -2,6 +2,7 @@
 import SideNav from '@/app/ui/dashboard/sidenav';
 import FacturaFacilLogo from '@/app/ui/factura-facil';
 import { inter } from '@/app/ui/fonts';
+export const experimental_ppr = true;  //esto es para activar el ppr (rencerizado parcial) (ver next.config.ts)
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
