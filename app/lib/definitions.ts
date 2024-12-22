@@ -17,13 +17,13 @@ export type Customer = {
 };
 
 export type Invoice = {
-  id: string;
+  id: string; // This is a unique identifier for the invoice
   customer_id: string;
   amount: number;
-  date: string;
   // In TypeScript, this is called a string union type.
   // It means that the "status" property can only be one of the two strings: 'pending' or 'paid'.
-  status: 'pending' | 'paid';
+  status: 'pending' | 'paid' | 'proforma';
+  date: string;
 };
 
 export type Revenue = {
@@ -52,7 +52,7 @@ export type InvoicesTable = {
   image_url: string;
   date: string;
   amount: number;
-  status: 'pending' | 'paid';
+  status: 'pending' | 'paid' | 'proforma';
 };
 
 export type CustomersTableType = {
@@ -83,6 +83,6 @@ export type CustomerField = {
 export type InvoiceForm = {
   id: string;
   customer_id: string;
-  amount: number;
-  status: 'pending' | 'paid';
+  amount: number; 
+  status: 'pending' | 'paid' | 'proforma';
 };
