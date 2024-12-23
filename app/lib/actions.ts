@@ -22,6 +22,27 @@ const FormSchema = z.object({ //crea un objeto con los campos que se van a valid
 });
  
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
+const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+
+export async function updateInvoice(id: string, formData: FormData) {
+  const { customerId, amount, status } = UpdateInvoice.parse({
+    customerId: formData.get('customerId'),
+    amount: formData.get('amount'),
+    status: formData.get('status'),
+  });
+ 
+  const amountInCents = amount * 100;
+ 
+  await sql`
+    UPDATE invoices
+    SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+    WHERE id = ${id}
+  `;
+ 
+  revalidatePath('/dashboard/invoices');
+  redirect('/dashboard/invoices');
+}
+
 
 // La función createInvoice toma un FormData objeto y lo envía a un servidor para crear una nueva factura.
 export async function createInvoice(formData: FormData) {
@@ -49,4 +70,13 @@ export async function createInvoice(formData: FormData) {
   console.log('Este es el valor de FormData ' + JSON.stringify(rawFormData));
   //console.log(typeof FormData.amount);  //esto es para ver el tipo de dato que se esta enviando ojo que es un string
 
+}
+
+export async function deleteInvoice(id: string) {
+  try{
+  await sql`DELETE FROM invoices WHERE id = ${id}`;
+  revalidatePath('/dashboard/invoices');;
+  }catch(error){
+    throw new Error('No se pudo eliminar la factura');
+  }
 }
