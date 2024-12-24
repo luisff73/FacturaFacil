@@ -71,6 +71,7 @@ export async function fetchCardData() {
     const invoiceStatusPromise = sql`SELECT
          SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
          SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
+         SUM(CASE WHEN status = 'proforma' THEN amount ELSE 0 END) AS "proforma"
          FROM invoices`;
 
     const data = await Promise.all([
@@ -83,12 +84,14 @@ export async function fetchCardData() {
     const numberOfCustomers = Number(data[1].rows[0].count ?? '0');
     const totalPaidInvoices = formatCurrency(data[2].rows[0].paid ?? '0');
     const totalPendingInvoices = formatCurrency(data[2].rows[0].pending ?? '0');
+    const totalProformaInvoices = formatCurrency(data[2].rows[0].proforma ?? '0');
 
     return {
       numberOfCustomers,
       numberOfInvoices,
       totalPaidInvoices,
       totalPendingInvoices,
+      totalProformaInvoices
     };
   } catch (error) {
     console.error('Database Error:', error);
@@ -170,7 +173,7 @@ export async function fetchInvoiceById(id: string) {
       // Convert amount from cents to dollars
       amount: invoice.amount / 100,
     }));
-
+    console.log(invoice); // Devolvera Invoice que es un array vacio []
     return invoice[0];
   } catch (error) {
     console.error('Database Error:', error);
@@ -207,6 +210,7 @@ export async function fetchFilteredCustomers(query: string) {
 		  COUNT(invoices.id) AS total_invoices,
 		  SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
 		  SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
+      SUM(CASE WHEN invoices.status = 'proforma' THEN invoices.amount ELSE 0 END) AS total_proforma
 		FROM customers
 		LEFT JOIN invoices ON customers.id = invoices.customer_id
 		WHERE
@@ -220,6 +224,7 @@ export async function fetchFilteredCustomers(query: string) {
       ...customer,
       total_pending: formatCurrency(customer.total_pending),
       total_paid: formatCurrency(customer.total_paid),
+      total_proforma: formatCurrency(customer.total_proforma),
     }));
 
     return customers;

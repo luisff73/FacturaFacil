@@ -12,12 +12,18 @@ import { revalidatePath } from 'next/cache'; //importa revalidatePath para hacer
 
 import { redirect } from 'next/navigation'; //importa Redirect para redirigir a otra pagina
 
- 
-const FormSchema = z.object({ //crea un objeto con los campos que se van a validar antes de enviarlos al servidor
+ // Define the schema for FormSchema
+const FormSchema = z.object({
   id: z.string(),
-  customerId: z.string(),
-  amount: z.coerce.number(), //convierte el valor string a un numero
-  status: z.enum(['pending', 'paid', 'proforma']),
+  customerId: z.string({
+    invalid_type_error: 'Please select a customer.',
+  }),
+  amount: z.coerce
+    .number()
+    .gt(0, { message: 'Please enter an amount greater than $0.' }),
+  status: z.enum(['pending', 'paid', 'proforma' ], {
+    invalid_type_error: 'Please select an invoice status.',
+  }),
   date: z.string(),
 });
  
@@ -31,13 +37,17 @@ export async function updateInvoice(id: string, formData: FormData) {
     status: formData.get('status'),
   });
  
-  const amountInCents = amount * 100;
+  const amountInCents = Math.round(amount * 100);
  
-  await sql`
-    UPDATE invoices
-    SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-    WHERE id = ${id}
-  `;
+  try {
+    await sql`
+        UPDATE invoices
+        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+        WHERE id = ${id}
+      `;
+  } catch {
+    return { message: 'Database Error: Failed to Update Invoice.' };
+  }
  
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
@@ -45,17 +55,51 @@ export async function updateInvoice(id: string, formData: FormData) {
 
 
 // La función createInvoice toma un FormData objeto y lo envía a un servidor para crear una nueva factura.
-export async function createInvoice(formData: FormData) {
-    const { customerId, amount, status } = CreateInvoice.parse({
+export type State = {
+  errors?: {
+    customerId?: string[];
+    amount?: string[];
+    status?: string[];
+  };
+  message?: string | null;
+};
+ 
+export async function createInvoice(prevState: State, formData: FormData) {
+
+    // Log the formData values
+    console.log('customerId:', formData.get('customerId'));
+    console.log('amount:', formData.get('amount'));
+    console.log('status:', formData.get('status'));
+    console.log('FormData entries:', Array.from(formData.entries()));
+    
+
+  // Valida los campos del formulario. usando zod
+  const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
+
+  if (!validatedFields.success) {
+    console.log('Validation errors:', validatedFields.error.flatten().fieldErrors);
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Invoice.',
+    };
+  }
+
+
+  // Prepare data for insertion into the database
+  const { customerId, amount, status } = validatedFields.data;
   const amountInCents = Math.round(amount * 100); //convierte el valor de amount a centavos
   const date = new Date().toISOString().split('T')[0]; //obtiene la fecha actual en formato aaa-mm-dd
-
+  try {
+    // Inserta una nueva factura en la base de datos.
   await sql`INSERT INTO invoices (customer_id, amount, status, date) VALUES (${customerId}, ${amountInCents}, ${status}, ${date})`;
-
+} catch  {
+  console.error('Error al crear la factura:', Error);
+  throw new Error('No se pudo crear la factura');
+}
   
   //Una vez actualizada la base de datos, /dashboard/invoicesse volverá a validar la ruta y se obtendrán 
   // datos nuevos del servidor.
@@ -73,10 +117,12 @@ export async function createInvoice(formData: FormData) {
 }
 
 export async function deleteInvoice(id: string) {
+  
   try{
   await sql`DELETE FROM invoices WHERE id = ${id}`;
   revalidatePath('/dashboard/invoices');;
-  }catch{
+  }catch  {
+    console.error('Error al eliminar la factura:', Error);
     throw new Error('No se pudo eliminar la factura');
   }
 }
