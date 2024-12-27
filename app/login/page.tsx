@@ -1,5 +1,10 @@
 import FacturaFacilLogo from '@/app/ui/factura-facil';
 import LoginForm from '@/app/ui/login-form';
+import { Metadata } from 'next'; // importamos Metadata de next
+
+export const metadata: Metadata = {
+  title: 'Login',  // esto funcionaria pero es estatico y no se puede cambiar
+};
  
 export default function LoginPage() {
   return (

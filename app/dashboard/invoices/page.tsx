@@ -7,6 +7,11 @@ import { lusitana } from '@/app/ui/fonts';
 import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
 import { fetchInvoicesPages } from '@/app/lib/data';
+import { Metadata } from 'next'; // importamos Metadata de next
+
+export const metadata: Metadata = {
+  title: 'Facturas',  // esto funcionaria pero es estatico y no se puede cambiar
+};
 
 export default async function Page(props: {
   searchParams?: Promise<{

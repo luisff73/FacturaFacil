@@ -5,6 +5,11 @@ import Link from 'next/link';
 import styles from '@/app/ui/home.module.css'; // esto importaria mi css personalizado esto permite aplicar este estilo solo a este fichero
 import { lusitana, roboto, montserrat } from '@/app/ui/fonts'; // importa las fuentes de google de fonts.ts
 import Image from '../components/image';
+import { Metadata } from 'next'; // importamos Metadata de next
+
+export const metadata: Metadata = {
+  title: 'Panel',  // esto funcionaria pero es estatico y no se puede cambiar
+};
 
 export default function Page() {
   return (
