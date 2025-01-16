@@ -1,8 +1,8 @@
 import { db } from "@vercel/postgres";
 
-const client = await db.connect();
+const client = await db.connect(); // Conexion a la base de datos.
 
-async function listInvoices() {
+async function listInvoices() { // Función que realiza la consulta a la base de datos.
 	const data = await client.sql`
     SELECT invoices.amount, customers.name
     FROM invoices
