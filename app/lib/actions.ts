@@ -139,7 +139,7 @@ export async function authenticate(
       email,
       password,
       redirect: false,
-       callbackUrl: '/dashboard' // redireccionamos a la pagina de dashboard si la autenticacion es exitosa
+      callbackUrl: '/dashboard' // Redireccionamos a la página de dashboard si la autenticación es exitosa
     });
 
     if (result?.error) {
