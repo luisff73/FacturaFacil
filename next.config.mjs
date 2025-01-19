@@ -9,14 +9,6 @@ const nextConfig = {
       "tls": false,
     }
     return config
-  },
-  // Añadimos configuración específica para desarrollo
-  webpackDevMiddleware: config => {
-    config.watchOptions = {
-      poll: 1000,
-      aggregateTimeout: 300,
-    }
-    return config
   }
 }
 

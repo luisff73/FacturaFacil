@@ -20,6 +20,7 @@ async function getUser(email: string): Promise<User | undefined> {
 }
 
 export const authConfig = {
+  runtime: 'nodejs',  // Especificamos que use Node.js runtime
   providers: [
     CredentialsProvider({
       async authorize(credentials) {
@@ -70,6 +71,6 @@ export const authConfig = {
       return token;
     },
   },
-};
 
+};
 export default authConfig;
