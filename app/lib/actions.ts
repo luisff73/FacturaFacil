@@ -13,9 +13,9 @@ import { revalidatePath } from 'next/cache'; //importa revalidatePath para hacer
 import { redirect } from 'next/navigation'; //importa Redirect para redirigir a otra pagina
 
 import { signIn } from '@/auth'; // Importa signIn desde '@/auth'
-import { AuthError } from 'next-auth';
 
-// Define the schema for FormSchema
+
+// Define el esquema para FormSchema
 const FormSchema = z.object({
   id: z.string(),
   customerId: z.string({
@@ -95,8 +95,8 @@ export async function createInvoice(prevState: State, formData: FormData) {
   try {
     // Inserta una nueva factura en la base de datos.
     await sql`INSERT INTO invoices (customer_id, amount, status, date) VALUES (${customerId}, ${amountInCents}, ${status}, ${date})`;
-  } catch {
-    console.error('Error al crear la factura:', Error);
+  } catch (error) {
+    console.error('Error al crear la factura:', error);
     throw new Error('No se pudo crear la factura');
   }
 
@@ -117,8 +117,8 @@ export async function deleteInvoice(id: string) {
   try {
     await sql`DELETE FROM invoices WHERE id = ${id}`;
     revalidatePath('/dashboard/invoices');
-  } catch {
-    console.error('Error al eliminar la factura:', Error);
+  } catch (error) {
+    console.error('Error al eliminar la factura:', error);
     throw new Error('No se pudo eliminar la factura');
   }
 }
@@ -147,18 +147,9 @@ export async function authenticate(
       return 'Invalid credentials.';
     }
 
-   
+    return null;
   } catch (error) {
     console.error('Error durante la autenticación:', error);
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case 'CredentialsSignin':
-          return 'Invalid credentials.';
-        default:
-          return 'Something went wrong.';
-      }
-    }
-    console.error('Error during authentication:', error);
-    return 'Authentication faileds.';
+    return 'Authentication failed.';
   }
 }
