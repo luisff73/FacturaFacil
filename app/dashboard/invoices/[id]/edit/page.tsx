@@ -4,7 +4,7 @@ import { fetchInvoiceById, fetchCustomers } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next'; // importamos Metadata de next
 
-export const metadata: Metadata = {
+export const metadata: Metadata = {  // posicionamiento SEO
   title: 'Edicion de Facturas',  // esto funcionaria pero es estatico y no se puede cambiar
 };
 

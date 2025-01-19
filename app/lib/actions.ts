@@ -146,6 +146,7 @@ export async function authenticate(
           return 'Something went wrong.';
       }
     }
-    throw error;
+    console.error('Error during authentication:', error);
+    throw new Error('Authentication failed.');
   }
 }
