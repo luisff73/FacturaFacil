@@ -33,7 +33,7 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} method="POST" className="space-y-3"> {/* Cambio aquí */}
+    <form onSubmit={handleSubmit} method="POST" className="space-y-3">
       <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
         <h1 className={`${lusitana.className} mb-3 text-2xl`}>
           Por favor haz login para continuar.
@@ -52,7 +52,6 @@ export default function LoginForm() {
               name="email"
               className="w-full rounded-lg border border-gray-300 px-3 py-2"
               required
-              autoComplete="email"
             />
           </div>
           <div>
@@ -68,7 +67,6 @@ export default function LoginForm() {
               name="password"
               className="w-full rounded-lg border border-gray-300 px-3 py-2"
               required
-              autoComplete="current-password"
             />
           </div>
           {errorMessage && (
