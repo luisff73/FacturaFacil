@@ -1,4 +1,4 @@
-'use server';
+'use client';
 
 // Al agregar 'use server', se marcan todas las funciones exportadas dentro del archivo como Acciones de servidor. 
 // Estas funciones de servidor se pueden importar y utilizar en los componentes de cliente y servidor.
@@ -122,9 +122,7 @@ export async function deleteInvoice(id: string) {
   }
 }
 
-export async function authenticate(
-  formData: FormData,
-) {
+export async function authenticate(formData: FormData) {
   try {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
@@ -137,17 +135,16 @@ export async function authenticate(
       redirect: false,
       email,
       password,
-      callbackUrl: '/dashboard' // Redireccionamos a la página de dashboard si la autenticación es exitosa
     });
 
     if (result?.error) {
       console.error('Failed to sign in:', result.error);
-      return 'Credenciales no validas.';
+      return 'Invalid credentials.';
     }
 
     return null;
   } catch (error) {
     console.error('Error durante la autenticación:', error);
-    return 'Fallo en la Authentificación.';
+    return 'Authentication failed.';
   }
 }

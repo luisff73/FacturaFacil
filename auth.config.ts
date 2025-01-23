@@ -20,7 +20,7 @@ async function getUser(email: string): Promise<User | undefined> {
     return user.rows[0];
   } catch (error) {
     console.error('Failed to fetch user:', error);
-    throw new Error('Failed to fetch user.');
+    return undefined;
   }
 }
 
@@ -61,9 +61,8 @@ const authConfig = {
       return session;
     },
     async jwt({ token, user }: { token: JWT; user?: User }) {
-      // Añade cualquier dato adicional al token JWT si es necesario
       if (user) {
-        token.id = user.id;
+        token.sub = user.id;
       }
       return token;
     },
