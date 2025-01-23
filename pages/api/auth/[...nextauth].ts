@@ -1,10 +1,12 @@
 import NextAuth from 'next-auth';
 import authConfig from '@/auth.config';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 const authOptions = {
   ...authConfig,
-  secret: process.env.AUTH_SECRET, // Add your secret here
+  secret: process.env.NEXTAUTH_SECRET, // Añade tu secreto aquí
 };
 
-export const { handlers: { GET, POST } } = NextAuth(authOptions as any);
-export default NextAuth(authOptions as any);
+export default function authHandler(req: NextApiRequest, res: NextApiResponse) {
+  return NextAuth(req, res, authOptions);
+}

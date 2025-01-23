@@ -12,8 +12,7 @@ import { revalidatePath } from 'next/cache'; //importa revalidatePath para hacer
 
 import { redirect } from 'next/navigation'; //importa Redirect para redirigir a otra pagina
 
-import { signIn } from '@/auth'; // Importa signIn desde '@/auth'
-
+import { signIn } from 'next-auth/react';
 
 // Define el esquema para FormSchema
 const FormSchema = z.object({
@@ -124,7 +123,6 @@ export async function deleteInvoice(id: string) {
 }
 
 export async function authenticate(
-  prevState: string | undefined,
   formData: FormData,
 ) {
   try {
@@ -136,20 +134,20 @@ export async function authenticate(
     }
 
     const result = await signIn('credentials', {
+      redirect: false,
       email,
       password,
-      redirect: false,
       callbackUrl: '/dashboard' // Redireccionamos a la página de dashboard si la autenticación es exitosa
     });
 
     if (result?.error) {
       console.error('Failed to sign in:', result.error);
-      return 'Invalid credentials.';
+      return 'Credenciales no validas.';
     }
 
     return null;
   } catch (error) {
     console.error('Error durante la autenticación:', error);
-    return 'Authentication failed.';
+    return 'Fallo en la Authentificación.';
   }
 }

@@ -1,11 +1,9 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
-import FacebookProvider from 'next-auth/providers/facebook';
 import GitHubProvider from 'next-auth/providers/github';
-import { z } from 'zod';
 import { sql } from '@vercel/postgres';
-import type { User } from '@/app/lib/definitions';
 import bcryptjs from 'bcryptjs';
+import type { User } from '@/app/lib/definitions';
 import type { DefaultSession, Session as NextAuthSession } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
 
@@ -29,47 +27,37 @@ async function getUser(email: string): Promise<User | undefined> {
 const authConfig = {
   providers: [
     CredentialsProvider({
-      async authorize(credentials) {
-        if (!credentials) {
-          console.log('No credentials provided');
+      name: 'Credentials',
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" }
+      },
+      authorize: async (credentials) => {
+        if (!credentials?.username || !credentials.password) {
           return null;
         }
-
-        const parsedCredentials = z
-          .object({ email: z.string().email(), password: z.string().min(6) })
-          .safeParse(credentials);
-
-        if (parsedCredentials.success) {
-          const { email, password } = parsedCredentials.data;
-          const user = await getUser(email);
-          if (!user) return null;
-          const passwordsMatch = await bcryptjs.compare(password, user.password);
-
-          if (passwordsMatch) return user;
+        const user = await getUser(credentials.username);
+        if (user && bcryptjs.compareSync(credentials.password, user.password)) {
+          return user;
+        } else {
+          return null;
         }
-        console.log('Invalid credentials');
-        return null;
-      },
+      }
     }),
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
     }),
     GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      clientId: process.env.GITHUB_CLIENT_ID ?? '',
+      clientSecret: process.env.GITHUB_CLIENT_SECRET ?? '',
     }),
   ],
-  pages: {
-    signIn: '/login', // Personaliza la página de inicio de sesión si es necesario
-  },
   callbacks: {
-    async session({ session, token, user }: { session: NextAuthSession; token: JWT; user: User }) {
-      // Añade cualquier dato adicional a la sesión si es necesario
+    async session({ session, token }: { session: Session; token: JWT }) {
+      if (token) {
+        session.user.id = token.sub;
+      }
       return session;
     },
     async jwt({ token, user }: { token: JWT; user?: User }) {
@@ -80,6 +68,7 @@ const authConfig = {
       return token;
     },
   },
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 export default authConfig;

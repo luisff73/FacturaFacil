@@ -2,18 +2,13 @@
 'use client';
 
 import { lusitana } from '@/app/ui/fonts';
-import {
-  AtSymbolIcon,
-  KeyIcon,
-  ExclamationCircleIcon,
-} from '@heroicons/react/24/outline';
+import { AtSymbolIcon, KeyIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from './button'; // Importamos el componente Button
-import { useActionState } from 'react';
+import { useState, useActionState } from 'react';
 import { authenticate } from '@/app/lib/actions'; // importamos la funcion authenticate de actions.ts
 import { signIn } from 'next-auth/react'; // Importamos la función signIn de next-auth
 import { FaGoogle, FaFacebook, FaGithub } from 'react-icons/fa';
-import { useState } from 'react';
 
 export default function LoginForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -22,12 +17,13 @@ export default function LoginForm() {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
-    const result = await authenticate(undefined, formData);
+    const result = await authenticate(formData);
 
-    if (result) {
+    if (result) { // Si hay un error, mostrarlo
       setErrorMessage(result);
     } else {
       // Redirigir manualmente si la autenticación fue exitosa
+      console.log('Autenticación exitosaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
       window.location.href = '/dashboard';
     }
   };
