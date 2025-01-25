@@ -15,11 +15,24 @@ import { FaGoogle, FaGithub } from 'react-icons/fa'; // Importar iconos de Googl
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard';
   const [errorMessage, formAction, isPending] = useActionState(
     authenticate,
     undefined,
   );
+
+  // Handlers para los botones de Social Login
+  const handleGoogleLogin = () => {
+    console.log('Inicio de sesión con Google');
+    // Lógica para redirigir a la autenticación con Google
+    window.location.href = '/api/auth/google'; // Cambia la URL según tu implementación
+  };
+
+  const handleGitHubLogin = () => {
+    console.log('Inicio de sesión con GitHub');
+    // Lógica para redirigir a la autenticación con GitHub
+    window.location.href = '/api/auth/github'; // Cambia la URL según tu implementación
+  };
 
   return (
     <form action={formAction} className="space-y-3">
@@ -83,6 +96,26 @@ export default function LoginForm() {
               <p className="text-sm text-red-500">{errorMessage}</p>
             </>
           )}
+        </div>
+
+        {/* Botones de Social Login */}
+        <div className="mt-6 space-y-3">
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+          >
+            <FaGoogle className="mr-2 h-5 w-5 text-red-500" />
+            Sign in with Google
+          </button>
+          <button
+            type="button"
+            onClick={handleGitHubLogin}
+            className="flex w-full items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-800"
+          >
+            <FaGithub className="mr-2 h-5 w-5" />
+            Sign in with GitHub
+          </button>
         </div>
       </div>
     </form>
