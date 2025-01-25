@@ -11,6 +11,7 @@ import { Button } from '@/app/ui/button';
 import { useActionState } from 'react';
 import { authenticate } from '@/app/lib/actions';
 import { useSearchParams } from 'next/navigation';
+import { FaGoogle, FaGithub } from 'react-icons/fa'; // Importar iconos de Google y GitHub
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
