@@ -67,19 +67,22 @@ export default async function CustomersTable({
                 <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
                   <tr>
                     <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                      Name
+                      Nombre
                     </th>
                     <th scope="col" className="px-3 py-5 font-medium">
-                      Email
+                      Correo Electronico
                     </th>
                     <th scope="col" className="px-3 py-5 font-medium">
-                      Total Invoices
+                      Total Facturas
                     </th>
                     <th scope="col" className="px-3 py-5 font-medium">
-                      Total Pending
+                      Total Pendiente
                     </th>
                     <th scope="col" className="px-4 py-5 font-medium">
-                      Total Paid
+                      Total Pagado
+                    </th>
+                    <th scope="col" className="px-4 py-5 font-medium">
+                      Total Proformas
                     </th>
                   </tr>
                 </thead>

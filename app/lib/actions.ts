@@ -1,4 +1,4 @@
-'use client';
+'use server';
 
 // Al agregar 'use server', se marcan todas las funciones exportadas dentro del archivo como Acciones de servidor. 
 // Estas funciones de servidor se pueden importar y utilizar en los componentes de cliente y servidor.

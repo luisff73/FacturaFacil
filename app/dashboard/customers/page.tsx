@@ -1,10 +1,25 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Metadata } from 'next'; // importamos Metadata de next
+import { fetchFilteredCustomers } from '@/app/lib/data';
+import CustomersTable from '@/app/ui/customers/table';
+import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Clientes',  // esto funcionaria pero es estatico y no se puede cambiar
+  title: 'Customers',
 };
-export default function Page() {
-    return <p>Customers Page</p>;
 
+export default async function Page(props: {
+  searchParams?: Promise<{
+    query?: string;
+    page?: string;
+  }>;
+}) {
+  const searchParams = await props.searchParams;
+  const query = searchParams?.query || '';
+
+  const customers = await fetchFilteredCustomers(query);
+
+  return (
+    <main>
+      <CustomersTable customers={customers} />
+    </main>
+  );
 }
