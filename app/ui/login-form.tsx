@@ -25,13 +25,13 @@ export default function LoginForm() {
   const handleGoogleLogin = () => {
     console.log('Inicio de sesión con Google');
     // Lógica para redirigir a la autenticación con Google
-    window.location.href = '/api/auth/google'; // Cambia la URL según tu implementación
+    window.location.href = '/api/auth/signin/google'; // Cambia la URL según tu implementación
   };
 
   const handleGitHubLogin = () => {
     console.log('Inicio de sesión con GitHub');
     // Lógica para redirigir a la autenticación con GitHub
-    window.location.href = '/api/auth/github'; // Cambia la URL según tu implementación
+    window.location.href = '/api/auth/signin/github'; // Cambia la URL según tu implementación
   };
 
   return (

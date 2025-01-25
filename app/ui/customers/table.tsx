@@ -1,20 +1,26 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import Image from 'next/image';
+import { UpdateCustomer, DeleteCustomer } from '@/app/ui/customers/buttons';
 import { lusitana } from '@/app/ui/fonts';
 import Search from '@/app/ui/search';
 import { FormattedCustomersTable } from '@/app/lib/definitions';
 
-export default async function CustomersTable({
-  customers,
-}: {
-  customers: FormattedCustomersTable[];
-}) {
+interface CustomersTableProps {
+  customers: {
+    total_pending: string;
+    total_paid: string;
+    total_proforma: string;
+    id: string;
+    name: string;
+    email: string;
+    image_url: string;
+    total_invoices: number;
+  }[];
+}
+
+export default function CustomersTable({ customers }: CustomersTableProps) {
   return (
     <div className="w-full">
-      <h1 className={`${lusitana.className} mb-8 text-xl md:text-2xl`}>
-        Customers
-      </h1>
-      <Search placeholder="Search customers..." />
+      <Search placeholder="Buscar clientes..." />
       <div className="mt-6 flow-root">
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
@@ -43,14 +49,18 @@ export default async function CustomersTable({
                           {customer.email}
                         </p>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <UpdateCustomer id={customer.id} />
+                        <DeleteCustomer id={customer.id} />
+                      </div>
                     </div>
                     <div className="flex w-full items-center justify-between border-b py-5">
                       <div className="flex w-1/2 flex-col">
-                        <p className="text-xs">Pending</p>
+                        <p className="text-xs">Pendiente</p>
                         <p className="font-medium">{customer.total_pending}</p>
                       </div>
                       <div className="flex w-1/2 flex-col">
-                        <p className="text-xs">Paid</p>
+                        <p className="text-xs">Pagado</p>
                         <p className="font-medium">{customer.total_paid}</p>
                       </div>
                     </div>
@@ -80,6 +90,9 @@ export default async function CustomersTable({
                     </th>
                     <th scope="col" className="px-4 py-5 font-medium">
                       Total Proformas
+                    </th>
+                    <th scope="col" className="px-4 py-5 font-medium">
+                      Acciones
                     </th>
                   </tr>
                 </thead>
@@ -114,7 +127,12 @@ export default async function CustomersTable({
                       <td className="whitespace-nowrap bg-white px-4 py-5 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
                         {customer.total_proforma}
                       </td>
-
+                      <td className="whitespace-nowrap bg-white px-4 py-5 text-sm">
+                        <div className="flex items-center gap-2">
+                          <UpdateCustomer id={customer.id} />
+                          <DeleteCustomer id={customer.id} />
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

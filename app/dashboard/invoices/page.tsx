@@ -9,7 +9,7 @@ import { fetchInvoicesPages } from '@/app/lib/data';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Invoices',
+  title: 'Facturas',
 };
 
 export default async function Page(props: {
@@ -30,14 +30,14 @@ export default async function Page(props: {
         <h1 className={`${lusitana.className} text-2xl`}>Invoices</h1>
       </div>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <Search placeholder="Search invoices..." />
+        <Search placeholder="Busqueda de facturas ..." />
         <CreateInvoice />
       </div>
       <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
         <Table query={query} currentPage={currentPage} />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
-        <Pagination totalPages={totalPages} />
+        <Pagination totalPages={totalPages} currentPage={currentPage} />
       </div>
     </div>
   );
