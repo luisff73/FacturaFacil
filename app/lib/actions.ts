@@ -1,18 +1,11 @@
 'use server';
 
-// Al agregar 'use server', se marcan todas las funciones exportadas dentro del archivo como Acciones de servidor. 
-// Estas funciones de servidor se pueden importar y utilizar en los componentes de cliente y servidor.
-
-import { z } from 'zod'; //importa zod para validar los datos que se envian en el formulario
-import { sql } from '@vercel/postgres'; //importa sql para hacer consultas a la base de datos
-
-// Dado que estás actualizando los datos que se muestran en la ruta de facturas, deseas borrar este caché 
-// y activar una nueva solicitud al servidor. Puedes hacerlo con la revalidatePathfunción de Next.js:
-import { revalidatePath } from 'next/cache'; //importa revalidatePath para hacer una nueva consulta a la base de datos
-
-import { redirect } from 'next/navigation'; //importa Redirect para redirigir a otra pagina
-
-import { signIn } from 'next-auth/react';
+import { z } from 'zod';
+import { sql } from '@vercel/postgres';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
 
 // Define el esquema para FormSchema
 const FormSchema = z.object({
@@ -30,32 +23,8 @@ const FormSchema = z.object({
 });
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
-const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+const UpdateInvoice = FormSchema.omit({ date: true, id: true });
 
-export async function updateInvoice(id: string, formData: FormData) {
-  const { customerId, amount, status } = UpdateInvoice.parse({
-    customerId: formData.get('customerId'),
-    amount: formData.get('amount'),
-    status: formData.get('status'),
-  });
-
-  const amountInCents = Math.round(amount * 100);
-
-  try {
-    await sql`
-        UPDATE invoices
-        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-        WHERE id = ${id}
-      `;
-  } catch {
-    return { message: 'Database Error: Failed to Update Invoice.' };
-  }
-
-  revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices');
-}
-
-// La función createInvoice toma un FormData objeto y lo envía a un servidor para crear una nueva factura.
 export type State = {
   errors?: {
     customerId?: string[];
@@ -79,8 +48,8 @@ export async function createInvoice(prevState: State, formData: FormData) {
     status: formData.get('status'),
   });
 
+  // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
-    console.log('Validation errors:', validatedFields.error.flatten().fieldErrors);
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Missing Fields. Failed to Create Invoice.',
@@ -103,48 +72,63 @@ export async function createInvoice(prevState: State, formData: FormData) {
   // datos nuevos del servidor.
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
+}
 
-  // esto seria una alternativa si hubesen muchos campos en el formulario
-  const rawFormData = Object.fromEntries(formData.entries());
+export async function updateInvoice(
+  id: string,
+  prevState: State,
+  formData: FormData,
+) {
+  const validatedFields = UpdateInvoice.safeParse({
+    customerId: formData.get('customerId'),
+    amount: formData.get('amount'),
+    status: formData.get('status'),
+  });
 
-  // Test it out:
-  console.log('Este es el valor de FormData ' + JSON.stringify(rawFormData));
-  //console.log(typeof FormData.amount);  //esto es para ver el tipo de dato que se esta enviando ojo que es un string
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Update Invoice.',
+    };
+  }
+
+  const { customerId, amount, status } = validatedFields.data;
+  const amountInCents = amount * 100;
+
+  try {
+    await sql`
+      UPDATE invoices
+      SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+      WHERE id = ${id}
+    `;
+  } catch (error) {
+    return { message: 'Database Error: Failed to Update Invoice.' };
+  }
+
+  revalidatePath('/dashboard/invoices');
+  redirect('/dashboard/invoices');
 }
 
 export async function deleteInvoice(id: string) {
-  try {
-    await sql`DELETE FROM invoices WHERE id = ${id}`;
-    revalidatePath('/dashboard/invoices');
-  } catch (error) {
-    console.error('Error al eliminar la factura:', error);
-    throw new Error('No se pudo eliminar la factura');
-  }
+  await sql`DELETE FROM invoices WHERE id = ${id}`;
+  revalidatePath('/dashboard/invoices');
 }
 
-export async function authenticate(formData: FormData) {
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
   try {
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-
-    if (!email || !password) {
-      return 'Email and password are required.';
-    }
-
-    const result = await signIn('credentials', {
-      redirect: false,
-      email,
-      password,
-    });
-
-    if (result?.error) {
-      console.error('Failed to sign in:', result.error);
-      return 'Invalid credentials.';
-    }
-
-    return null;
+    await signIn('credentials', formData);
   } catch (error) {
-    console.error('Error durante la autenticación:', error);
-    return 'Authentication failed.';
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+        default:
+          return 'Something went wrong.';
+      }
+    }
+    throw error;
   }
 }

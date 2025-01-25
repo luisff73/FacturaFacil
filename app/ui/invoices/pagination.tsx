@@ -11,13 +11,15 @@ import { useSearchParams, usePathname } from 'next/navigation';
 export default function Pagination({ totalPages }: { totalPages: number }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentPage = Number(searchParams?.get('page')) || 1;
-  const allPages = generatePagination(currentPage, totalPages);
+  const currentPage = Number(searchParams.get('page')) || 1;
+
   const createPageURL = (pageNumber: number | string) => {
     const params = new URLSearchParams(searchParams?.toString());  // create a new URLSearchParams object
     params.set('page', pageNumber.toString()); // set the page parameter to the page number
     return `${pathname}?${params.toString()}`;
   };
+
+  const allPages = generatePagination(currentPage, totalPages);
 
   return (
     <>
