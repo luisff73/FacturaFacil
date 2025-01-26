@@ -9,16 +9,19 @@ export const metadata: Metadata = {
   title: 'Editar Cliente',
 };
 
+interface PageProps {
+  params: { id: string }; // El tipo esperado para params
+}
 
-export default async function Page({ params }: { params: { id: string } }) { // obtener el id del cliente
-  const id = params.id; // obtener el id del cliente
-  const customers = await fetchCustomersById(id); // Obtiene los datos y los convierte al tipo Customer
+export default async function Page({ params }: PageProps) {
+  const id = params.id;
+  const customers = await fetchCustomersById(id);
 
   if (!customers || !Array.isArray(customers) || customers.length === 0) {
     notFound();
   }
 
-  const customer: Customer = { // definir los datos del cliente a editar en el formulario
+  const customer: Customer = {
     id: customers[0].id,
     name: customers[0].name,
     email: customers[0].email,
@@ -44,8 +47,7 @@ export default async function Page({ params }: { params: { id: string } }) { // 
           },
         ]}
       />
-
       <EditCustomerForm customer={customer} />
     </main>
-  );// pasar los datos del cliente al formulario de edición
+  );
 }
