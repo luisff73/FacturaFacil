@@ -1,36 +1,54 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Cambiado a next/navigation
-import { createCustomer } from '@/app/lib/actions';
+import { useRouter } from 'next/navigation';
+import { updateCustomer } from '@/app/lib/actions';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
-import { CustomerField } from '@/app/lib/definitions';
+import { Customer } from '@/app/lib/definitions';
 
-interface FormProps {
-  customers: CustomerField[];
+interface EditFormProps {
+  customer: Customer;
 }
 
-const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
-  const [state, setState] = useState<{ errors: { name?: string[]; email?: string[]; image_url?: string[]; direccion?: string[]; c_postal?: string[]; poblacion?: string[]; provincia?: string[]; telefono?: string[]; cif?: string[]; pais?: string[] }, message: string }>({ errors: {}, message: '' });
+const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
+  if (!customer) {
+    return <div className="flex justify-center items-center p-4">Cargando datos del cliente...</div>;
+  }
+
+  const [state, setState] = useState<{ 
+    errors: { 
+      name?: string[]; 
+      email?: string[]; 
+      image_url?: string[]; 
+      direccion?: string[]; 
+      c_postal?: string[]; 
+      poblacion?: string[]; 
+      provincia?: string[]; 
+      telefono?: string[]; 
+      cif?: string[]; 
+      pais?: string[] 
+    }, 
+    message: string 
+  }>({ errors: {}, message: '' });
+
   const router = useRouter();
 
   const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
     const fileInput = formData.get('image_url') as File;
-    let imageUrl = '';
+    let imageUrl = customer.image_url;
 
-    if (fileInput) {
-      // Aquí se podria manejar la carga del archivo y obtener la ruta local
-      // Por simplicidad, asumimos que el archivo se guarda en una carpeta 'uploads'
-      const filePath = `/customers/${fileInput.name}`;
+    if (fileInput && fileInput.name) {
+      // Aquí puedes manejar la carga del archivo y obtener la ruta local
+      const filePath = `/uploads/${fileInput.name}`;
       imageUrl = filePath;
 
-      // Aquí pordiamos agregar la lógica para guardar el archivo en el servidor
-      // Por ejemplo, usando una API para subir el archivo
+      // Aquí puedes agregar la lógica para guardar el archivo en el servidor
     }
 
     const data = {
+      id: customer.id,
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       image_url: imageUrl,
@@ -44,7 +62,7 @@ const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
     };
 
     try {
-      await createCustomer(data);
+      await updateCustomer(customer.id, data);
       router.push('/dashboard/customers');
     } catch (error) {
       if (error instanceof Error) {
@@ -54,7 +72,7 @@ const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
   };
 
   return (
-    // Formulario para crear un cliente
+    // Formulario para editar un cliente
     <form onSubmit={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
@@ -67,6 +85,7 @@ const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
               id="name"
               name="name"
               type="text"
+              defaultValue={customer.name}
               placeholder="Introduce el nombre del cliente"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="name-error"
@@ -75,6 +94,57 @@ const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
           <div id="name-error" aria-live="polite" aria-atomic="true">
             {state.errors?.name &&
               state.errors.name.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
+        {/* Customer Email */}
+        <div className="mb-4">
+          <label htmlFor="email" className="mb-2 block text-sm font-medium">
+            Correo electrónico del cliente
+          </label>
+          <div className="relative">
+            <input
+              id="email"
+              name="email"
+              type="email"
+              defaultValue={customer.email}
+              placeholder="Introduce el correo electrónico del cliente"
+              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              aria-describedby="email-error"
+            />
+          </div>
+          <div id="email-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.email &&
+              state.errors.email.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
+        {/* Customer Image URL */}
+        <div className="mb-4">
+          <label htmlFor="image_url" className="mb-2 block text-sm font-medium">
+            URL de la imagen del cliente
+          </label>
+          <div className="relative">
+            <input
+              id="image_url"
+              name="image_url"
+              type="file"
+              placeholder="Introduce la URL de la imagen del cliente"
+              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              aria-describedby="image_url-error"
+            />
+          </div>
+          <div id="image_url-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.image_url &&
+              state.errors.image_url.map((error: string) => (
                 <p className="mt-2 text-sm text-red-500" key={error}>
                   {error}
                 </p>
@@ -92,6 +162,7 @@ const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
               id="direccion"
               name="direccion"
               type="text"
+              defaultValue={customer.direccion}
               placeholder="Introduce la dirección del cliente"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="direccion-error"
@@ -117,6 +188,7 @@ const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
               id="c_postal"
               name="c_postal"
               type="text"
+              defaultValue={customer.c_postal}
               placeholder="Introduce el código postal del cliente"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="c_postal-error"
@@ -142,6 +214,7 @@ const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
               id="poblacion"
               name="poblacion"
               type="text"
+              defaultValue={customer.poblacion}
               placeholder="Introduce la población del cliente"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="poblacion-error"
@@ -167,6 +240,7 @@ const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
               id="provincia"
               name="provincia"
               type="text"
+              defaultValue={customer.provincia}
               placeholder="Introduce la provincia del cliente"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="provincia-error"
@@ -192,6 +266,7 @@ const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
               id="pais"
               name="pais"
               type="text"
+              defaultValue={customer.pais}
               placeholder="Introduce el país del cliente"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="pais-error"
@@ -217,6 +292,7 @@ const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
               id="telefono"
               name="telefono"
               type="text"
+              defaultValue={customer.telefono}
               placeholder="Introduce el teléfono del cliente"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="telefono-error"
@@ -242,6 +318,7 @@ const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
               id="cif"
               name="cif"
               type="text"
+              defaultValue={customer.cif}
               placeholder="Introduce el CIF del cliente"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="cif-error"
@@ -250,56 +327,6 @@ const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
           <div id="cif-error" aria-live="polite" aria-atomic="true">
             {state.errors?.cif &&
               state.errors.cif.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
-          </div>
-        </div>
-
-        {/* Customer Email */}
-        <div className="mb-4">
-          <label htmlFor="email" className="mb-2 block text-sm font-medium">
-            Correo electrónico del cliente
-          </label>
-          <div className="relative">
-            <input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Introduce el correo electrónico del cliente"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
-              aria-describedby="email-error"
-            />
-          </div>
-          <div id="email-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.email &&
-              state.errors.email.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
-          </div>
-        </div>
-
-        {/* Customer Image URL */}
-        <div className="mb-4">
-          <label htmlFor="image_url" className="mb-2 block text-sm font-medium">
-            URL de la imagen del cliente
-          </label>
-          <div className="relative">
-            <input
-              id="image_url"
-              name="image_url"
-              type="file" // Cambiado a tipo 'file'
-              placeholder="Introduce la URL de la imagen del cliente"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
-              aria-describedby="image_url-error"
-            />
-          </div>
-          <div id="image_url-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.image_url &&
-              state.errors.image_url.map((error: string) => (
                 <p className="mt-2 text-sm text-red-500" key={error}>
                   {error}
                 </p>
@@ -320,10 +347,10 @@ const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
         >
           Cancelar
         </Link>
-        <Button type="submit">Crear Cliente</Button>
+        <Button type="submit">Actualizar Cliente</Button>
       </div>
     </form>
   );
 };
 
-export default CreateCustomerForm;
+export default EditCustomerForm;

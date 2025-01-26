@@ -8,6 +8,7 @@ import { sql } from '@vercel/postgres';
 
 // Importación de tipos y definiciones desde ./definitions:
 import {
+  Customer,
   CustomerField,
   CustomersTableType,
   InvoiceForm,
@@ -189,6 +190,22 @@ export async function fetchCustomers() {
         name
       FROM customers
       ORDER BY name ASC
+    `;
+
+    const customers = data.rows;
+    return customers;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all customers.');
+  }
+}
+
+export async function fetchCustomersById(id: string) {
+  try {
+    const data = await sql<Customer>`
+      SELECT *
+      FROM customers
+      WHERE id = ${id};
     `;
 
     const customers = data.rows;

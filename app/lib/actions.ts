@@ -25,6 +25,20 @@ const FormSchema = z.object({
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ date: true, id: true });
+const CreateCustomer = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  image_url: z.string(),
+  direccion: z.string(),
+  c_postal: z.string(),
+  poblacion: z.string(),
+  provincia: z.string(),
+  telefono: z.string(),
+  cif: z.string(),
+  pais: z.string(),
+});
+const UpdateCustomer = CreateCustomer.omit({ image_url: true });
+
 
 export type State = {
   errors?: {
@@ -117,18 +131,35 @@ export async function deleteInvoice(id: string) {
 
 // Función para crear un cliente
 export async function createCustomer(data: Omit<Customer, 'id'>) {
-  const { name, email, image_url } = data;
+  const { name, email, image_url, direccion,c_postal,poblacion,provincia,telefono,cif,pais } = data;
 
   // Consulta SQL para insertar un nuevo cliente
   const result = await sql`
-    INSERT INTO customers (name, email, image_url)
-    VALUES (${name}, ${email}, ${image_url})
-    RETURNING id, name, email, image_url;
+    INSERT INTO customers (name, email, image_url, direccion,c_postal,poblacion,provincia,telefono,cif,pais)
+    VALUES (${name}, ${email}, ${image_url}, ${direccion},${c_postal},${poblacion},${provincia},${telefono},${cif},${pais})
+    RETURNING id, name, email, image_url ,direccion,c_postal,poblacion,provincia,telefono,cif,pais;
   `;
 
   // Devolver el cliente creado
   return result.rows[0];
 }
+
+// Función para actualizar un cliente
+export async function updateCustomer(id: string, data: Omit<Customer, 'id'>) {
+  const { name, email, image_url, direccion,c_postal,poblacion,provincia,telefono,cif,pais } = data;
+
+  // Consulta SQL para actualizar un cliente
+  const result = await sql`
+    UPDATE customers
+    SET name = ${name}, email = ${email}, image_url = ${image_url}, direccion = ${direccion}, c_postal = ${c_postal}, poblacion = ${poblacion}, provincia = ${provincia}, telefono = ${telefono}, cif = ${cif}, pais = ${pais}
+    WHERE id = ${id}
+    RETURNING id, name, email, image_url ,direccion,c_postal,poblacion,provincia,telefono,cif,pais;
+  `;
+
+  // Devolver el cliente actualizado
+  return result.rows[0];
+}
+
 
 export async function deleteCustomers(id: string) {
   await sql`DELETE FROM customers WHERE id = ${id}`;
