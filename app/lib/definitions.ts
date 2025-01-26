@@ -16,6 +16,13 @@ export type Customer = {
   name: string;
   email: string;
   image_url: string;
+  direccion: string;
+  c_postal: string;
+  poblacion: string;
+  provincia: string;
+  telefono: string;
+  cif: string;
+  pais: string;
 };
 
 export type Invoice = {

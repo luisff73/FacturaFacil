@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+import { Customer } from '@/app/lib/definitions';
 
 // Define el esquema para FormSchema
 const FormSchema = z.object({
@@ -112,6 +113,21 @@ export async function updateInvoice(
 export async function deleteInvoice(id: string) {
   await sql`DELETE FROM invoices WHERE id = ${id}`;
   revalidatePath('/dashboard/invoices');
+}
+
+// Función para crear un cliente
+export async function createCustomer(data: Omit<Customer, 'id'>) {
+  const { name, email, image_url } = data;
+
+  // Consulta SQL para insertar un nuevo cliente
+  const result = await sql`
+    INSERT INTO customers (name, email, image_url)
+    VALUES (${name}, ${email}, ${image_url})
+    RETURNING id, name, email, image_url;
+  `;
+
+  // Devolver el cliente creado
+  return result.rows[0];
 }
 
 export async function deleteCustomers(id: string) {
