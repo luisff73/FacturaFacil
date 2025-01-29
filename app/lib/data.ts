@@ -200,7 +200,7 @@ export async function fetchCustomers() {
   }
 }
 
-export async function fetchCustomersById(id: string) {
+export async function fetchCustomersById(id: string): Promise<Customer[]> {
   try {
     const data = await sql<Customer>`
       SELECT *
@@ -212,7 +212,7 @@ export async function fetchCustomersById(id: string) {
     return customers;
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch all customers.');
+    throw new Error('Failed to fetch customer.');
   }
 }
 

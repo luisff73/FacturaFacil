@@ -17,23 +17,11 @@ export default async function Page({ params }: PageProps) {
   const id = params.id;
   const customers = await fetchCustomersById(id);
 
-  if (!customers || !Array.isArray(customers) || customers.length === 0) {
+  if (!customers || customers.length === 0) {
     notFound();
   }
 
-  const customer: Customer = {
-    id: customers[0].id,
-    name: customers[0].name,
-    email: customers[0].email,
-    image_url: customers[0].image_url,
-    direccion: customers[0].direccion,
-    c_postal: customers[0].c_postal,
-    poblacion: customers[0].poblacion,
-    provincia: customers[0].provincia,
-    telefono: customers[0].telefono,
-    cif: customers[0].cif,
-    pais: customers[0].pais,
-  };
+  const customer = customers[0];
 
   return (
     <main>

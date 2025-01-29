@@ -60,6 +60,9 @@ importers:
         specifier: ^3.24.1
         version: 3.24.1
     devDependencies:
+      '@next/eslint-plugin-next':
+        specifier: ^15.1.6
+        version: 15.1.6
       '@types/bcrypt':
         specifier: ^5.0.2
         version: 5.0.2
