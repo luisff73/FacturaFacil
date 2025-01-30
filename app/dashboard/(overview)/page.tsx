@@ -5,7 +5,7 @@
 import RevenueChart from '@/app/ui/dashboard/revenue-chart';
 import LatestInvoices from '@/app/ui/dashboard/latest-invoices';
 import { lusitana } from '@/app/ui/fonts';
-import { fetchCardData } from '@/app/lib/data'; // Importamos la función fetchRevenue de data.ts
+// import { fetchCardData } from '@/app/lib/data'; // Importamos la función fetchRevenue de data.ts
 import { Suspense } from 'react';
 import CardWrapper from '@/app/ui/dashboard/cards';
 import { RevenueChartSkeleton, LatestInvoicesSkeleton, CardsSkeleton, } from '@/app/ui/skeletons';
@@ -16,7 +16,7 @@ export default async function Page() { // componente asiincrono para poder hacer
     // const latestInvoices = await fetchLatestInvoices(); // Llamamos a la función fetchLatestInvoices y guardamos el resultado en la variable latestInvoices
     // hasta que no se resuelva la promesa no se renderiza el componente y no continua fetchCardData
     // Llamamos a la función fetchCardData y guardamos el resultado en las variables numberOfInvoices, numberOfCustomers, totalPaidInvoices y totalPendingInvoices    
-    const { numberOfInvoices, numberOfCustomers, totalPaidInvoices, totalPendingInvoices } = await fetchCardData();
+    // const { numberOfInvoices, numberOfCustomers, totalPaidInvoices, totalPendingInvoices } = await fetchCardData();
 
     return (
         <main>

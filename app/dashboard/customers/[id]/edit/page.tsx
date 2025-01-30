@@ -9,9 +9,9 @@ export const metadata: Metadata = {
   title: 'Editar Cliente',
 };
 
-interface PageProps {
-  params: { id: string }; // El tipo esperado para params
-}
+// interface PageProps {
+//   params: { id: string }; // El tipo esperado para params
+// }
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;

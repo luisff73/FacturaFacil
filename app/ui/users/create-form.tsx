@@ -1,7 +1,7 @@
 // Luis
 // filepath: /c:/DAW/desenvolupament web client/next/nextjs-dashboard/app/ui/users/create-form.tsx
 import { useState, useEffect } from 'react';
-import { User } from '@/app/lib/definitions'; 
+import { User } from '@/app/lib/definitions';
 // Importa la interfaz User desde definitions.ts
 
 
@@ -16,7 +16,8 @@ export default function CreateUserForm({ user }: CreateUserFormProps) {
   const [email, setEmail] = useState(user?.email || ''); // inicializamos el estado de email
   const [password, setPassword] = useState(''); // inicializamos el estado de password
   const [type, setType] = useState(user?.type || ''); // inicializamos el estado de type
-  const [token, setToken] = useState(''); // inicializamos el estado de token
+  const [token] = useState(''); // inicializamos el estado de token
+  //const [token, setToken] = useState(''); // inicializamos el estado de token
 
   const handleSubmit = async (event: React.FormEvent) => { // definimos la funcion handleSubmit
     event.preventDefault();

@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
-import { Customer } from '@/app/lib/definitions';
+import { Customer, ArticulosTableType } from '@/app/lib/definitions';
 
 // Define el esquema para FormSchema
 const FormSchema = z.object({
@@ -25,19 +25,20 @@ const FormSchema = z.object({
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ date: true, id: true });
-const CreateCustomer = z.object({
-  name: z.string(),
-  email: z.string().email(),
-  image_url: z.string(),
-  direccion: z.string(),
-  c_postal: z.string(),
-  poblacion: z.string(),
-  provincia: z.string(),
-  telefono: z.string(),
-  cif: z.string(),
-  pais: z.string(),
-});
-const UpdateCustomer = CreateCustomer.omit({ image_url: true });
+// const CreateCustomer = z.object({
+//   name: z.string(),
+//   email: z.string().email(),
+//   image_url: z.string(),
+//   direccion: z.string(),
+//   c_postal: z.string(),
+//   poblacion: z.string(),
+//   provincia: z.string(),
+//   telefono: z.string(),
+//   cif: z.string(),
+//   pais: z.string(),
+// });
+
+// const UpdateCustomer = CreateCustomer.omit({ image_url: true });
 
 
 export type State = {
@@ -117,7 +118,7 @@ export async function updateInvoice(
       WHERE id = ${id}
     `;
   } catch (error) {
-    return { message: 'Database Error: Failed to Update Invoice.' };
+    return { message: 'Database Error: Failed to Update Invoice.'+error };
   }
 
   revalidatePath('/dashboard/invoices');
@@ -183,4 +184,45 @@ export async function authenticate(
     }
     throw error;
   }
+}
+export async function deleteArticulo(id: string) {
+  await sql`DELETE FROM articulos WHERE id = ${id}`;
+  revalidatePath('/dashboard/articulos');
+}
+
+// Función para actualizar un articulo
+export async function updateArticulo(id: string, data: Omit<ArticulosTableType, 'id'>) {
+  const { codigo, descripcion, precio, iva, stock, imagen } = data;
+
+  // Consulta SQL para actualizar un artículo
+  const result = await sql`
+    UPDATE articulos
+    SET 
+      codigo = ${codigo}, 
+      descripcion = ${descripcion}, 
+      precio = ${precio}, 
+      iva = ${iva}, 
+      stock = ${stock}, 
+      imagen = ${JSON.stringify(imagen)}
+    WHERE id = ${id}
+    RETURNING id, codigo, descripcion, precio, iva, stock, imagen;
+  `;
+
+  // Devolver el artículo actualizado
+  return result.rows[0];
+}
+
+// Función para crear un artículo
+export async function createArticulo(data: Omit<ArticulosTableType, 'id'>) {
+  const { codigo, descripcion, precio, iva, stock, imagen } = data;
+
+  // Consulta SQL para insertar un nuevo artículo
+  const result = await sql`
+    INSERT INTO articulos (codigo, descripcion, precio, iva, stock, imagen)
+    VALUES (${codigo}, ${descripcion}, ${precio}, ${iva}, ${stock}, ${JSON.stringify(imagen)})
+    RETURNING id, codigo, descripcion, precio, iva, stock, imagen;
+  `;
+
+  // Devolver el artículo creado
+  return result.rows[0];
 }

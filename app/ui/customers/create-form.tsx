@@ -10,7 +10,7 @@ interface FormProps {
   customers: CustomerField[];
 }
 
-const CreateCustomerForm: React.FC<FormProps> = ({ customers }) => {
+const CreateCustomerForm: React.FC<FormProps> = () => {
   const [state, setState] = useState<{ errors: { name?: string[]; email?: string[]; image_url?: string[]; direccion?: string[]; c_postal?: string[]; poblacion?: string[]; provincia?: string[]; telefono?: string[]; cif?: string[]; pais?: string[] }, message: string }>({ errors: {}, message: '' });
   const router = useRouter();
 

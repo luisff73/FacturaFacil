@@ -15,6 +15,7 @@ import {
   InvoicesTable,
   LatestInvoiceRaw,
   Revenue,
+  ArticulosTableType,
 } from './definitions';
 
 
@@ -238,8 +239,9 @@ export async function fetchCustomersPages(query: string) {
   }
 }
 
-export async function fetchFilteredCustomers(query: string, currentPage: number) {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+export async function fetchFilteredCustomers(query: string) {
+
+  // const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   
   try {
     const data = await sql<CustomersTableType>`
@@ -272,5 +274,76 @@ export async function fetchFilteredCustomers(query: string, currentPage: number)
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch customer table.');
+  }
+}
+export async function fetchFilteredArticulos(query: string) {
+
+  // const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+  
+  try {
+    const data = await sql<ArticulosTableType>`
+      SELECT
+        id,
+        codigo,
+        descripcion,
+        precio,
+        iva,
+        stock,
+        imagen AS imagen
+      FROM articulos
+      WHERE
+        codigo ILIKE ${`%${query}%`} OR
+        descripcion ILIKE ${`%${query}%`}
+      ORDER BY codigo ASC
+    `;
+  
+    const articulos = data.rows.map((articulo) => ({
+      ...articulo,
+      precio: parseFloat(articulo.precio.toFixed(2)), // Formatear el precio a 2 decimales
+      iva: parseFloat(articulo.iva.toFixed(2)), // Formatear el IVA a 2 decimales
+      stock: parseFloat(articulo.stock.toFixed(2)), // Formatear el stock a 2 decimales
+    }));
+  
+    return articulos;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch articulos table.');
+  }
+}
+
+export async function fetchArticulosPages(query: string) {
+  try {
+    const count = await sql`SELECT COUNT(*)
+    FROM articulos
+    WHERE
+      articulos.codigo ILIKE ${`%${query}%`} OR
+      articulos.descripcion ILIKE ${`%${query}%`}
+  `;
+
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of articulos.');
+  }
+}
+
+export async function fetchArticulosById(id: string) {
+
+  try {
+    const data = await sql<ArticulosTableType>`
+      SELECT *
+      FROM articulos
+      WHERE id = ${id};
+    `;
+
+    const articulos = data.rows.map((articulo) => ({
+      ...articulo,
+    }));
+    console.log(articulos);
+    return articulos[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch articulos.');
   }
 }

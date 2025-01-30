@@ -98,3 +98,13 @@ export type InvoiceForm = {
   amount: number; 
   status: 'pending' | 'paid' | 'proforma';
 };
+
+export type ArticulosTableType = {
+  id: string;
+  codigo: string;
+  descripcion: string;
+  precio: number;
+  iva: number;
+  stock: number;
+  imagen: { id: number; ruta: string }[];
+};
