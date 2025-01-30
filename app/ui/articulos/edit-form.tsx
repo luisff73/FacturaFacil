@@ -5,6 +5,7 @@ import { updateArticulo } from '@/app/lib/actions';
 import { ArticulosTableType } from '@/app/lib/definitions';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface EditFormProps {
   articulo: ArticulosTableType;
@@ -18,14 +19,14 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
     const fileInput = formData.get('imagen') as File;
-    let imageUrl = articulo.imagen[0]?.ruta || '';
+    let imageUrl = articulo.imagen ? articulo.imagen[0]?.ruta : '';
 
     if (fileInput && fileInput.name) {
-      // Aquí puedes manejar la carga del archivo y obtener la ruta local
-      const filePath = `/uploads/${fileInput.name}`;
+      // Aquí va la ruta local
+      const filePath = `/articulos/${fileInput.name}`;
       imageUrl = filePath;
 
-      // Aquí puedes agregar la lógica para guardar el archivo en el servidor
+      // Aquí puede ir la lógica para guardar el archivo en el servidor
     }
 
     const data = {
@@ -34,7 +35,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
       precio: parseFloat(formData.get('precio') as string),
       iva: parseFloat(formData.get('iva') as string),
       stock: parseFloat(formData.get('stock') as string),
-      imagen: [{ id: 1, ruta: imageUrl }]
+      imagen: imageUrl ? [{ id: 1, ruta: imageUrl }] : articulo.imagen
     };
 
     try {
@@ -48,7 +49,6 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
   };
 
   return (
-    // Formulario para editar un artículo
     <form onSubmit={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Articulo Código */}
@@ -114,7 +114,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               name="precio"
               type="number"
               step="0.01"
-              defaultValue={articulo.precio.toFixed(2)}
+              defaultValue={articulo.precio.toString()}
               placeholder="Introduce el precio del artículo"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="precio-error"
@@ -141,7 +141,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               name="iva"
               type="number"
               step="0.01"
-              defaultValue={articulo.iva.toFixed(2)}
+              defaultValue={articulo.iva.toString()}
               placeholder="Introduce el IVA del artículo"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="iva-error"
@@ -168,7 +168,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               name="stock"
               type="number"
               step="0.01"
-              defaultValue={articulo.stock.toFixed(2)}
+              defaultValue={articulo.stock.toString()}
               placeholder="Introduce el stock del artículo"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="stock-error"
@@ -183,6 +183,26 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               ))}
           </div>
         </div>
+
+        {/* Articulo Imagenes */}
+        {articulo.imagen && articulo.imagen.length > 0 && (
+          <div className="mb-4">
+            <label className="mb-2 block text-sm font-medium">Imágenes del artículo</label>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              {articulo.imagen.map((img, index) => (
+                <div key={index} className="relative w-full h-32">
+                  <Image
+                    src={img.ruta.startsWith('/') ? img.ruta : `/${img.ruta}`}
+                    alt={`Imagen ${index + 1}`}
+                    layout="fill"
+                    objectFit="contain"
+                    className="rounded-md"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Articulo Imagen */}
         <div className="mb-4">
@@ -207,6 +227,12 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
                 </p>
               ))}
           </div>
+        </div>
+
+        <div aria-live="polite" aria-atomic="true">
+          {state.message ? (
+            <p className="mt-2 text-sm text-red-500">{state.message}</p>
+          ) : null}
         </div>
 
         <div aria-live="polite" aria-atomic="true">

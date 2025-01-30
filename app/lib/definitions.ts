@@ -106,5 +106,5 @@ export type ArticulosTableType = {
   precio: number;
   iva: number;
   stock: number;
-  imagen: { id: number; ruta: string }[];
+  imagen: { id: number; ruta: string }[] | null; // imagen puede ser null
 };

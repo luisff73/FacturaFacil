@@ -1,28 +1,28 @@
-import { fetchCustomers } from '@/app/lib/data';
-import Form from '@/app/ui/customers/create-form';
-import Breadcrumbs from '@/app/ui/customers/breadcrumbs';
+import { fetchArticulos } from '@/app/lib/data';
+import Form from '@/app/ui/articulos/create-form';
+import Breadcrumbs from '@/app/ui/articulos/breadcrumbs';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Alta de clientes',
+  title: 'Alta de artículos',
 };
 
 export default async function Page() {
-  const customers = await fetchCustomers();
+  const articulos = await fetchArticulos();
 
   return (
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: 'Clientes', href: '/dashboard/customers' },
+          { label: 'Artículos', href: '/dashboard/articulos' },
           {
-            label: 'Alta de clientes',
-            href: '/dashboard/customers/create',
+            label: 'Alta de artículos',
+            href: '/dashboard/articulos/create',
             active: true,
           },
         ]}
       />
-      <Form customers={customers} /> 
+      <Form articulos={articulos} />
     </main>
   );
 }

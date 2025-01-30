@@ -299,9 +299,6 @@ export async function fetchFilteredArticulos(query: string) {
   
     const articulos = data.rows.map((articulo) => ({
       ...articulo,
-      precio: parseFloat(articulo.precio.toFixed(2)), // Formatear el precio a 2 decimales
-      iva: parseFloat(articulo.iva.toFixed(2)), // Formatear el IVA a 2 decimales
-      stock: parseFloat(articulo.stock.toFixed(2)), // Formatear el stock a 2 decimales
     }));
   
     return articulos;
@@ -328,22 +325,41 @@ export async function fetchArticulosPages(query: string) {
   }
 }
 
-export async function fetchArticulosById(id: string) {
-
+export async function fetchArticulosById(id: string): Promise<ArticulosTableType | null> {
   try {
     const data = await sql<ArticulosTableType>`
-      SELECT *
+      SELECT id, codigo, descripcion, precio, iva, stock, imagen
       FROM articulos
       WHERE id = ${id};
     `;
 
     const articulos = data.rows.map((articulo) => ({
       ...articulo,
+      precio: parseFloat(articulo.precio as unknown as string),
+      iva: parseFloat(articulo.iva as unknown as string),
+      stock: parseFloat(articulo.stock as unknown as string),
+      imagen: articulo.imagen // Ya no necesitas JSON.parse aquí
     }));
-    console.log(articulos);
-    return articulos[0];
+    
+    return articulos[0] || null;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch articulos.');
+  }
+}
+
+export async function fetchArticulos() {
+  try {
+    const data = await sql<ArticulosTableType>`
+      SELECT *
+      FROM articulos
+      ORDER BY codigo ASC
+    `;
+
+    const articulos = data.rows;
+    return articulos;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all articulos.');
   }
 }
