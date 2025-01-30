@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import SideNav from '@/app/ui/dashboard/sidenav';
 import FacturaFacilLogo from '@/app/ui/factura-facil';
 //import { inter } from '@/app/ui/fonts';

@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import FacturaFacilLogo from '@/app/ui/factura-facil';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 //import styles from '@/app/ui/home.module.css'; // esto importaria mi css personalizado esto permite aplicar este estilo solo a este fichero
-import {  roboto } from '@/app/ui/fonts'; // importa las fuentes de google de fonts.ts
+import { roboto } from '@/app/ui/fonts'; // importa las fuentes de google de fonts.ts
 import Image from '../components/image';
 import { Metadata } from 'next'; // importamos Metadata de next
 //import CreateUserForm from './ui/users/create-form';

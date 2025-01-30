@@ -1,5 +1,4 @@
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 
 
 //import { Card } from '@/app/ui/dashboard/cards'; // Importamos el componente Card para usarlo en el dashboard
