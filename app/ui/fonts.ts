@@ -1,7 +1,7 @@
 // archivo de importacion de fuentes
 // next incluye las fuentes que importamos para que no haya dependencias ni precargas de terceros
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Inter, Lusitana, Roboto, Montserrat } from "next/font/google";
+import { Inter, Lusitana, Montserrat } from "next/font/google";
 
 export const inter = Inter({ subsets: ["latin"] });
 export const lusitana = Lusitana({

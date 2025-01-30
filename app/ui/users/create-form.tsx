@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { User } from '@/app/lib/definitions'; // Importa la interfaz User desde definitions.ts
 
 
-
-interface CreateUserFormProps { // definimos la interfaz CreateUserFormProps
-  user?: User; // el ? indica que es opcional
+// definimos la interfaz CreateUserFormProps
+// el ? indica que es opcional
+interface CreateUserFormProps {
+  user?: User;
 }
 
 export default function CreateUserForm({ user }: CreateUserFormProps) {
@@ -18,8 +19,8 @@ export default function CreateUserForm({ user }: CreateUserFormProps) {
 
   const handleSubmit = async (event: React.FormEvent) => { // definimos la funcion handleSubmit
     event.preventDefault();
-    const method = user ? 'PUT' : 'POST'; // si user existe entonces method es 'PUT' sino 'POST'
-    const endpoint = user ? `/api/users/${user.id}` : '/api/users'; // si user existe entonces endpoint es `/api/users/${user.id}` sino '/api/users'
+    const method = user ? 'PUT' : 'POST'; // si user existe entonces method es PUT sino POST
+    const endpoint = user ? `/api/users/${user.id}` : '/api/users'; // si user existe entonces endpoint es /api/users/${user.id} sino /api/users
     const response = await fetch(endpoint, { // hacemos una peticion fetch 
       method, // metodo
       headers: { // cabeceras
@@ -34,15 +35,17 @@ export default function CreateUserForm({ user }: CreateUserFormProps) {
     }
   };
 
-  useEffect(() => { // useEffect se ejecuta despues de cada renderizado para actualizar el DOM
-    if (user) { // si user existe
+  // useEffect se ejecuta despues de cada renderizado para actualizar el DOM
+  // si user existe
+  useEffect(() => {
+    if (user) {
       setName(user.name);
       setEmail(user.email);
       setType(user.type);
     }
   }, [user]);
-
-  return ( // retornamos el formulario con los campos name, email, password y type
+  // retornamos el formulario con los campos name, email, password y type
+  return (
     <form onSubmit={handleSubmit}>
       <input
         type="text"
@@ -72,3 +75,4 @@ export default function CreateUserForm({ user }: CreateUserFormProps) {
     </form>
   );
 }
+
