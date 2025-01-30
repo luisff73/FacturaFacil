@@ -13,15 +13,16 @@ interface PageProps {
   params: { id: string }; // El tipo esperado para params
 }
 
-export default async function Page({ params }: PageProps) {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const id = params.id;
   const customers = await fetchCustomersById(id);
 
-  if (!customers || customers.length === 0) {
+  if (!customers) {
     notFound();
   }
 
-  const customer = customers[0];
+  const customer: Customer = customers; // Aquí uso la interfaz Customer
 
   return (
     <main>
