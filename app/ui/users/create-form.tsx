@@ -1,7 +1,8 @@
 // Luis
 // filepath: /c:/DAW/desenvolupament web client/next/nextjs-dashboard/app/ui/users/create-form.tsx
 import { useState, useEffect } from 'react';
-import { User } from '@/app/lib/definitions'; // Importa la interfaz User desde definitions.ts
+import { User } from '@/app/lib/definitions'; 
+// Importa la interfaz User desde definitions.ts
 
 
 // definimos la interfaz CreateUserFormProps

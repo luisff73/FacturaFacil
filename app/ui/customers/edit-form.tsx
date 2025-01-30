@@ -11,26 +11,7 @@ interface EditFormProps {
 }
 
 const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
-  if (!customer) {
-    return <div className="flex justify-center items-center p-4">Cargando datos del cliente...</div>;
-  }
-
-  const [state, setState] = useState<{ 
-    errors: { 
-      name?: string[]; 
-      email?: string[]; 
-      image_url?: string[]; 
-      direccion?: string[]; 
-      c_postal?: string[]; 
-      poblacion?: string[]; 
-      provincia?: string[]; 
-      telefono?: string[]; 
-      cif?: string[]; 
-      pais?: string[] 
-    }, 
-    message: string 
-  }>({ errors: {}, message: '' });
-
+  const [state, setState] = useState<{ errors: { name?: string[]; email?: string[]; image_url?: string[]; direccion?: string[]; c_postal?: string[]; poblacion?: string[]; provincia?: string[]; telefono?: string[]; cif?: string[]; pais?: string[] }, message: string }>({ errors: {}, message: '' });
   const router = useRouter();
 
   const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
