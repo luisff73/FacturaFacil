@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React from 'react';
-import NextImage from 'next/image';
+
+import React from "react";
+import NextImage from "next/image";
 
 interface ImageProps {
     src: string;

@@ -71,7 +71,8 @@ export default function CreateUserForm({ user }: CreateUserFormProps) {
         value={type}
         onChange={(e) => setType(e.target.value)}
       />
-      <button type="submit">{user ? 'Actualizar Usuario' : 'Crear Usuario'}</button> // si user existe entonces 'Actualizar Usuario' sino 'Crear Usuario'
+      <button type="submit">{user ? 'Actualizar Usuario' : 'Crear Usuario'}</button>
+      {/* si user existe entonces Actualizar Usuario sino Crear Usuario */}
     </form>
   );
 }
