@@ -101,15 +101,15 @@ export default function EditInvoiceForm({
             <div className="flex gap-4">
               <div className="flex items-center">
                 <input
-                  id="pending"
+                  id="Pendiente"
                   name="status"
                   type="radio"
-                  value="pending"
-                  defaultChecked={invoice.status === 'pending'}
+                  value="Pendiente"
+                  defaultChecked={invoice.status === 'Pendiente'}
                   className="h-4 w-4 border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
                 />
                 <label
-                  htmlFor="pending"
+                  htmlFor="Pendiente"
                   className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600"
                 >
                   Pendiente <ClockIcon className="h-4 w-4" />
@@ -117,15 +117,15 @@ export default function EditInvoiceForm({
               </div>
               <div className="flex items-center">
                 <input
-                  id="proforma"
+                  id="Proforma"
                   name="status"
                   type="radio"
-                  value="proforma"
-                  defaultChecked={invoice.status === 'proforma'}
+                  value="Proforma"
+                  defaultChecked={invoice.status === 'Proforma'}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
                 />
                 <label
-                  htmlFor="proforma"
+                  htmlFor="Proforma"
                   className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600"
                 >
                   Proforma <CloudIcon className="h-4 w-4" />
@@ -133,15 +133,15 @@ export default function EditInvoiceForm({
               </div>
               <div className="flex items-center">
                 <input
-                  id="paid"
+                  id="Pagada"
                   name="status"
                   type="radio"
-                  value="paid"
-                  defaultChecked={invoice.status === 'paid'}
+                  value="Pagada"
+                  defaultChecked={invoice.status === 'Pagada'}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-400 text-gray-600 focus:ring-2"
                 />
                 <label
-                  htmlFor="paid"
+                  htmlFor="Pagada"
                   className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white"
                 >
                   Pagada <CheckIcon className="h-4 w-4" />

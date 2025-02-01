@@ -6,8 +6,8 @@ import Search from '@/app/ui/search';
 
 interface CustomersTableProps {
   customers: {
-    total_pending: string;
-    total_paid: string;
+    total_pendiente: string;
+    total_pagada: string;
     total_proforma: string;
     id: string;
     name: string;
@@ -57,11 +57,11 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
                     <div className="flex w-full items-center justify-between border-b py-5">
                       <div className="flex w-1/2 flex-col">
                         <p className="text-xs">Pendiente</p>
-                        <p className="font-medium">{customer.total_pending}</p>
+                        <p className="font-medium">{customer.total_pendiente}</p>
                       </div>
                       <div className="flex w-1/2 flex-col">
                         <p className="text-xs">Pagado</p>
-                        <p className="font-medium">{customer.total_paid}</p>
+                        <p className="font-medium">{customer.total_pagada}</p>
                       </div>
                     </div>
                     <div className="pt-4 text-sm">
@@ -89,7 +89,7 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
                       Total Pagado
                     </th>
                     <th scope="col" className="px-4 py-5 font-medium">
-                      Total Proformas
+                      Total Proforma
                     </th>
                     <th scope="col" className="px-4 py-5 font-medium">
                       Acciones
@@ -119,10 +119,10 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
                         {customer.total_invoices}
                       </td>
                       <td className="whitespace-nowrap bg-white px-4 py-5 text-sm">
-                        {customer.total_pending}
+                        {customer.total_pendiente}
                       </td>
                       <td className="whitespace-nowrap bg-white px-4 py-5 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
-                        {customer.total_paid}
+                        {customer.total_pagada}
                       </td>
                       <td className="whitespace-nowrap bg-white px-4 py-5 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
                         {customer.total_proforma}

@@ -72,9 +72,9 @@ export async function fetchCardData() {
     const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
     const invoiceStatusPromise = sql`SELECT
-         SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
-         SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending",
-         SUM(CASE WHEN status = 'proforma' THEN amount ELSE 0 END) AS "proforma"
+         SUM(CASE WHEN status = 'Pagada' THEN amount ELSE 0 END) AS "Pagada",
+         SUM(CASE WHEN status = 'Pendiente' THEN amount ELSE 0 END) AS "Pendiente",
+         SUM(CASE WHEN status = 'Proforma' THEN amount ELSE 0 END) AS "Proforma"
          FROM invoices`;
 
     const data = await Promise.all([
@@ -85,9 +85,9 @@ export async function fetchCardData() {
 
     const numberOfInvoices = Number(data[0].rows[0].count ?? '0');
     const numberOfCustomers = Number(data[1].rows[0].count ?? '0');
-    const totalPaidInvoices = formatCurrency(data[2].rows[0].paid ?? '0');
-    const totalPendingInvoices = formatCurrency(data[2].rows[0].pending ?? '0');
-    const totalProformaInvoices = formatCurrency(data[2].rows[0].proforma ?? '0');
+    const totalPaidInvoices = formatCurrency(data[2].rows[0].Pagada ?? '0');
+    const totalPendingInvoices = formatCurrency(data[2].rows[0].Pendiente ?? '0');
+    const totalProformaInvoices = formatCurrency(data[2].rows[0].Proforma ?? '0');
 
     return {
       numberOfCustomers,
@@ -252,9 +252,9 @@ export async function fetchFilteredCustomers(query: string) {
 		  customers.email,
 		  customers.image_url,
 		  COUNT(invoices.id) AS total_invoices,
-		  SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
-		  SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid,
-      SUM(CASE WHEN invoices.status = 'proforma' THEN invoices.amount ELSE 0 END) AS total_proforma
+		  SUM(CASE WHEN invoices.status = 'Pendiente' THEN invoices.amount ELSE 0 END) AS total_pendiente,
+		  SUM(CASE WHEN invoices.status = 'Pagada' THEN invoices.amount ELSE 0 END) AS total_pagada,
+      SUM(CASE WHEN invoices.status = 'Proforma' THEN invoices.amount ELSE 0 END) AS total_proforma
 		FROM customers
 		LEFT JOIN invoices ON customers.id = invoices.customer_id
 		WHERE
@@ -266,8 +266,8 @@ export async function fetchFilteredCustomers(query: string) {
 
     const customers = data.rows.map((customer) => ({
       ...customer,
-      total_pending: formatCurrency(customer.total_pending),
-      total_paid: formatCurrency(customer.total_paid),
+      total_pendiente: formatCurrency(customer.total_pendiente),
+      total_pagada: formatCurrency(customer.total_pagada),
       total_proforma: formatCurrency(customer.total_proforma),
     }));
 
