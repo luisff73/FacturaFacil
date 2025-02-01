@@ -20,8 +20,8 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
     const fileInput = formData.get('imagen') as File;
-    let imageUrl = articulo.imagen ? articulo.imagen[0]?.ruta : '';
 
+    let imageUrl = '';
     if (fileInput && fileInput.name) {
       // Aquí va la ruta local
       const filePath = `/articulos/${fileInput.name}`;
@@ -30,13 +30,16 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
       // Aquí puede ir la lógica para guardar el archivo en el servidor
     }
 
+    const newImage = imageUrl ? { id: (images?.length || 0) + 1, ruta: imageUrl } : null;
+    const updatedImages = newImage ? [...(images || []), newImage] : images || [];
+
     const data = {
       codigo: formData.get('codigo') as string,
       descripcion: formData.get('descripcion') as string,
       precio: parseFloat(formData.get('precio') as string),
       iva: parseFloat(formData.get('iva') as string),
       stock: parseFloat(formData.get('stock') as string),
-      imagen: imageUrl ? [{ id: 1, ruta: imageUrl }] : articulo.imagen
+      imagen: updatedImages
     };
 
     try {
