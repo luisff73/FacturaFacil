@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateArticulo,handleDeleteImage } from '@/app/lib/actions';
+import { updateArticulo, deleteArticuloImage } from '@/app/lib/actions';
 import { ArticulosTableType } from '@/app/lib/definitions';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
@@ -13,6 +13,7 @@ interface EditFormProps {
 
 const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
   const [state, setState] = useState<{ errors: { codigo?: string[]; descripcion?: string[]; precio?: string[]; iva?: string[]; stock?: string[]; imagen?: string[] }, message: string }>({ errors: {}, message: '' });
+  const [images, setImages] = useState(articulo.imagen);
   const router = useRouter();
 
   const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -45,6 +46,17 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
       if (error instanceof Error) {
         setState({ errors: (error as any).errors || {}, message: error.message });
       }
+    }
+  };
+
+  const handleDeleteImage = async (imageId: number, index: number) => {
+    try {
+      await deleteArticuloImage(Number(articulo.id), imageId);
+      // Actualiza el estado para reflejar la eliminación de la imagen
+      const updatedImages = images ? images.filter((_, i) => i !== index) : [];
+      setImages(updatedImages);
+    } catch (error) {
+      console.error('Error al eliminar la imagen del artículo:', error);
     }
   };
 
@@ -185,32 +197,31 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
         </div>
 
         {/* Articulo Imagenes */}
-        {articulo.imagen && articulo.imagen.length > 0 && (
-  <div className="mb-4">
-    <label className="mb-2 block text-sm font-medium">Imágenes del artículo</label>
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-      {articulo.imagen.map((img, index) => (
-        <div key={index} className="relative w-full h-32 flex">
-          <button
-            type="button"
-            onClick={() => handleDeleteImage(img.id, index)}
-            className="absolute top-1 right-1 z-10 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
-          >
-            ×
-          </button>
-          <Image
-            src={img.ruta.startsWith('/') ? img.ruta : `/${img.ruta}`}
-            alt={`Imagen ${index + 1}`}
-            layout="fill"
-            objectFit="contain"
-            className="rounded-md object-center md:object-left"
-          />
-        </div>
-      ))}
-    </div>
-  </div>
-)}
-
+        {images && images.length > 0 && (
+          <div className="mb-4">
+            <label className="mb-2 block text-sm font-medium">Imágenes del artículo</label>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+              {images.map((img, index) => (
+                <div key={index} className="relative w-full h-32 flex">
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteImage(img.id, index)}
+                    className="absolute top-1 right-1 z-10 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                  >
+                    ×
+                  </button>
+                  <Image
+                    src={img.ruta.startsWith('/') ? img.ruta : `/${img.ruta}`}
+                    alt={`Imagen ${index + 1}`}
+                    layout="fill"
+                    objectFit="contain"
+                    className="rounded-md object-center md:object-left"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Articulo Imagen */}
         <div className="mb-4">
@@ -235,12 +246,6 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
                 </p>
               ))}
           </div>
-        </div>
-
-        <div aria-live="polite" aria-atomic="true">
-          {state.message ? (
-            <p className="mt-2 text-sm text-red-500">{state.message}</p>
-          ) : null}
         </div>
 
         <div aria-live="polite" aria-atomic="true">
