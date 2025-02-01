@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateArticulo } from '@/app/lib/actions';
+import { updateArticulo,handleDeleteImage } from '@/app/lib/actions';
 import { ArticulosTableType } from '@/app/lib/definitions';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
@@ -186,23 +186,31 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
 
         {/* Articulo Imagenes */}
         {articulo.imagen && articulo.imagen.length > 0 && (
-          <div className="mb-4">
-            <label className="mb-2 block text-sm font-medium">Imágenes del artículo</label>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              {articulo.imagen.map((img, index) => (
-                <div key={index} className="relative w-full h-32">
-                  <Image
-                    src={img.ruta.startsWith('/') ? img.ruta : `/${img.ruta}`}
-                    alt={`Imagen ${index + 1}`}
-                    layout="fill"
-                    objectFit="contain"
-                    className="rounded-md"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+  <div className="mb-4">
+    <label className="mb-2 block text-sm font-medium">Imágenes del artículo</label>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+      {articulo.imagen.map((img, index) => (
+        <div key={index} className="relative w-full h-32 flex">
+          <button
+            type="button"
+            onClick={() => handleDeleteImage(img.id, index)}
+            className="absolute top-1 right-1 z-10 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+          >
+            ×
+          </button>
+          <Image
+            src={img.ruta.startsWith('/') ? img.ruta : `/${img.ruta}`}
+            alt={`Imagen ${index + 1}`}
+            layout="fill"
+            objectFit="contain"
+            className="rounded-md object-center md:object-left"
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
 
         {/* Articulo Imagen */}
         <div className="mb-4">

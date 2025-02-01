@@ -6,7 +6,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
-import { Customer, ArticulosTableType } from '@/app/lib/definitions';
+import { Customer, ArticulosTableType, User } from '@/app/lib/definitions';
+import bcrypt from 'bcrypt';
 
 // Define el esquema para FormSchema
 const FormSchema = z.object({
@@ -17,6 +18,7 @@ const FormSchema = z.object({
   amount: z.coerce
     .number()
     .gt(0, { message: 'Please enter an amount greater than $0.' }),
+    
   status: z.enum(['pending', 'paid', 'proforma'], {
     invalid_type_error: 'Please select an invoice status.',
   }),
@@ -224,5 +226,92 @@ export async function createArticulo(data: Omit<ArticulosTableType, 'id'>) {
   `;
 
   // Devolver el artículo creado
+  return result.rows[0];
+}
+export async function deleteArticuloImage(articuloId: number, imageId: number) {
+  try {
+    const result = await sql`
+      UPDATE articulos 
+      SET imagen = (
+        SELECT COALESCE(
+          jsonb_agg(img)
+          FILTER (WHERE (img->>'id')::int != ${imageId}),
+          '[]'::jsonb
+        )
+        FROM jsonb_array_elements(imagen) img
+      )
+      WHERE id = ${articuloId}
+    `;
+    return result;
+  } catch (error) {
+    console.error('Error al eliminar la imagen del artículo:', error);
+    return { 
+      success: false, 
+      error: 'Error al eliminar la imagen del artículo' 
+    };
+  }
+}
+
+export async function handleDeleteImage(articuloId: number, imageId: number) {
+  try {
+    await deleteArticuloImage(articuloId, imageId);
+    revalidatePath('/dashboard/articulos');
+    return { success: true };
+  } catch (error) {
+    console.error('Error al eliminar la imagen', error);
+    return { 
+      success: false, 
+      error: 'Error al eliminar la imagen' 
+    };
+  }
+}
+
+export async function deleteUser(id: string) {
+  await sql`DELETE FROM users WHERE id = ${id}`;
+  revalidatePath('/dashboard/users');
+}
+
+// Función para actualizar un usuario
+export async function updateUser(id: string, data: Omit<User, 'id'>) {
+  const { name,email,password,type,token } = data;
+
+ // Encriptar la contraseña
+ const saltRounds = 5; // nivel de encriptacion (más alto = más seguro, pero más lento)
+ const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+  // Consulta SQL para actualizar un artículo
+  const result = await sql`
+    UPDATE users
+    SET 
+      name = ${name}, 
+      email = ${email}, 
+      password = ${hashedPassword}, 
+      type = ${type}, 
+      token = ${token}   
+    WHERE id = ${id}
+    RETURNING id, name, email, password, type, token;
+  `;
+
+  // Devolver el artículo actualizado
+  return result.rows[0];
+}
+
+
+
+export async function createUser(data: Omit<User, 'id'>) {
+  const { name, email, password, type, token } = data;
+
+  // Encriptar la contraseña
+  const saltRounds = 5; // nivel de encriptacion (más alto = más seguro, pero más lento)
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+  // Consulta SQL para insertar un nuevo usuario con la contraseña encriptada
+  const result = await sql`
+    INSERT INTO users (name, email, password, type, token)
+    VALUES (${name}, ${email}, ${hashedPassword}, ${type}, ${token})
+    RETURNING id, name, email, password, type, token;
+  `;
+
+  // Devolver el usuario creado
   return result.rows[0];
 }

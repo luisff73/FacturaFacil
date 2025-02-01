@@ -1,48 +1,33 @@
 'use client';
-// Luis
-// filepath: /c:/DAW/desenvolupament web client/next/nextjs-dashboard/app/ui/users/create-form.tsx
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createUser } from '@/app/lib/actions';
+import { updateUser } from '@/app/lib/actions';
 import { User } from '@/app/lib/definitions';
-import Link from 'next/link';
 import { Button } from '@/app/ui/button';
-// Importa la interfaz User desde definitions.ts
+import Link from 'next/link';
 
-
-// definimos la interfaz CreateUserFormProps
-// el ? indica que es opcional
-interface CreateUserFormProps {
-  user?: User[];
+interface EditFormProps {
+  user: User;
 }
 
-const CreateUserForm: React.FC<CreateUserFormProps> = () => {
-  const [state, setState] = useState<{
-    errors: {
-      name?: string[];
-      email?: string[];
-      password?: string[];
-      type?: string[]
-    },
-    message: string
-  }>({ errors: {}, message: '' });
-
+const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
+  const [state, setState] = useState<{ errors: Partial<Record<keyof User, string[]>>; message: string }>({ errors: {}, message: '' });
   const router = useRouter();
 
   const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
 
-    const data: Omit<User, "id"> = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      password: formData.get('password') as string,
-      type: formData.get('type') as string,
-      token: '', // Add a default value for the token
+    const data: Omit<User, 'id'> = {
+      name: formData.get('name') as string || '',
+      email: formData.get('email') as string || '',
+      password: formData.get('password') as string || '',
+      token: formData.get('token') as string || '',
+      type: formData.get('type') as string || '',
     };
 
     try {
-      await createUser(data);
+      await updateUser(user.id, data);
       router.push('/dashboard/users');
     } catch (error) {
       if (error instanceof Error) {
@@ -50,20 +35,22 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
       }
     }
   };
+
   return (
     <form onSubmit={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        {/* Nombre */}
+        {/* User Name */}
         <div className="mb-4">
           <label htmlFor="name" className="mb-2 block text-sm font-medium">
-            Nombre
+            Name
           </label>
           <div className="relative">
             <input
               id="name"
               name="name"
               type="text"
-              placeholder="Introduce el nombre del usuario"
+              defaultValue={user.name}
+              placeholder="Enter user name"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="name-error"
             />
@@ -78,7 +65,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
           </div>
         </div>
 
-        {/* Email */}
+        {/* User Email */}
         <div className="mb-4">
           <label htmlFor="email" className="mb-2 block text-sm font-medium">
             Email
@@ -88,7 +75,8 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
               id="email"
               name="email"
               type="email"
-              placeholder="Introduce el email del usuario"
+              defaultValue={user.email}
+              placeholder="Enter user email"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="email-error"
             />
@@ -103,17 +91,18 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
           </div>
         </div>
 
-        {/* Contraseña */}
+        {/* User Password */}
         <div className="mb-4">
           <label htmlFor="password" className="mb-2 block text-sm font-medium">
-            Contraseña
+            Password
           </label>
           <div className="relative">
             <input
               id="password"
               name="password"
               type="password"
-              placeholder="Introduce la contraseña del usuario"
+              defaultValue={user.password}
+              placeholder="Enter user password"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="password-error"
             />
@@ -128,22 +117,47 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
           </div>
         </div>
 
-        {/* Tipo de usuario */}
+        {/* User Token */}
         <div className="mb-4">
-          <label htmlFor="type" className="mb-2 block text-sm font-medium">
-            Selecciona rol de usuario
+          <label htmlFor="token" className="mb-2 block text-sm font-medium">
+            Token
           </label>
           <div className="relative">
-            <select
+            <input
+              id="token"
+              name="token"
+              type="text"
+              defaultValue={user.token}
+              placeholder="Enter user token"
+              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              aria-describedby="token-error"
+            />
+          </div>
+          <div id="token-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.token &&
+              state.errors.token.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
+        {/* User Type */}
+        <div className="mb-4">
+          <label htmlFor="type" className="mb-2 block text-sm font-medium">
+            Type
+          </label>
+          <div className="relative">
+            <input
               id="type"
               name="type"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2"
+              type="text"
+              defaultValue={user.type}
+              placeholder="Enter user type"
+              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="type-error"
-              required
-            >
-              <option value="admin">admin</option>
-              <option value="user">user</option>
-            </select>
+            />
           </div>
           <div id="type-error" aria-live="polite" aria-atomic="true">
             {state.errors?.type &&
@@ -155,14 +169,12 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
           </div>
         </div>
 
-
         <div aria-live="polite" aria-atomic="true">
           {state.message ? (
             <p className="mt-2 text-sm text-red-500">{state.message}</p>
           ) : null}
         </div>
       </div>
-
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/users"
@@ -170,10 +182,10 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
         >
           Cancelar
         </Link>
-        <Button type="submit">Crear Usuario</Button>
+        <Button type="submit">Actualizar Usuario</Button>
       </div>
     </form>
   );
 };
 
-export default CreateUserForm;
+export default EditUsersForm;

@@ -16,6 +16,7 @@ import {
   LatestInvoiceRaw,
   Revenue,
   ArticulosTableType,
+  User,
 } from './definitions';
 
 
@@ -39,7 +40,7 @@ export async function fetchRevenue() {
     return data.rows;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch revenue data.');
+    throw new Error('Error en el fetch revenue data.');
   }
 }
 
@@ -59,7 +60,7 @@ export async function fetchLatestInvoices() {
     return latestInvoices;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch the latest invoices.');
+    throw new Error('Error en el fetch the latest invoices.');
   }
 }
 
@@ -97,7 +98,7 @@ export async function fetchCardData() {
     };
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch card data.');
+    throw new Error('Error en el fetch card data.');
   }
 }
 
@@ -133,7 +134,7 @@ export async function fetchFilteredInvoices(
     return invoices.rows;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoices.');
+    throw new Error('Error en el fetch invoices.');
   }
 }
 
@@ -154,7 +155,7 @@ export async function fetchInvoicesPages(query: string) {
     return totalPages;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of invoices.');
+    throw new Error('Error en el fetch total number of invoices.');
   }
 }
 
@@ -179,7 +180,7 @@ export async function fetchInvoiceById(id: string) {
     return invoice[0];
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoice.');
+    throw new Error('Error en el fetch invoice.');
   }
 }
 
@@ -197,7 +198,7 @@ export async function fetchCustomers() {
     return customers;
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch all customers.');
+    throw new Error('Error en el fetch all customers.');
   }
 }
 
@@ -218,7 +219,7 @@ export async function fetchCustomersById(id: string) {
     return customer[0];
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch customer.');
+    throw new Error('Error en el fetch customer.');
   }
 }
 
@@ -235,7 +236,7 @@ export async function fetchCustomersPages(query: string) {
     return totalPages;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of customers.');
+    throw new Error('Error en el fetch total number of customers.');
   }
 }
 
@@ -273,7 +274,7 @@ export async function fetchFilteredCustomers(query: string) {
     return customers;
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch customer table.');
+    throw new Error('Error en el fetch de la tabla de clientes customer.');
   }
 }
 export async function fetchFilteredArticulos(query: string) {
@@ -304,7 +305,7 @@ export async function fetchFilteredArticulos(query: string) {
     return articulos;
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch articulos table.');
+    throw new Error('Error en el fetch en la tabla de articulos.');
   }
 }
 
@@ -321,7 +322,7 @@ export async function fetchArticulosPages(query: string) {
     return totalPages;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of articulos.');
+    throw new Error('Error en el fetch total number de articulos.');
   }
 }
 
@@ -344,7 +345,7 @@ export async function fetchArticulosById(id: string): Promise<ArticulosTableType
     return articulos[0] || null;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch articulos.');
+    throw new Error('Error en el fetch de la tabla articulos.');
   }
 }
 
@@ -360,6 +361,73 @@ export async function fetchArticulos() {
     return articulos;
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch all articulos.');
+    throw new Error('Error en el fetch all de la tabla articulos.');
+  }
+}
+export async function fetchUsers() {
+  try {
+    const data = await sql<User>`
+      SELECT *
+      FROM users
+      ORDER BY name ASC
+    `;
+
+    const users = data.rows;
+    return users;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Error en el fetch all de la tabla.');
+  }
+}
+export async function fetchFilteredUsers(query: string) {
+  
+  try {
+    const data = await sql<User>`
+      SELECT
+        id,
+        name,
+        email,
+        password,
+        type,
+        token
+      FROM users
+      WHERE
+        name ILIKE ${`%${query}%`} OR
+        email ILIKE ${`%${query}%`}
+      ORDER BY name ASC
+    `;
+  
+    const user = data.rows.map((user) => ({
+      ...user,
+    }));
+  
+    return user;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Error en el fetch de la tabla users.');
+  }
+}
+export async function fetchUsersById(id: string): Promise<User | null> {
+  try {
+    const data = await sql<User>`
+      SELECT
+        id,
+        name,
+        email,
+        password,
+        type,
+        token
+      FROM users
+      WHERE id = ${id};
+    `;
+
+    const users = data.rows.map((users) => ({
+      ...users,
+    }));
+    
+    return users[0] || null;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Error en el fetch de la tabla users.');
   }
 }

@@ -22,7 +22,7 @@ export default async function Page(props: {
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-8">
-        <h1 className={`${lusitana.className} text-xl md:text-2xl`}>Clientes</h1>
+        <h1 className={`${lusitana.className} text-xl md:text-2xl`}>Articulos</h1>
         <CreateArticulo />
       </div>
       <ArticulosTable articulos={articulos} />
