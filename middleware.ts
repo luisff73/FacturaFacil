@@ -1,41 +1,9 @@
-import { NextResponse, NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import NextAuth from 'next-auth';
+import { authConfig } from './auth.config';
 
-export async function middleware(request: NextRequest) {
-  const session = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-  console.log (session?.type)
-  console.log (request.nextUrl.pathname)
-  // Rutas protegidas
-  const protectedPaths = ["/dashboard"];
-
-  // Verificar si la ruta actual es una ruta protegida
-  const isProtectedPath = protectedPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  );
-
-  // Si la ruta es protegida y no hay sesión, redirigir a la página de login
-  if (isProtectedPath && !session) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  // Si el usuario no es admin y está intentando acceder a /dashboard/users, denegar acceso
-  if (
-    request.nextUrl.pathname.startsWith("/dashboard/users") &&
-    session?.type !== "admin"
-  ) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  return NextResponse.next();
-}
+export default NextAuth(authConfig).auth;
 
 export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|.*\\.png$).*)",
-    "/dashboard/:path*",
-    "/dashboard/users",
-  ],
+  // https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
+  matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
 };
