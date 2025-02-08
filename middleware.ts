@@ -18,6 +18,7 @@ export async function middleware(request: NextRequest) {
 
   // Si la ruta es protegida y no hay sesión, redirigir a la página de login
   if (isProtectedPath && !session) {
+    console.log("Redirigiendo a login, no hay sesión");
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -26,6 +27,7 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/dashboard/users") &&
     session?.type !== "admin"
   ) {
+    console.log("Acceso denegado a /dashboard/users, no es admin");
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
@@ -35,7 +37,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/((?!api|_next/static|_next/image|.*\\.png$).*)",
-    "/dashboard/:path*",
-    "/dashboard/users",
+    "/dashboard/:path*", // Protege todas las rutas bajo /dashboard
+    "/dashboard/users", // Protege la ruta /dashboard/users
   ],
 };
