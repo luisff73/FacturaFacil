@@ -1,6 +1,4 @@
 import type { NextAuthConfig } from 'next-auth';
-import { getToken } from 'next-auth/jwt';
-import { NextResponse, NextRequest } from "next/server";
 
 export const authConfig = {
   pages: {
@@ -11,31 +9,16 @@ export const authConfig = {
     // while this file is also used in non-Node.js environments
   ],
   callbacks: {
-    authorized: async ({ auth, request }) => {
-      const session = await getToken({
-        req: request,
-        secret: process.env.NEXTAUTH_SECRET,
-      });
-
-      console.log(session?.type);
-      console.log(request.nextUrl.pathname);
-
-      const isLoggedIn = !!session;
-      const isOnDashboard = request.nextUrl.pathname.startsWith('/dashboard');
-      const isUsersPath = request.nextUrl.pathname.startsWith('/dashboard/users');
-      const isAdmin = session?.type === 'admin';
-
-      if (isUsersPath && !isAdmin) {
-        return false;
-      }
-
+    authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user;
+      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       if (isOnDashboard) {
         if (isLoggedIn) return true;
-        return false;
+        return false; // Redirect unauthenticated users to login page
       } else if (isLoggedIn) {
-        return NextResponse.redirect(new URL('/dashboard', request.nextUrl));
+        return Response.redirect(new URL('/dashboard', nextUrl));
       }
-
       return true;
-    },  },
+    },
+  },
 } satisfies NextAuthConfig;
