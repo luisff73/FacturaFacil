@@ -8,6 +8,7 @@ import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 import { Customer, ArticulosTableType, User } from "@/app/lib/definitions";
 import bcrypt from "bcrypt";
+import { signOut } from "@/auth";
 
 // Define el esquema para FormSchema
 const FormSchema = z.object({
@@ -207,6 +208,7 @@ export async function authenticate(
     throw error;
   }
 }
+
 export async function deleteArticulo(id: string) {
   await sql`DELETE FROM articulos WHERE id = ${id}`;
   revalidatePath("/dashboard/articulos");
@@ -336,4 +338,8 @@ export async function createUser(data: Omit<User, "id">) {
 
   // Devolver el usuario creado
   return result.rows[0];
+}
+
+export async function signOutAction() {
+  await signOut({ redirectTo: "/" });
 }

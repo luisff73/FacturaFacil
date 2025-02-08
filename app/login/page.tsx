@@ -12,7 +12,7 @@ export default function LoginPage() {
             <FacturaFacilLogo />
           </div>
         </div>
-        <Suspense>
+        <Suspense fallback={<div>Cargando...</div>}>
           <LoginForm />
         </Suspense>
       </div>

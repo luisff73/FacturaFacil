@@ -8,7 +8,7 @@ export type User = {
   email: string;
   password: string;
   token: string;
-  type: string;
+  type: 'admin' | 'user';
 };
 
 export type Customer = {

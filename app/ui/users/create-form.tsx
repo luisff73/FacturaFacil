@@ -5,9 +5,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createUser } from '@/app/lib/actions';
 import { User } from '@/app/lib/definitions';
+// Importa la interfaz User desde definitions.ts
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
-// Importa la interfaz User desde definitions.ts
+import Cookies from 'js-cookie';
 
 
 // definimos la interfaz CreateUserFormProps
@@ -37,8 +38,8 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       password: formData.get('password') as string,
-      type: formData.get('type') as string,
-      token: '', // Add a default value for the token
+      token: Cookies.get('token') as string,
+      type: formData.get('type') as 'admin' | 'user',
     };
 
     try {

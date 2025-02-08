@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
 import {
   UserGroupIcon,
+  UserCircleIcon,
   HomeIcon,
   DocumentDuplicateIcon,
   TagIcon,
@@ -15,22 +16,18 @@ import clsx from 'clsx'; // importa la libreria clsx
 // Depending on the size of the application, this would be stored in a database.
 const links = [
   { name: 'Inicio', href: '/dashboard', icon: HomeIcon },
-  {
-    name: 'Facturas',
-    href: '/dashboard/invoices',
-    icon: DocumentDuplicateIcon,
-  },
+  { name: 'Facturas', href: '/dashboard/invoices', icon: DocumentDuplicateIcon },
   { name: 'Clientes', href: '/dashboard/customers', icon: UserGroupIcon },
   { name: 'Productos', href: '/dashboard/articulos', icon: TagIcon },
-  { name: 'Usuarios', href: '/dashboard/users', icon: UserGroupIcon },
+  { name: 'Usuarios', href: '/dashboard/users', icon: UserCircleIcon, adminOnly: true },
 ];
 
 export default function NavLinks() {
   const pathname = usePathname();
   return (
     <>
-      {links.map((link) => {
-        const LinkIcon = link.icon; // LinkIcon es el icono que se va a mostrar en el link
+      {visibleLinks.map((link) => {
+        const LinkIcon = link.icon;
         return (
           <Link // Link es un componente de next que permite navegar entre paginas sin recargar la pagina
             key={link.name}
