@@ -2,12 +2,15 @@ import { NextResponse, NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
+  // Intentar obtener el token de la sesión
   const session = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
   console.log(session?.type);
   console.log(request.nextUrl.pathname);
+  console.log("Middleware ejecutado - Sesión obtenida:", session);
+
   // Rutas protegidas
   const protectedPaths = ["/dashboard"];
 
@@ -15,6 +18,9 @@ export async function middleware(request: NextRequest) {
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
+
+  // Log para verificar si la ruta está protegida
+  console.log("Ruta protegida:", isProtectedPath);
 
   // Si la ruta es protegida y no hay sesión, redirigir a la página de login
   if (isProtectedPath && !session) {
