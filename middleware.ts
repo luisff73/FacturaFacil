@@ -45,7 +45,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/((?!api|_next/static|_next/image|.*\\.png$).*)",
-    "/dashboard/:path*", // Protege todas las rutas bajo /dashboard
+    //"/dashboard/:path*", // Protege todas las rutas bajo /dashboard
     "/dashboard/users", // Protege la ruta /dashboard/users
   ],
 };
