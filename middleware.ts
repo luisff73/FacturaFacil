@@ -18,6 +18,8 @@ export async function middleware(request: NextRequest) {
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
+  console.log("Ruta actual:", request.nextUrl.pathname);
+  console.log("Comprobando ruta protegida", protectedPaths);
 
   // Log para verificar si la ruta está protegida
   console.log("Ruta protegida:", isProtectedPath);
