@@ -26,7 +26,7 @@ export default function NavLinks() {
   const pathname = usePathname();
   return (
     <>
-      {visibleLinks.map((link) => {
+      {links.map((link) => {
         const LinkIcon = link.icon;
         return (
           <Link // Link es un componente de next que permite navegar entre paginas sin recargar la pagina
