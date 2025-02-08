@@ -65,10 +65,10 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
 
   return (
     <form onSubmit={formAction}>
-      <div className="rounded-md bg-gray-50 p-4 md:p-6">
+      <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
         {/* Articulo Código */}
         <div className="mb-4">
-          <label htmlFor="codigo" className="mb-2 block text-sm font-medium">
+          <label htmlFor="codigo" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Código del artículo
           </label>
           <div className="relative">
@@ -78,14 +78,14 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               type="text"
               defaultValue={articulo.codigo}
               placeholder="Introduce el código del artículo"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="codigo-error"
             />
           </div>
           <div id="codigo-error" aria-live="polite" aria-atomic="true">
             {state.errors?.codigo &&
               state.errors.codigo.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                   {error}
                 </p>
               ))}
@@ -94,7 +94,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
 
         {/* Articulo Descripción */}
         <div className="mb-4">
-          <label htmlFor="descripcion" className="mb-2 block text-sm font-medium">
+          <label htmlFor="descripcion" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Descripción del artículo
           </label>
           <div className="relative">
@@ -104,14 +104,14 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               type="text"
               defaultValue={articulo.descripcion}
               placeholder="Introduce la descripción del artículo"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="descripcion-error"
             />
           </div>
           <div id="descripcion-error" aria-live="polite" aria-atomic="true">
             {state.errors?.descripcion &&
               state.errors.descripcion.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                   {error}
                 </p>
               ))}
@@ -120,7 +120,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
 
         {/* Articulo Precio */}
         <div className="mb-4">
-          <label htmlFor="precio" className="mb-2 block text-sm font-medium">
+          <label htmlFor="precio" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Precio del artículo
           </label>
           <div className="relative">
@@ -131,14 +131,14 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               step="0.01"
               defaultValue={articulo.precio.toString()}
               placeholder="Introduce el precio del artículo"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="precio-error"
             />
           </div>
           <div id="precio-error" aria-live="polite" aria-atomic="true">
             {state.errors?.precio &&
               state.errors.precio.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                   {error}
                 </p>
               ))}
@@ -147,7 +147,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
 
         {/* Articulo IVA */}
         <div className="mb-4">
-          <label htmlFor="iva" className="mb-2 block text-sm font-medium">
+          <label htmlFor="iva" className="mb-2 block text-sm font-medium dark:text-gray-200">
             IVA del artículo
           </label>
           <div className="relative">
@@ -158,14 +158,14 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               step="0.01"
               defaultValue={articulo.iva.toString()}
               placeholder="Introduce el IVA del artículo"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="iva-error"
             />
           </div>
           <div id="iva-error" aria-live="polite" aria-atomic="true">
             {state.errors?.iva &&
               state.errors.iva.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                   {error}
                 </p>
               ))}
@@ -174,7 +174,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
 
         {/* Articulo Stock */}
         <div className="mb-4">
-          <label htmlFor="stock" className="mb-2 block text-sm font-medium">
+          <label htmlFor="stock" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Stock del artículo
           </label>
           <div className="relative">
@@ -185,14 +185,14 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               step="0.01"
               defaultValue={articulo.stock.toString()}
               placeholder="Introduce el stock del artículo"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="stock-error"
             />
           </div>
           <div id="stock-error" aria-live="polite" aria-atomic="true">
             {state.errors?.stock &&
               state.errors.stock.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                   {error}
                 </p>
               ))}
@@ -202,10 +202,10 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
         {/* Articulo Imagenes */}
         {images && images.length > 0 && (
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-medium">Imágenes del artículo</label>
+            <label className="mb-2 block text-sm font-medium dark:text-gray-200">Imágenes del artículo</label>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
               {images.map((img, index) => (
-                <div key={index} className="relative w-full h-32 flex">
+                <div key={index} className="relative w-full h-32 flex dark:bg-gray-900 rounded-md">
                   <button
                     type="button"
                     onClick={() => handleDeleteImage(img.id, index)}
@@ -228,7 +228,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
 
         {/* Articulo Imagen */}
         <div className="mb-4">
-          <label htmlFor="imagen" className="mb-2 block text-sm font-medium">
+          <label htmlFor="imagen" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Imagen del artículo
           </label>
           <div className="relative">
@@ -237,14 +237,14 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               name="imagen"
               type="file"
               placeholder="Introduce la imagen del artículo"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="imagen-error"
             />
           </div>
           <div id="imagen-error" aria-live="polite" aria-atomic="true">
             {state.errors?.imagen &&
               state.errors.imagen.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                   {error}
                 </p>
               ))}
@@ -253,14 +253,14 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
 
         <div aria-live="polite" aria-atomic="true">
           {state.message ? (
-            <p className="mt-2 text-sm text-red-500">{state.message}</p>
+            <p className="mt-2 text-sm text-red-500 dark:text-red-400">{state.message}</p>
           ) : null}
         </div>
       </div>
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/articulos"
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+          className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-800 px-4 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
         >
           Cancelar
         </Link>
@@ -268,6 +268,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
       </div>
     </form>
   );
+
 };
 
 export default EditArticulosForm;

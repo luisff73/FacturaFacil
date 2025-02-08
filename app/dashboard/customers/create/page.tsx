@@ -11,7 +11,7 @@ export default async function Page() {
   const customers = await fetchCustomers();
 
   return (
-    <main>
+    <main className="dark:bg-gray-900">
       <Breadcrumbs
         breadcrumbs={[
           { label: 'Clientes', href: '/dashboard/customers' },
@@ -22,7 +22,7 @@ export default async function Page() {
           },
         ]}
       />
-      <Form customers={customers} /> 
+      <Form customers={customers} />
     </main>
   );
 }

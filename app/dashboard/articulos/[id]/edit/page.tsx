@@ -25,7 +25,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const articulos: ArticulosTableType = articulo; // Aquí uso la interfaz ArticulosTableType
 
   return (
-    <main>
+    <main className="dark:bg-gray-900 min-h-screen p-4">
       <Breadcrumbs
         breadcrumbs={[
           { label: 'Artículos', href: '/dashboard/articulos' },
@@ -36,7 +36,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           },
         ]}
       />
-      <EditArticulosForm articulo={articulos} />
+      <div className="dark:bg-gray-800 rounded-lg">
+        <EditArticulosForm articulo={articulos} />
+      </div>
     </main>
   );
+  
 }

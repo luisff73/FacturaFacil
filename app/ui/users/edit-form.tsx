@@ -38,10 +38,10 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
 
   return (
     <form onSubmit={formAction}>
-      <div className="rounded-md bg-gray-50 p-4 md:p-6">
+      <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
         {/* User Name */}
         <div className="mb-4">
-          <label htmlFor="name" className="mb-2 block text-sm font-medium">
+          <label htmlFor="name" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Name
           </label>
           <div className="relative">
@@ -51,23 +51,22 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               type="text"
               defaultValue={user.name}
               placeholder="Enter user name"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="name-error"
             />
           </div>
           <div id="name-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.name &&
-              state.errors.name.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
+            {state.errors?.name?.map((error: string) => (
+              <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
+                {error}
+              </p>
+            ))}
           </div>
         </div>
 
         {/* User Email */}
         <div className="mb-4">
-          <label htmlFor="email" className="mb-2 block text-sm font-medium">
+          <label htmlFor="email" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Email
           </label>
           <div className="relative">
@@ -77,23 +76,22 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               type="email"
               defaultValue={user.email}
               placeholder="Enter user email"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="email-error"
             />
           </div>
           <div id="email-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.email &&
-              state.errors.email.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
+            {state.errors?.email?.map((error: string) => (
+              <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
+                {error}
+              </p>
+            ))}
           </div>
         </div>
 
         {/* User Password */}
         <div className="mb-4">
-          <label htmlFor="password" className="mb-2 block text-sm font-medium">
+          <label htmlFor="password" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Password
           </label>
           <div className="relative">
@@ -103,23 +101,22 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               type="password"
               defaultValue={user.password}
               placeholder="Enter user password"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="password-error"
             />
           </div>
           <div id="password-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.password &&
-              state.errors.password.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
+            {state.errors?.password?.map((error: string) => (
+              <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
+                {error}
+              </p>
+            ))}
           </div>
         </div>
 
         {/* User Token */}
         <div className="mb-4">
-          <label htmlFor="token" className="mb-2 block text-sm font-medium">
+          <label htmlFor="token" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Token
           </label>
           <div className="relative">
@@ -129,23 +126,22 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               type="text"
               defaultValue={user.token}
               placeholder="Enter user token"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="token-error"
             />
           </div>
           <div id="token-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.token &&
-              state.errors.token.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
+            {state.errors?.token?.map((error: string) => (
+              <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
+                {error}
+              </p>
+            ))}
           </div>
         </div>
 
         {/* User Type */}
         <div className="mb-4">
-          <label htmlFor="type" className="mb-2 block text-sm font-medium">
+          <label htmlFor="type" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Type
           </label>
           <div className="relative">
@@ -155,30 +151,30 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               type="text"
               defaultValue={user.type}
               placeholder="Enter user type"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="type-error"
             />
           </div>
           <div id="type-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.type &&
-              state.errors.type.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
+            {state.errors?.type?.map((error: string) => (
+              <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
+                {error}
+              </p>
+            ))}
           </div>
         </div>
 
         <div aria-live="polite" aria-atomic="true">
-          {state.message ? (
-            <p className="mt-2 text-sm text-red-500">{state.message}</p>
-          ) : null}
+          {state.message && (
+            <p className="mt-2 text-sm text-red-500 dark:text-red-400">{state.message}</p>
+          )}
         </div>
       </div>
+
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/users"
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+          className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-800 px-4 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
         >
           Cancelar
         </Link>
@@ -186,6 +182,7 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
       </div>
     </form>
   );
+
 };
 
 export default EditUsersForm;

@@ -53,10 +53,10 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
   };
   return (
     <form onSubmit={formAction}>
-      <div className="rounded-md bg-gray-50 p-4 md:p-6">
+      <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
         {/* Nombre */}
         <div className="mb-4">
-          <label htmlFor="name" className="mb-2 block text-sm font-medium">
+          <label htmlFor="name" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Nombre
           </label>
           <div className="relative">
@@ -65,14 +65,14 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
               name="name"
               type="text"
               placeholder="Introduce el nombre del usuario"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="name-error"
             />
           </div>
           <div id="name-error" aria-live="polite" aria-atomic="true">
             {state.errors?.name &&
               state.errors.name.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                   {error}
                 </p>
               ))}
@@ -81,7 +81,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
 
         {/* Email */}
         <div className="mb-4">
-          <label htmlFor="email" className="mb-2 block text-sm font-medium">
+          <label htmlFor="email" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Email
           </label>
           <div className="relative">
@@ -90,14 +90,14 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
               name="email"
               type="email"
               placeholder="Introduce el email del usuario"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="email-error"
             />
           </div>
           <div id="email-error" aria-live="polite" aria-atomic="true">
             {state.errors?.email &&
               state.errors.email.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                   {error}
                 </p>
               ))}
@@ -106,7 +106,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
 
         {/* Contraseña */}
         <div className="mb-4">
-          <label htmlFor="password" className="mb-2 block text-sm font-medium">
+          <label htmlFor="password" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Contraseña
           </label>
           <div className="relative">
@@ -115,14 +115,14 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
               name="password"
               type="password"
               placeholder="Introduce la contraseña del usuario"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="password-error"
             />
           </div>
           <div id="password-error" aria-live="polite" aria-atomic="true">
             {state.errors?.password &&
               state.errors.password.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                   {error}
                 </p>
               ))}
@@ -131,14 +131,14 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
 
         {/* Tipo de usuario */}
         <div className="mb-4">
-          <label htmlFor="type" className="mb-2 block text-sm font-medium">
+          <label htmlFor="type" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Selecciona rol de usuario
           </label>
           <div className="relative">
             <select
               id="type"
               name="type"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="type-error"
               required
             >
@@ -149,17 +149,16 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
           <div id="type-error" aria-live="polite" aria-atomic="true">
             {state.errors?.type &&
               state.errors.type.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                   {error}
                 </p>
               ))}
           </div>
         </div>
 
-
         <div aria-live="polite" aria-atomic="true">
           {state.message ? (
-            <p className="mt-2 text-sm text-red-500">{state.message}</p>
+            <p className="mt-2 text-sm text-red-500 dark:text-red-400">{state.message}</p>
           ) : null}
         </div>
       </div>
@@ -167,7 +166,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/users"
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+          className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-800 px-4 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
         >
           Cancelar
         </Link>
@@ -175,6 +174,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
       </div>
     </form>
   );
+
 };
 
 export default CreateUserForm;

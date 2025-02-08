@@ -21,7 +21,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   return (
-    <main>
+    <main className="dark:bg-gray-900">
       <Breadcrumbs
         breadcrumbs={[
           { label: 'Usuarios', href: '/dashboard/users' },

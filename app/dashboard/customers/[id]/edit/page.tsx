@@ -25,7 +25,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const customer: Customer = customers; // Aquí uso la interfaz Customer
 
   return (
-    <main>
+    <main className="dark:bg-gray-900">
       <Breadcrumbs
         breadcrumbs={[
           { label: 'Clientes', href: '/dashboard/customers' },

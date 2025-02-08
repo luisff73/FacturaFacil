@@ -36,11 +36,9 @@ export default function LoginForm() {
 
   return (
     <form action={formAction} className="space-y-3">
-      <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
-        <h1 className={`${lusitana.className} mb-3 text-2xl`}>
-          Please log in to continue.
-        </h1>
-        <div className="w-full">
+      <div className="flex-1 rounded-lg bg-gray-50 dark:bg-gray-800 px-6 pb-4 pt-8">
+        <h1 className="text-xl font-bold dark:text-white">Iniciar sesión</h1>
+        <div className="w-full p-6 bg-white dark:bg-gray-900 rounded-lg">
           <div>
             <label
               className="mb-3 mt-5 block text-xs font-medium text-gray-900"

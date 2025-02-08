@@ -1,3 +1,4 @@
+"use client";
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default function providers(req: NextApiRequest, res: NextApiResponse) {

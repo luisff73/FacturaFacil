@@ -1,6 +1,7 @@
 'use client';
+
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Cambiado a next/navigation
+import { useRouter } from 'next/navigation';
 import { createCustomer } from '@/app/lib/actions';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
@@ -21,13 +22,8 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
     let imageUrl = '';
 
     if (fileInput) {
-      // Aquí se podria manejar la carga del archivo y obtener la ruta local
-      // Por simplicidad, asumimos que el archivo se guarda en una carpeta 'uploads'
       const filePath = `/customers/${fileInput.name}`;
       imageUrl = filePath;
-
-      // Aquí pordiamos agregar la lógica para guardar el archivo en el servidor
-      // Por ejemplo, usando una API para subir el archivo
     }
 
     const data = {
@@ -54,12 +50,11 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
   };
 
   return (
-    // Formulario para crear un cliente
     <form onSubmit={formAction}>
-      <div className="rounded-md bg-gray-50 p-4 md:p-6">
+      <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
-          <label htmlFor="name" className="mb-2 block text-sm font-medium">
+          <label htmlFor="name" className="mb-2 block text-sm font-medium dark:text-white">
             Nombre del cliente
           </label>
           <div className="relative">
@@ -68,7 +63,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
               name="name"
               type="text"
               placeholder="Introduce el nombre del cliente"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:bg-gray-900 dark:text-white"
               aria-describedby="name-error"
             />
           </div>
@@ -84,7 +79,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
 
         {/* Customer Direccion */}
         <div className="mb-4">
-          <label htmlFor="direccion" className="mb-2 block text-sm font-medium">
+          <label htmlFor="direccion" className="mb-2 block text-sm font-medium dark:text-white">
             Dirección
           </label>
           <div className="relative">
@@ -93,7 +88,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
               name="direccion"
               type="text"
               placeholder="Introduce la dirección del cliente"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:bg-gray-900 dark:text-white"
               aria-describedby="direccion-error"
             />
           </div>
@@ -109,7 +104,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
 
         {/* Customer Codigo Postal */}
         <div className="mb-4">
-          <label htmlFor="c_postal" className="mb-2 block text-sm font-medium">
+          <label htmlFor="c_postal" className="mb-2 block text-sm font-medium dark:text-white">
             Código Postal
           </label>
           <div className="relative">
@@ -118,7 +113,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
               name="c_postal"
               type="text"
               placeholder="Introduce el código postal del cliente"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:bg-gray-900 dark:text-white"
               aria-describedby="c_postal-error"
             />
           </div>
@@ -134,7 +129,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
 
         {/* Customer Poblacion */}
         <div className="mb-4">
-          <label htmlFor="poblacion" className="mb-2 block text-sm font-medium">
+          <label htmlFor="poblacion" className="mb-2 block text-sm font-medium dark:text-white">
             Población
           </label>
           <div className="relative">
@@ -143,7 +138,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
               name="poblacion"
               type="text"
               placeholder="Introduce la población del cliente"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:bg-gray-900 dark:text-white"
               aria-describedby="poblacion-error"
             />
           </div>
@@ -159,7 +154,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
 
         {/* Customer Provincia */}
         <div className="mb-4">
-          <label htmlFor="provincia" className="mb-2 block text-sm font-medium">
+          <label htmlFor="provincia" className="mb-2 block text-sm font-medium dark:text-white">
             Provincia
           </label>
           <div className="relative">
@@ -168,7 +163,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
               name="provincia"
               type="text"
               placeholder="Introduce la provincia del cliente"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:bg-gray-900 dark:text-white"
               aria-describedby="provincia-error"
             />
           </div>
@@ -184,7 +179,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
 
         {/* Customer Pais */}
         <div className="mb-4">
-          <label htmlFor="pais" className="mb-2 block text-sm font-medium">
+          <label htmlFor="pais" className="mb-2 block text-sm font-medium dark:text-white">
             País
           </label>
           <div className="relative">
@@ -193,7 +188,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
               name="pais"
               type="text"
               placeholder="Introduce el país del cliente"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:bg-gray-900 dark:text-white"
               aria-describedby="pais-error"
             />
           </div>
@@ -209,7 +204,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
 
         {/* Customer Telefono */}
         <div className="mb-4">
-          <label htmlFor="telefono" className="mb-2 block text-sm font-medium">
+          <label htmlFor="telefono" className="mb-2 block text-sm font-medium dark:text-white">
             Teléfono
           </label>
           <div className="relative">
@@ -218,7 +213,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
               name="telefono"
               type="text"
               placeholder="Introduce el teléfono del cliente"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:bg-gray-900 dark:text-white"
               aria-describedby="telefono-error"
             />
           </div>
@@ -234,7 +229,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
 
         {/* Customer CIF */}
         <div className="mb-4">
-          <label htmlFor="cif" className="mb-2 block text-sm font-medium">
+          <label htmlFor="cif" className="mb-2 block text-sm font-medium dark:text-white">
             CIF
           </label>
           <div className="relative">
@@ -243,7 +238,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
               name="cif"
               type="text"
               placeholder="Introduce el CIF del cliente"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:bg-gray-900 dark:text-white"
               aria-describedby="cif-error"
             />
           </div>
@@ -259,7 +254,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
 
         {/* Customer Email */}
         <div className="mb-4">
-          <label htmlFor="email" className="mb-2 block text-sm font-medium">
+          <label htmlFor="email" className="mb-2 block text-sm font-medium dark:text-white">
             Correo electrónico del cliente
           </label>
           <div className="relative">
@@ -268,7 +263,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
               name="email"
               type="email"
               placeholder="Introduce el correo electrónico del cliente"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:bg-gray-900 dark:text-white"
               aria-describedby="email-error"
             />
           </div>
@@ -284,16 +279,16 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
 
         {/* Customer Image URL */}
         <div className="mb-4">
-          <label htmlFor="image_url" className="mb-2 block text-sm font-medium">
+          <label htmlFor="image_url" className="mb-2 block text-sm font-medium dark:text-white">
             URL de la imagen del cliente
           </label>
           <div className="relative">
             <input
               id="image_url"
               name="image_url"
-              type="file" // Cambiado a tipo 'file'
+              type="file"
               placeholder="Introduce la URL de la imagen del cliente"
-              className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:bg-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 dark:file:bg-gray-700 dark:file:text-gray-200"
               aria-describedby="image_url-error"
             />
           </div>
@@ -316,7 +311,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/customers"
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+          className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-700 px-4 text-sm font-medium text-gray-600 dark:text-gray-200 transition-colors hover:bg-gray-200 dark:hover:bg-gray-600"
         >
           Cancelar
         </Link>

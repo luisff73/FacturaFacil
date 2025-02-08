@@ -22,7 +22,9 @@ export default async function Page(props: {
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-8">
-        <h1 className={`${lusitana.className} text-xl md:text-2xl`}>Clientes</h1>
+        <h1 className={`${lusitana.className} text-xl md:text-2xl dark:text-white`}>
+          Clientes
+        </h1>
         <CreateCustomer />
       </div>
       <CustomersTable customers={customers} />

@@ -19,21 +19,34 @@ const links = [
   { name: 'Facturas', href: '/dashboard/invoices', icon: DocumentDuplicateIcon },
   { name: 'Clientes', href: '/dashboard/customers', icon: UserGroupIcon },
   { name: 'Productos', href: '/dashboard/articulos', icon: TagIcon },
-  { name: 'Usuarios', href: '/dashboard/users', icon: UserCircleIcon, adminOnly: true },
+  { name: 'Usuarios_protegido', href: '/dashboard/users', icon: UserCircleIcon, adminOnly: true },
+  { name: 'Usuarios', href: '/dashboard/users', icon: UserCircleIcon },
 ];
 
-export default function NavLinks() {
+export default function NavLinks({ user }: { user?: { type?: 'admin' | 'user' } }) {
   const pathname = usePathname();
+
+  // Filtramos los enlaces según el tipo de usuario
+  const visibleLinks = links.filter(link => {
+    // Si el enlace tiene adminOnly, solo lo mostramos si el usuario es admin
+    if (link.adminOnly) {
+      console.log('Tipo de usuario:', user?.type);
+      return user?.type === 'admin';
+    }
+    // Si no tiene adminOnly, lo mostramos siempre
+    return true;
+  });
+
   return (
     <>
-      {links.map((link) => {
+      {visibleLinks.map((link) => {
         const LinkIcon = link.icon;
         return (
           <Link // Link es un componente de next que permite navegar entre paginas sin recargar la pagina
             key={link.name}
             href={link.href}
             className={clsx( // clsx es una libreria que permite concatenar clases de forma dinamica
-              'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-green-600 md:flex-none md:justify-start md:p-2 md:px-3',
+              'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 dark:bg-gray-800 p-3 text-sm font-medium hover:bg-sky-100 dark:hover:bg-sky-900 hover:text-green-600 dark:text-white',
               {
                 'bg-sky-100 text-green-600': pathname === link.href,
               },
