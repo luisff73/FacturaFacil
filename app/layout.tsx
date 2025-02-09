@@ -1,7 +1,7 @@
 import '@/app/ui/global.css';
 import { inter } from '@/app/ui/fonts';
 import { Metadata } from 'next';
-import ThemeToggle from '@/components/BarraTemas';
+import BarraTemas from '@/components/BarraTemas';
 
 export const metadata: Metadata = {
   title: {
@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="en" className="light">
       <body className={`${inter.className} antialiased dark:bg-gray-900 dark:text-white min-h-screen transition-colors duration-300`}>
         <div className="fixed top-4 right-4 z-50">
-          <ThemeToggle />
+          <BarraTemas />
         </div>
         {children}
       </body>
