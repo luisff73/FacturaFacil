@@ -22,7 +22,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
         {/* Customer Name */}
         <div className="mb-4">
           <label htmlFor="customer" className="mb-2 block text-sm font-medium">
-            Choose customer
+            Seleccione un cliente
           </label>
           <div className="relative">
             <select
@@ -33,7 +33,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
               aria-describedby="customer-error"
             >
               <option value="" disabled>
-                Select a customer
+                Seleccione un cliente
               </option>
               {customers.map((customer) => (
                 <option key={customer.id} value={customer.id}>
@@ -41,7 +41,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
                 </option>
               ))}
             </select>
-            <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+            <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 focus:border-bg-green-500 focus:ring focus:ring-bg-green-200" />
           </div>
           <div id="customer-error" aria-live="polite" aria-atomic="true">
             {state.errors?.customerId &&

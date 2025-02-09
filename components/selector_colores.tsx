@@ -8,18 +8,20 @@ const SelectorColores: React.FC<{ onColorChange: (colors: { [key: string]: strin
         const selectedColor = event.target.value;
         setBaseColor(selectedColor);
 
-        // Calcula los colores ajustados
+        // Calcula los tonos ajustados
         const colors = {
-            400: tinycolor(selectedColor).lighten(10).toString(), // Un color más claro
+            100: tinycolor(selectedColor).lighten(60).toString(), // Un tono muy claro
+            200: tinycolor(selectedColor).lighten(40).toString(), // Un tono claro
+            400: tinycolor(selectedColor).lighten(10).toString(), // Un tono más claro
             500: selectedColor, // Color base
-            600: tinycolor(selectedColor).darken(10).toString(), // Un color más oscuro
-            700: tinycolor(selectedColor).darken(20).toString(), // Un color muy oscuro
+            600: tinycolor(selectedColor).darken(10).toString(), // Un tono más oscuro
+            700: tinycolor(selectedColor).darken(20).toString(), // Un tono muy oscuro
         };
 
         // Llama a la función para actualizar los colores
         onColorChange(colors);
 
-        // Actualiza las variables TAILWIND con los nuevos colores
+        // Actualiza las variables CSS con los nuevos colores
         Object.keys(colors).forEach((key) => {
             document.documentElement.style.setProperty(`--bg-green-${key}`, colors[key as unknown as keyof typeof colors]);
         });
@@ -29,12 +31,12 @@ const SelectorColores: React.FC<{ onColorChange: (colors: { [key: string]: strin
 
     return (
         <div>
-            <label className={`block text-sm font-medium  text-white`}>Color Base</label>
-            <input
+            <label className={`block text-sm font-medium text-center text-white`}>Color Base</label>
+            <input 
                 type="color"
                 value={baseColor}
                 onChange={handleChange}
-                className="border rounded p-2"
+                className="border rounded p-2 w-full bg-green-400 border-green-400" 
             />
         </div>
     );

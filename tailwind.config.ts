@@ -14,6 +14,8 @@ const config: Config = {
       },
       colors: {
         green: {
+          100: "var(--bg-green-100)", // Usar la variable CSS Un verde muy claro
+          200: "var(--bg-green-200)", // Usar la variable CSS Un verde para hovers
           400: "var(--bg-green-400)", // Usar la variable CSS Un verde más
           500: "var(--bg-green-500)", // Usar la variable CSS Un verde medio
           600: "var(--bg-green-600)", // Usar la variable CSS Un verde más oscuro
