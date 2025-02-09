@@ -16,3 +16,10 @@ input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+:root {
+  --bg-green-400: #4CAF50;
+  --bg-green-500: #388E3C;
+  --bg-green-600: #2E7D32;
+  --bg-green-700: #1B5E20;
+}

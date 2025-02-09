@@ -13,10 +13,11 @@ const config: Config = {
         "13": "repeat(13, minmax(0, 1fr))",
       },
       colors: {
-        blue: {
-          400: "#2589FE",
-          500: "#0070F3",
-          600: "#2F6FEB",
+        green: {
+          400: "var(--bg-green-400)", // Usar la variable CSS Un verde más
+          500: "var(--bg-green-500)", // Usar la variable CSS Un verde medio
+          600: "var(--bg-green-600)", // Usar la variable CSS Un verde más oscuro
+          700: "var(--bg-green-700)", // Usar la variable CSS Un verde muy oscuro
         },
       },
     },
