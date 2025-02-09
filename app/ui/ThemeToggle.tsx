@@ -17,7 +17,7 @@ export default function ThemeToggle() {
     return (
         <button
             onClick={() => setDarkMode(!darkMode)}
-            className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700"
+            className="p-2 rounded-lg bg-green-400 dark:bg-gray-700"
         >
             {darkMode ? (
                 <SunIcon className="h-5 w-5" />
