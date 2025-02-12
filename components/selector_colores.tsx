@@ -31,12 +31,12 @@ const SelectorColores: React.FC<{ onColorChange: (colors: { [key: string]: strin
 
     return (
         <div>
-            <label className={`block text-sm font-medium text-center text-white`}>Color Base</label>
-            <input 
+            <label className={"block text-sm font-medium text-center bg-opacity-0 text-green-700"}>Color App</label>
+            <input
                 type="color"
                 value={baseColor}
                 onChange={handleChange}
-                className="border rounded p-2 w-full bg-green-400 border-green-400" 
+                className="border rounded p-2 w-full bg-green-400 border-green-400 text-color-black"
             />
         </div>
     );

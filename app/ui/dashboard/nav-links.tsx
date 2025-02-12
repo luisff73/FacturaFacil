@@ -46,9 +46,9 @@ export default function NavLinks({ user }: { user?: { type?: 'admin' | 'user' } 
             key={link.name}
             href={link.href}
             className={clsx( // clsx es una libreria que permite concatenar clases de forma dinamica
-              'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 dark:bg-gray-800 p-3 text-sm font-medium hover:bg-sky-100 dark:hover:bg-sky-900 hover:text-green-600 dark:text-white',
+              'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 dark:bg-gray-800 p-3 text-sm font-medium hover:bg-green-200 dark:hover:bg-grey-900 hover:text-green-600 dark:text-white',
               {
-                'bg-sky-100 text-green-600': pathname === link.href,
+                'bg-green-100 text-green-600': pathname === link.href,
               },
             )}
           >

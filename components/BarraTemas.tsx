@@ -27,7 +27,7 @@ export default function BarraTemas() {
     };
 
     return (
-        <div className="flex space-x-2 bg-green-500">
+        <div className="flex space-x-2 bg-green-000">
             <button
                 className="p-2 rounded-lg bg-green-400 dark:bg-gray-700"
                 onClick={() => setShowColorPicker(!showColorPicker)} // Alterna la visibilidad del SelectorColores

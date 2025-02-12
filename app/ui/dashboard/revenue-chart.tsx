@@ -10,9 +10,9 @@ import { fetchRevenue } from '@/app/lib/data';
 // https://www.chartjs.org/
 // https://airbnb.io/visx/
 
-export default async function RevenueChart(){ // hace el componente asincrono para poder hacer la peticion a la api
+export default async function RevenueChart() { // hace el componente asincrono para poder hacer la peticion a la api
   const revenue = await fetchRevenue(); // Fetch data dentro del componente
-  
+
   const chartHeight = 350;
   const { yAxisLabels, topLabel } = generateYAxis(revenue);
 
@@ -26,8 +26,8 @@ export default async function RevenueChart(){ // hace el componente asincrono pa
         Ingresos recientes
       </h2>
       <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-4">
-      <div className="sm:grid-cols-13 mt-0 grid grid-cols-12 items-end gap-2 rounded-md bg-white dark:bg-gray-900 p-4 md:gap-4">
-      {/* y-axis */}
+        <div className="sm:grid-cols-13 mt-0 grid grid-cols-12 items-end gap-2 rounded-md bg-white dark:bg-gray-900 p-4 md:gap-4">
+          {/* y-axis */}
           <div
             className="mb-6 hidden flex-col justify-between text-sm text-gray-400 sm:flex"
             style={{ height: `${chartHeight}px` }}
@@ -41,7 +41,7 @@ export default async function RevenueChart(){ // hace el componente asincrono pa
             <div key={month.month} className="flex flex-col items-center gap-2">
               {/* bars */}
               <div
-                className="w-full rounded-md bg-green-300"
+                className="w-full rounded-md bg-green-200"
                 style={{
                   height: `${(chartHeight / topLabel) * month.revenue}px`,
                 }}
