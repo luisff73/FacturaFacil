@@ -1,4 +1,4 @@
-# Proyecto Facturas
+# Proyecto Facturacion
 
 Este proyecto es una aplicación web para la gestión de facturas y clientes, desarrollada utilizando tecnologías modernas de desarrollo web. A continuación se detalla la información relevante sobre el proyecto, incluyendo las tecnologías utilizadas, el flujo de la aplicación y los componentes de React empleados.
 
