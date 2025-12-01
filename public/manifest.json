@@ -1,0 +1,23 @@
+{
+    "name": "FacturaFacil",
+    "short_name": "FacturaFacil",
+    "description": "Tu programa de gestión autónomo",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#22c55e",
+    "icons": [
+      {
+        "src": "/facturafacil_logo.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/hero-mobile.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
+  
+  
