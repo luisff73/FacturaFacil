@@ -12,7 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#4CAF50",
     icons: [
       {
-        src: "/facturafacil.png",
+        src: "/facturafacil_logo.png",
         sizes: "192x192",
         type: "image/png",
       },
