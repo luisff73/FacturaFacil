@@ -11,15 +11,20 @@ export const metadata: Metadata = {
     default: "Panel FacturaFacil",
   },
   description: "Tu programa de gestión autónomo FacturaFacil.",
-  metadataBase: new URL("https://tu-dominio.com"), // Actualiza esto con tu dominio real
+  metadataBase: new URL("https://proyecto-next-git-vercel-react-server-c-1c3ef9-jvrluis-projects.vercel.app/"), // Actualiza esto con tu dominio real
   manifest: "/manifest.json", // Añade esto para el manifiesto de la PWA
-  themeColor: "#22c55e", // Ajusta este color según tu diseño
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "FacturaFacil",
   },
+}
+
+export function generateViewport() {
+  return {
+    viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
+    themeColor: "#22c55e",
+  };
 }
 
 export default function RootLayout({

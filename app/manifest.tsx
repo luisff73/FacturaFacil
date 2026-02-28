@@ -17,7 +17,7 @@ export default function manifest(): MetadataRoute.Manifest {
         type: "image/png",
       },
       {
-        src: "/hero-mobile.png",
+        src: "/grafico_movil.png",
         sizes: "512x512",
         type: "image/png",
       },
