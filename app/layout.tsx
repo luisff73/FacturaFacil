@@ -1,6 +1,6 @@
-import "@/app/ui/global.css"
-import { inter } from "@/app/ui/fonts"
-import type { Metadata } from "next"
+import "@/app/ui/global.css" // Importa los estilos globales y tailwindcss
+import { inter } from "@/app/ui/fonts" // Importa la fuente Inter
+import type { Metadata } from "next" // Importa el tipo Metadata de Next.js q
 import BarraTemas from "@/components/BarraTemas"
 //import { RegisterSW } from "@/register-sw"
 import type React from "react" // Import React
