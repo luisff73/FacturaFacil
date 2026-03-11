@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { createCustomer } from '@/app/lib/actions';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
-import { CustomerField } from '@/app/lib/definitions';
+import { Customer } from '@/app/lib/definitions';
 
 interface FormProps {
-  customers: CustomerField[];
+  customers: Customer[];
 }
 
 const CreateCustomerForm: React.FC<FormProps> = () => {
@@ -36,7 +36,8 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
       provincia: formData.get('provincia') as string,
       pais: formData.get('pais') as string,
       telefono: formData.get('telefono') as string,
-      cif: formData.get('cif') as string
+      cif: formData.get('cif') as string,
+      id_empresa: 1, // hay que asignar esto de alguna manera, por ahora lo dejo fijo a 1
     };
 
     try {

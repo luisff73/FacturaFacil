@@ -21,9 +21,9 @@ export default function BarraTemas() {
 
     const handleColorChange = (colors: { [key: string]: string }) => {
 
-        const color = colors['700']; // Asegúrate de usar la clave correcta
+        const color = colors['700'];
         setBgColor(color);
-        console.log('Color de fondo actualizado:', color);
+        // console.log('Color de fondo actualizado:', color);
     };
 
     return (

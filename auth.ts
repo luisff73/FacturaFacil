@@ -52,21 +52,26 @@ export const { auth, signIn, signOut } = NextAuth({
   // Este callback se ejecuta cada vez que se crea un token JWT
   callbacks: {
     async jwt({ token, user }) {
-      // Si el usuario existe, añadir el campo type al token
+      // Si el usuario existe, añadir los campos type e id_empresa al token
       if (user) {
         token = {
           ...token,
           type: (user as User).type,
+          id_empresa: (user as any).id_empresa,
         };
       }
       console.log("JWT Token contenido:", token); // muestra todo el contenido del token
-      console.log("Type en el token:", token.type); // muestra específicamente el valor de type
+      console.log("Type en el token:", token.type);
+      console.log("id_empresa en el token:", (token as any).id_empresa);
       return token;
     },
     async session({ session, token }) {
       console.log("Sesión actual:", session);
       console.log("Token en sesión:", token);
-      // Devuelve el token con el campo type añadido a la sesión
+      // incluir id_empresa en el objeto user de la sesión para poder accederlo
+      if (session.user && (token as any).id_empresa) {
+        (session.user as any).id_empresa = (token as any).id_empresa;
+      }
       return session;
     },
   },

@@ -19,6 +19,7 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
     const formData = new FormData(event.target as HTMLFormElement);
 
     const data: Omit<User, 'id'> = {
+      id_empresa: user.id_empresa,
       name: formData.get('name') as string || '',
       email: formData.get('email') as string || '',
       password: formData.get('password') as string || '',

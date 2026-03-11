@@ -6,7 +6,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
-import { Customer, ArticulosTableType, User } from "@/app/lib/definitions";
+import {
+  Customer,
+  ArticulosTableType,
+  User,
+  Empresas,
+} from "@/app/lib/definitions";
+import { requireEmpresaId } from "./data";
 import bcrypt from "bcrypt";
 import { signOut } from "@/auth";
 
@@ -58,6 +64,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
   console.log("amount:", formData.get("amount"));
   console.log("status:", formData.get("status"));
   console.log("FormData entries:", Array.from(formData.entries()));
+  console.log("empresaId: ojo con la empresa");
 
   // Valida los campos del formulario. usando zod
   const validatedFields = CreateInvoice.safeParse({
@@ -79,14 +86,15 @@ export async function createInvoice(prevState: State, formData: FormData) {
   const amountInCents = Math.round(amount * 100); //convierte el valor de amount a centavos
   const date = new Date().toISOString().split("T")[0]; //obtiene la fecha actual en formato aaa-mm-dd
   try {
+    const idEmpresa = await requireEmpresaId();
     // Inserta una nueva factura en la base de datos.
-    await sql`INSERT INTO invoices (customer_id, amount, status, date) VALUES (${customerId}, ${amountInCents}, ${status}, ${date})`;
+    await sql`INSERT INTO invoices (customer_id, amount, status, date, id_empresa) VALUES (${customerId}, ${amountInCents}, ${status}, ${date}, ${idEmpresa})`;
   } catch (error) {
     console.error("Error al crear la factura:", error);
     throw new Error("No se pudo crear la factura");
   }
 
-  //Una vez actualizada la base de datos, /dashboard/invoicesse volverá a validar la ruta y se obtendrán
+  //Una vez actualizada la base de datos, /dashboard/invoices se volverá a validar la ruta y se obtendrán
   // datos nuevos del servidor.
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
@@ -95,7 +103,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
 export async function updateInvoice(
   id: string,
   prevState: State,
-  formData: FormData
+  formData: FormData,
 ) {
   const validatedFields = UpdateInvoice.safeParse({
     customerId: formData.get("customerId"),
@@ -149,9 +157,9 @@ export async function createCustomer(data: Omit<Customer, "id">) {
 
   // Consulta SQL para insertar un nuevo cliente
   const result = await sql`
-    INSERT INTO customers (name, email, image_url, direccion,c_postal,poblacion,provincia,telefono,cif,pais)
-    VALUES (${name}, ${email}, ${image_url}, ${direccion},${c_postal},${poblacion},${provincia},${telefono},${cif},${pais})
-    RETURNING id, name, email, image_url ,direccion,c_postal,poblacion,provincia,telefono,cif,pais;
+    INSERT INTO customers (name, email, image_url, direccion,c_postal,poblacion,provincia,telefono,cif,pais, id_empresa)
+    VALUES (${name}, ${email}, ${image_url}, ${direccion},${c_postal},${poblacion},${provincia},${telefono},${cif},${pais}, 1) 
+    RETURNING id, name, email, image_url ,direccion,c_postal,poblacion,provincia,telefono,cif,pais, id_empresa;
   `;
 
   // Devolver el cliente creado
@@ -192,7 +200,7 @@ export async function deleteCustomers(id: string) {
 
 export async function authenticate(
   prevState: string | undefined,
-  formData: FormData
+  formData: FormData,
 ) {
   try {
     await signIn("credentials", formData);
@@ -202,7 +210,7 @@ export async function authenticate(
         case "CredentialsSignin":
           return "Invalid credentials.";
         default:
-          return "Something went wrong.";
+          return "Algo ha ido mal.";
       }
     }
     throw error;
@@ -217,7 +225,7 @@ export async function deleteArticulo(id: string) {
 // Función para actualizar un articulo
 export async function updateArticulo(
   id: string,
-  data: Omit<ArticulosTableType, "id">
+  data: Omit<ArticulosTableType, "id" | "id_empresa">,
 ) {
   const { codigo, descripcion, precio, iva, stock, imagen } = data;
 
@@ -240,15 +248,18 @@ export async function updateArticulo(
 }
 
 // Función para crear un artículo
-export async function createArticulo(data: Omit<ArticulosTableType, "id">) {
+export async function createArticulo(
+  data: Omit<ArticulosTableType, "id" | "id_empresa">,
+) {
   const { codigo, descripcion, precio, iva, stock, imagen } = data;
+  const idEmpresa = await requireEmpresaId();
 
   // Consulta SQL para insertar un nuevo artículo
   const result = await sql`
-    INSERT INTO articulos (codigo, descripcion, precio, iva, stock, imagen)
+    INSERT INTO articulos (codigo, descripcion, precio, iva, stock, imagen, id_empresa)
     VALUES (${codigo}, ${descripcion}, ${precio}, ${iva}, ${stock}, ${JSON.stringify(
-    imagen
-  )})
+      imagen,
+    )}, ${idEmpresa})
     RETURNING id, codigo, descripcion, precio, iva, stock, imagen;
   `;
 
@@ -305,7 +316,7 @@ export async function updateUser(id: string, data: Omit<User, "id">) {
   const saltRounds = 5; // nivel de encriptacion (más alto = más seguro, pero más lento)
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-  // Consulta SQL para actualizar un artículo
+  // Consulta SQL para actualizar un USUARIO
   const result = await sql`
     UPDATE users
     SET 
@@ -318,12 +329,12 @@ export async function updateUser(id: string, data: Omit<User, "id">) {
     RETURNING id, name, email, password, type, token;
   `;
 
-  // Devolver el artículo actualizado
+  // Devolver el usuario actualizado
   return result.rows[0];
 }
 
 export async function createUser(data: Omit<User, "id">) {
-  const { name, email, password, type, token } = data;
+  const { name, email, password, type, token, id_empresa } = data;
 
   // Encriptar la contraseña
   const saltRounds = 5; // nivel de encriptacion (más alto = más seguro, pero más lento)
@@ -331,9 +342,9 @@ export async function createUser(data: Omit<User, "id">) {
 
   // Consulta SQL para insertar un nuevo usuario con la contraseña encriptada
   const result = await sql`
-    INSERT INTO users (name, email, password, type, token)
-    VALUES (${name}, ${email}, ${hashedPassword}, ${type}, ${token})
-    RETURNING id, name, email, password, type, token;
+    INSERT INTO users (name, email, password, type, token, id_empresa)
+    VALUES (${name}, ${email}, ${hashedPassword}, ${type}, ${token}, ${id_empresa})
+    RETURNING id, name, email, password, type, token, id_empresa;
   `;
 
   // Devolver el usuario creado
@@ -342,4 +353,106 @@ export async function createUser(data: Omit<User, "id">) {
 
 export async function signOutAction() {
   await signOut({ redirectTo: "/" });
+}
+
+export async function deleteEmpresa(id: string) {
+  await sql`DELETE FROM empresas WHERE id = ${id}`;
+  revalidatePath("/dashboard/empresas");
+}
+
+// Función para actualizar una empresa
+export async function updateEmpresa(id: string, data: Omit<Empresas, "id">) {
+  const {
+    nombre,
+    direccion,
+    c_postal,
+    poblacion,
+    provincia,
+    telefono,
+    cif,
+    email,
+    iva,
+    activa,
+    recargo_equivalencia,
+    password,
+  } = data;
+
+  // Encriptar la contraseña
+  const saltRounds = 5; // nivel de encriptacion (más alto = más seguro, pero más lento)
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+  // Consulta SQL para actualizar una empresa
+  const result = await sql`
+    UPDATE empresas
+    SET 
+      nombre = ${nombre}, 
+      direccion = ${direccion}, 
+      c_postal = ${c_postal}, 
+      poblacion = ${poblacion}, 
+      provincia = ${provincia}, 
+      telefono = ${telefono}, 
+      cif = ${cif},
+      email = ${email},
+      iva = ${iva},
+      recargo_equivalencia = ${recargo_equivalencia},
+      activa = ${activa},
+      password = ${hashedPassword}
+    WHERE id = ${id}
+    RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, recargo_equivalencia, password;
+  `;
+
+  // Devolver la empresa actualizada
+  return result.rows[0];
+}
+
+// cuando llamamos desde el cliente aún no conocemos el id de la empresa, por lo que el usuario inicial puede omitirlo.  La función helper se encargará de fusionarlo automáticamente después de crear la empresa.  Por eso `initialUser` puede omitir tanto `id` como `id_empresa`.
+
+export async function createEmpresa(
+  data: Omit<Empresas, "id">,
+  initialUser?: Omit<User, "id" | "id_empresa">,
+) {
+  const {
+    nombre,
+    direccion,
+    c_postal,
+    poblacion,
+    provincia,
+    telefono,
+    cif,
+    email,
+    iva,
+    recargo_equivalencia,
+    password,
+    activa,
+  } = data;
+
+  // Encriptar la contraseña de la empresa
+  const saltRounds = 5;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+  // Insertar la empresa
+  const result = await sql`
+    INSERT INTO empresas (nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, recargo_equivalencia, password, activa)
+    VALUES (${nombre}, ${direccion}, ${c_postal}, ${poblacion}, ${provincia}, ${telefono}, ${cif}, ${email}, ${iva}, ${recargo_equivalencia}, ${hashedPassword}, ${activa})
+    RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, recargo_equivalencia, password;
+  `;
+
+  const empresa = result.rows[0];
+
+  // Si se ha pasado un usuario inicial, crearlo y asociarlo a la nueva empresa
+  if (initialUser) {
+    try {
+      // we merge the newly-created empresa id here before delegating to
+      // createUser, satisfying its expectation for `id_empresa`.
+      await createUser({
+        ...initialUser,
+        id_empresa: empresa.id,
+      });
+    } catch (err) {
+      // opcional: puedes manejar errores de usuario aquí o propagarlos
+      console.error("Failed to create initial user for empresa", err);
+    }
+  }
+
+  return empresa;
 }

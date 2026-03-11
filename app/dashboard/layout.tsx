@@ -3,6 +3,8 @@ import SideNav from '@/app/ui/dashboard/sidenav';
 import FacturaFacilLogo from '@/app/ui/factura-facil';
 //import { inter } from '@/app/ui/fonts';
 
+export const dynamic = 'force-dynamic';
+
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <div className="flex h-screen flex-col">

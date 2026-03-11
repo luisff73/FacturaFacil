@@ -23,7 +23,8 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
       name?: string[];
       email?: string[];
       password?: string[];
-      type?: string[]
+      type?: string[];
+      id_empresa?: string[];
     },
     message: string
   }>({ errors: {}, message: '' });
@@ -40,6 +41,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
       password: formData.get('password') as string,
       token: Cookies.get('token') as string,
       type: formData.get('type') as 'admin' | 'user',
+      id_empresa: Number(formData.get('id_empresa')),
     };
 
     try {

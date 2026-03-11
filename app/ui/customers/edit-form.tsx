@@ -11,7 +11,7 @@ interface EditFormProps {
 }
 
 const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
-  const [state, setState] = useState<{ errors: { name?: string[]; email?: string[]; image_url?: string[]; direccion?: string[]; c_postal?: string[]; poblacion?: string[]; provincia?: string[]; telefono?: string[]; cif?: string[]; pais?: string[] }, message: string }>({ errors: {}, message: '' });
+  const [state, setState] = useState<{ errors: { name?: string[]; email?: string[]; image_url?: string[]; direccion?: string[]; c_postal?: string[]; poblacion?: string[]; provincia?: string[]; telefono?: string[]; cif?: string[]; pais?: string[]; id_empresa?: number[]; }, message: string }>({ errors: {}, message: '' });
   const router = useRouter();
 
   const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -39,7 +39,9 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
       provincia: formData.get('provincia') as string,
       pais: formData.get('pais') as string,
       telefono: formData.get('telefono') as string,
-      cif: formData.get('cif') as string
+      cif: formData.get('cif') as string,
+      id_empresa: customer.id_empresa,
+
     };
 
     try {
@@ -322,7 +324,7 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
         <Button type="submit">Actualizar Cliente</Button>
       </div>
     </form>
-);
+  );
 
 };
 
