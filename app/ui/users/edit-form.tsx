@@ -25,6 +25,7 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
       password: formData.get('password') as string || '',
       token: formData.get('token') as string || '',
       type: formData.get('type') as 'admin' | 'user',
+      css: user.css,
     };
 
     try {

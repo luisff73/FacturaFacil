@@ -75,6 +75,7 @@ const CreateEmpresaForm: React.FC = () => {
       password: (form.user_password as HTMLInputElement).value,
       type: 'admin' as const,
       token: Cookies.get('token') || '',
+      css: '#4CAF50',
     };
 
     try {

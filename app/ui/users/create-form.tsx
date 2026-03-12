@@ -42,6 +42,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
       token: Cookies.get('token') as string,
       type: formData.get('type') as 'admin' | 'user',
       id_empresa: Number(formData.get('id_empresa')),
+      css: '#4CAF50',
     };
 
     try {

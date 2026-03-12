@@ -1,4 +1,4 @@
-import { fetchEmpresas } from '@/app/lib/data';
+
 import Form from '@/app/ui/empresas/create-form';
 import Breadcrumbs from '@/app/ui/empresas/breadcrumbs';
 import { Metadata } from 'next';

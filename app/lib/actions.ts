@@ -311,7 +311,7 @@ export async function deleteUser(id: string) {
 
 // Función para actualizar un usuario
 export async function updateUser(id: string, data: Omit<User, "id">) {
-  const { name, email, password, type, token } = data;
+  const { name, email, password, type, token, css } = data;
 
   // Encriptar la contraseña
   const saltRounds = 5; // nivel de encriptacion (más alto = más seguro, pero más lento)
@@ -325,9 +325,10 @@ export async function updateUser(id: string, data: Omit<User, "id">) {
       email = ${email}, 
       password = ${hashedPassword}, 
       type = ${type}, 
-      token = ${token}   
+      token = ${token},
+      css = ${css}
     WHERE id = ${id}
-    RETURNING id, name, email, password, type, token;
+    RETURNING id, name, email, password, type, token, css;
   `;
 
   // Devolver el usuario actualizado
@@ -335,7 +336,7 @@ export async function updateUser(id: string, data: Omit<User, "id">) {
 }
 
 export async function createUser(data: Omit<User, "id">) {
-  let { name, email, password, type, token, id_empresa } = data;
+  let { name, email, password, type, token, id_empresa, css } = data;
 
   if (!id_empresa) {
     id_empresa = await requireEmpresaId();
@@ -345,11 +346,10 @@ export async function createUser(data: Omit<User, "id">) {
   const saltRounds = 5; // nivel de encriptacion (más alto = más seguro, pero más lento)
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-  // Consulta SQL para insertar un nuevo usuario con la contraseña encriptada
   const result = await sql`
-    INSERT INTO users (name, email, password, type, token, id_empresa)
-    VALUES (${name}, ${email}, ${hashedPassword}, ${type}, ${token}, ${id_empresa})
-    RETURNING id, name, email, password, type, token, id_empresa;
+    INSERT INTO users (name, email, password, type, token, id_empresa, css)
+    VALUES (${name}, ${email}, ${hashedPassword}, ${type}, ${token}, ${id_empresa}, ${css})
+    RETURNING id, name, email, password, type, token, id_empresa, css;
   `;
 
   // Devolver el usuario creado
