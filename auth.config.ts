@@ -4,18 +4,46 @@ export const authConfig = {
   pages: {
     signIn: '/login',
   },
+  session: { strategy: 'jwt' },
+  secret: process.env.AUTH_SECRET,
+  trustHost: true,
   providers: [
-    // added later in auth.ts since it requires bcrypt which is only compatible with Node.js
-    // while this file is also used in non-Node.js environments
+ 
   ],
   callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.type = user.type;
+        token.id_empresa = user.id_empresa;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user && token.id_empresa) {
+        session.user.id_empresa = token.id_empresa;
+        session.user.type = token.type;
+      }
+      return session;
+    },
     authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
+      const isLoggedIn = !!auth?.user && !!(auth.user as any).id_empresa;
+      const isAdmin = (auth?.user as any)?.type === 'admin';
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-      if (isOnDashboard) {
-        if (isLoggedIn) return true;
+      const isOnUsersAdmin = nextUrl.pathname.startsWith('/dashboard/users');
+      const isOnLogin = nextUrl.pathname.startsWith('/login');
+      // Las rutas de creación de empresa deben ser públicas porque se está registrando la primera vez
+      const isEmpresaRegistration = nextUrl.pathname === '/dashboard/empresas/create' || nextUrl.pathname === '/dashboard/empresas';
+      
+      if (isOnDashboard && !isEmpresaRegistration) {
+        if (isLoggedIn) {
+          // Si intenta acceder a cualquier ruta relativa a usuarios y NO es admin, se le devuelve a dashboard
+          if (isOnUsersAdmin && !isAdmin) {
+             return Response.redirect(new URL('/dashboard', nextUrl));
+          }
+          return true;
+        }
         return false; // Redirect unauthenticated users to login page
-      } else if (isLoggedIn) {
+      } else if (isLoggedIn && isOnLogin) {
         return Response.redirect(new URL('/dashboard', nextUrl));
       }
       return true;

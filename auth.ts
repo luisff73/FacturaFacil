@@ -19,7 +19,7 @@ async function getUser(email: string): Promise<User | undefined> {
   }
 }
 
-export const { auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
@@ -41,6 +41,7 @@ export const { auth, signIn, signOut } = NextAuth({
               name: user.name,
               email: user.email,
               type: user.type, // Incluir el campo type en el objeto de usuario
+              id_empresa: user.id_empresa, // Incluir el campo id_empresa
             };
         }
 
@@ -49,30 +50,4 @@ export const { auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  // Este callback se ejecuta cada vez que se crea un token JWT
-  callbacks: {
-    async jwt({ token, user }) {
-      // Si el usuario existe, añadir los campos type e id_empresa al token
-      if (user) {
-        token = {
-          ...token,
-          type: (user as User).type,
-          id_empresa: (user as any).id_empresa,
-        };
-      }
-      console.log("JWT Token contenido:", token); // muestra todo el contenido del token
-      console.log("Type en el token:", token.type);
-      console.log("id_empresa en el token:", (token as any).id_empresa);
-      return token;
-    },
-    async session({ session, token }) {
-      console.log("Sesión actual:", session);
-      console.log("Token en sesión:", token);
-      // incluir id_empresa en el objeto user de la sesión para poder accederlo
-      if (session.user && (token as any).id_empresa) {
-        (session.user as any).id_empresa = (token as any).id_empresa;
-      }
-      return session;
-    },
-  },
 });

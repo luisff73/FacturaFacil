@@ -33,8 +33,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es" className="light">
+    <html lang="es" className="light" suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         className={`${inter.className} antialiased dark:bg-gray-900 dark:text-white min-h-screen transition-colors duration-300`}
       >
         <div className="fixed top-4 right-4 z-50">

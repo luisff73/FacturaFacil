@@ -154,11 +154,13 @@ export async function createCustomer(data: Omit<Customer, "id">) {
     cif,
     pais,
   } = data;
+  
+  const id_empresa = await requireEmpresaId();
 
   // Consulta SQL para insertar un nuevo cliente
   const result = await sql`
     INSERT INTO customers (name, email, image_url, direccion,c_postal,poblacion,provincia,telefono,cif,pais, id_empresa)
-    VALUES (${name}, ${email}, ${image_url}, ${direccion},${c_postal},${poblacion},${provincia},${telefono},${cif},${pais}, 1) 
+    VALUES (${name}, ${email}, ${image_url}, ${direccion},${c_postal},${poblacion},${provincia},${telefono},${cif},${pais}, ${id_empresa}) 
     RETURNING id, name, email, image_url ,direccion,c_postal,poblacion,provincia,telefono,cif,pais, id_empresa;
   `;
 
@@ -334,7 +336,11 @@ export async function updateUser(id: string, data: Omit<User, "id">) {
 }
 
 export async function createUser(data: Omit<User, "id">) {
-  const { name, email, password, type, token, id_empresa } = data;
+  let { name, email, password, type, token, id_empresa } = data;
+
+  if (!id_empresa) {
+    id_empresa = await requireEmpresaId();
+  }
 
   // Encriptar la contraseña
   const saltRounds = 5; // nivel de encriptacion (más alto = más seguro, pero más lento)

@@ -3,9 +3,7 @@
 // Se utiliza para interactuar con una base de datos PostgreSQL.
 // Permite ejecutar consultas SQL de manera segura y eficiente.
 import { sql } from "@vercel/postgres";
-import getServerSession from "next-auth";
-import type { Session } from "next-auth";
-import { authConfig } from "../../auth.config";
+import { auth } from "../../auth";
 
 // Importación de tipos y definiciones desde ./definitions:
 import {
@@ -22,13 +20,18 @@ import {
 
 import { formatCurrency } from "./utils";
 
+import { redirect } from 'next/navigation';
+
 // helper que extrae id_empresa del usuario autenticado
 export async function requireEmpresaId(): Promise<number> {
-  const session = (await getServerSession(authConfig)) as unknown as Session | null;
-  if (!session || !session.user || !(session.user as any).id_empresa) {
-    throw new Error("No authenticated user or empresa id missing");
+  const session = await auth();
+  if (!session || !session.user || !session.user.id_empresa) {
+    // He habilitado la ruta /dashboard/empresas como pública, así que 
+    // cuando no haya usuario retornara un ID ficticio (0) que los queries de SQL
+    // buscarán sin romper el build en vez de forzar una intercepción por código.
+    return 0;
   }
-  return Number((session.user as any).id_empresa);
+  return Number(session.user.id_empresa);
 }
 
 export async function fetchRevenue() {

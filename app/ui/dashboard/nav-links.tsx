@@ -19,8 +19,7 @@ const links = [
   { name: 'Facturas', href: '/dashboard/invoices', icon: DocumentDuplicateIcon },
   { name: 'Clientes', href: '/dashboard/customers', icon: UserGroupIcon },
   { name: 'Productos', href: '/dashboard/articulos', icon: TagIcon },
-  { name: 'Usuarios_protegido', href: '/dashboard/users', icon: UserCircleIcon, adminOnly: true },
-  { name: 'Usuarios', href: '/dashboard/users', icon: UserCircleIcon },
+  { name: 'Usuarios', href: '/dashboard/users', icon: UserCircleIcon, adminOnly: true },
 ];
 
 export default function NavLinks({ user }: { user?: { type?: 'admin' | 'user' } }) {

@@ -31,6 +31,8 @@ export default function BarraTemas() {
             <button
                 className="p-2 rounded-lg bg-green-400 dark:bg-gray-700"
                 onClick={() => setShowColorPicker(!showColorPicker)} // Alterna la visibilidad del SelectorColores
+                title="Cambiar color"
+                aria-label="Cambiar color"
             >
                 <PencilIcon className="h-5 w-5" />
             </button>
@@ -42,6 +44,8 @@ export default function BarraTemas() {
             <button
                 onClick={() => setDarkMode(!darkMode)}
                 className="p-2 rounded-lg bg-green-400 dark:bg-gray-700"
+                title={darkMode ? "Activar modo claro" : "Activar modo oscuro"}
+                aria-label={darkMode ? "Activar modo claro" : "Activar modo oscuro"}
             >
                 {darkMode ? (
                     <SunIcon className="h-5 w-5" />
