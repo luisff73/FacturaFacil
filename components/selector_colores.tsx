@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import tinycolor from 'tinycolor2';
+import { updateUserCss } from '@/app/lib/actions';
 
-const SelectorColores: React.FC<{ onColorChange: (colors: { [key: string]: string }) => void }> = ({ onColorChange }) => {
-    const [baseColor, setBaseColor] = useState('#4CAF50'); // Color base inicial
+const SelectorColores: React.FC<{
+    onColorChange: (colors: { [key: string]: string }) => void,
+    initialColor: string
+}> = ({ onColorChange, initialColor }) => {
+    const [baseColor, setBaseColor] = useState(initialColor); // Usar el color de la BD
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedColor = event.target.value;
-        setBaseColor(selectedColor);
+    // Efecto para aplicar el color inicial al montar el componente (al refrescar página)
+    useEffect(() => {
+        applyColors(initialColor);
+    }, [initialColor]);
 
-        // Calcula los tonos ajustados
+    const applyColors = (selectedColor: string) => {
         const colors = {
             100: tinycolor(selectedColor).lighten(60).toString(), // Un tono muy claro
             200: tinycolor(selectedColor).lighten(40).toString(), // Un tono claro
@@ -18,15 +23,26 @@ const SelectorColores: React.FC<{ onColorChange: (colors: { [key: string]: strin
             700: tinycolor(selectedColor).darken(20).toString(), // Un tono muy oscuro
         };
 
-        // Llama a la función para actualizar los colores
         onColorChange(colors);
 
-        // Actualiza las variables CSS con los nuevos colores
         Object.keys(colors).forEach((key) => {
             document.documentElement.style.setProperty(`--bg-green-${key}`, colors[key as unknown as keyof typeof colors]);
         });
+    };
 
+    const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedColor = event.target.value;
+        setBaseColor(selectedColor);
 
+        // Aplicar visualmente al instante
+        applyColors(selectedColor);
+
+        // Guardar en la base de datos (Server Action)
+        try {
+            await updateUserCss(selectedColor);
+        } catch (error) {
+            console.error("No se pudo guardar el color:", error);
+        }
     };
 
     return (

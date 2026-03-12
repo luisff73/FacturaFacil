@@ -15,6 +15,7 @@ export const authConfig = {
       if (user) {
         token.type = user.type;
         token.id_empresa = user.id_empresa;
+        token.css = (user as any).css;
       }
       return token;
     },
@@ -22,6 +23,7 @@ export const authConfig = {
       if (session.user && token.id_empresa) {
         session.user.id_empresa = token.id_empresa;
         session.user.type = token.type;
+        (session.user as any).css = (token as any).css;
       }
       return session;
     },

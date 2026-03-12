@@ -4,7 +4,7 @@ import { z } from "zod";
 import { sql } from "@vercel/postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { signIn } from "@/auth";
+import { signIn, auth, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 import {
   Customer,
@@ -14,7 +14,6 @@ import {
 } from "@/app/lib/definitions";
 import { requireEmpresaId } from "./data";
 import bcrypt from "bcrypt";
-import { signOut } from "@/auth";
 
 // Define el esquema para FormSchema
 const FormSchema = z.object({
@@ -461,4 +460,22 @@ export async function createEmpresa(
   }
 
   return empresa;
+}
+
+export async function updateUserCss(css: string) {
+  const session = await auth();
+  if (!session?.user?.email) {
+    throw new Error("No session found");
+  }
+
+  try {
+    await sql`
+      UPDATE users
+      SET css = ${css}
+      WHERE email = ${session.user.email}
+    `;
+  } catch (error) {
+    console.error("Database Error: Failed to Update User CSS.", error);
+    throw new Error("Failed to update user CSS.");
+  }
 }

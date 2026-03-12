@@ -27,11 +27,16 @@ export function generateViewport() {
   };
 }
 
-export default function RootLayout({
+import { auth } from "@/auth";
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth();
+  const userColor = (session?.user as any)?.css || '#4CAF50';
+
   return (
     <html lang="es" className="light" suppressHydrationWarning>
       <body
@@ -39,7 +44,7 @@ export default function RootLayout({
         className={`${inter.className} antialiased dark:bg-gray-900 dark:text-white min-h-screen transition-colors duration-300`}
       >
         <div className="fixed top-4 right-4 z-50">
-          <BarraTemas />
+          <BarraTemas initialColor={userColor} />
         </div>
         {children}
         {/* <RegisterSW /> */}

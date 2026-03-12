@@ -10,7 +10,9 @@ export type User = {
   password: string;
   token: string;
   type: "admin" | "user";
+  css: string;
 };
+
 
 export type Customer = {
   id: string;

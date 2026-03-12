@@ -42,6 +42,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               email: user.email,
               type: user.type, // Incluir el campo type en el objeto de usuario
               id_empresa: user.id_empresa, // Incluir el campo id_empresa
+              css: user.css, // Incluir el campo css  
             };
         }
 

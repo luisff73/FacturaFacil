@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { SunIcon, MoonIcon, PencilIcon } from '@heroicons/react/24/outline';
 import SelectorColores from '@/components/selector_colores';
 
-export default function BarraTemas() {
+export default function BarraTemas({ initialColor }: { initialColor: string }) {
     const [darkMode, setDarkMode] = useState(false);
-    const [bgColor, setBgColor] = useState('--bg-green-700');
+    const [bgColor, setBgColor] = useState(initialColor);
     const [showColorPicker, setShowColorPicker] = useState(false);
 
     useEffect(() => {
@@ -38,7 +38,7 @@ export default function BarraTemas() {
             </button>
 
             {showColorPicker && (
-                <SelectorColores onColorChange={handleColorChange} />
+                <SelectorColores onColorChange={handleColorChange} initialColor={initialColor} />
             )}
 
             <button
