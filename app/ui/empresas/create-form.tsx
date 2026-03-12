@@ -25,7 +25,7 @@ function ErrorMessages({ field, errors }: { field: string; errors?: string[] }) 
 }
 
 const FIELDS: Array<{
-  name: keyof Omit<Empresas, 'id' | 'fecha_creacion'>;
+  name: keyof Omit<Empresas, 'id' | 'fecha_creacion' | 'css'>;
   label: string;
   type: string;
   placeholder: string;
@@ -40,6 +40,7 @@ const FIELDS: Array<{
     { name: 'email', label: 'Email', type: 'email', placeholder: 'Introduce el email de la empresa' },
     { name: 'iva', label: 'IVA', type: 'number', placeholder: 'Introduce el IVA de la empresa' },
     { name: 'recargo_equivalencia', label: 'Recargo de Equivalencia', type: 'number', placeholder: 'Introduce el recargo de equivalencia de la empresa' },
+
   ];
 
 const CreateEmpresaForm: React.FC = () => {

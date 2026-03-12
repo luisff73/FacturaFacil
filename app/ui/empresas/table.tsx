@@ -1,5 +1,4 @@
-import React from 'react';     
-import { Empresas } from '@/app/lib/definitions';
+import React from 'react';
 import { UpdateEmpresa, DeleteEmpresa } from '@/app/ui/empresas/buttons';
 import { fetchFilteredEmpresas } from '@/app/lib/data';
 

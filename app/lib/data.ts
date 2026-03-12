@@ -20,8 +20,6 @@ import {
 
 import { formatCurrency } from "./utils";
 
-import { redirect } from 'next/navigation';
-
 // helper que extrae id_empresa del usuario autenticado
 export async function requireEmpresaId(): Promise<number> {
   const session = await auth();

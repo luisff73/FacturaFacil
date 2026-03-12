@@ -23,7 +23,7 @@ export default function BarraTemas({ initialColor }: { initialColor: string }) {
 
         const color = colors['700'];
         setBgColor(color);
-        // console.log('Color de fondo actualizado:', color);
+        console.log('Color de fondo actualizado:', bgColor);
     };
 
     return (

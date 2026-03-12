@@ -9,7 +9,6 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   // not required right now but kept if you later need list context
-  const empresas = await fetchEmpresas();
 
   return (
     <main>

@@ -12,7 +12,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const id = params.id;
   // Promise.all devuelve una tupla; damos nombres separados
-  const [empresa, empresas] = await Promise.all([
+  const [empresa] = await Promise.all([
     fetchEmpresaById(id),
     fetchEmpresas(),
   ]);
