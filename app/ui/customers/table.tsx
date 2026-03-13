@@ -2,6 +2,8 @@ import Image from 'next/image';
 import { UpdateCustomer, DeleteCustomer } from '@/app/ui/customers/buttons';
 import Search from '@/app/ui/search';
 
+const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || 'https://tqqqihkzj4uwev0c.public.blob.vercel-storage.com';
+
 interface CustomersTableProps {
   customers: {
     total_pendiente: string;
@@ -34,7 +36,15 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
                         <div className="mb-2 flex items-center">
                           <div className="flex items-center gap-3">
                             <Image
-                              src={customer.image_url}
+                              src={
+                                customer.image_url && customer.image_url.startsWith('http')
+                                  ? customer.image_url
+                                  : customer.image_url && customer.image_url.startsWith('/')
+                                  ? customer.image_url
+                                  : customer.image_url 
+                                    ? `${BLOB_URL}/${customer.image_url}`
+                                    : `https://ui-avatars.com/api/?name=${customer.name}&background=random`
+                              }
                               className="rounded-full"
                               alt={`${customer.name}'s profile picture`}
                               width={28}
@@ -101,7 +111,13 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
                       <td className="whitespace-nowrap bg-white dark:bg-gray-900 py-5 pl-4 pr-3 text-sm text-black dark:text-white group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-center gap-3">
                           <Image
-                            src={customer.image_url}
+                            src={
+                              customer.image_url.startsWith('http')
+                                ? customer.image_url
+                                : customer.image_url.startsWith('/')
+                                ? customer.image_url
+                                : `${BLOB_URL}/${customer.image_url}`
+                            }
                             className="rounded-full"
                             alt={`${customer.name}'s profile picture`}
                             width={28}

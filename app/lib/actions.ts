@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { put } from "@vercel/blob";
 import { sql } from "@vercel/postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -19,11 +20,11 @@ import bcrypt from "bcrypt";
 const FormSchema = z.object({
   id: z.string(),
   customerId: z.string({
-    invalid_type_error: "Please select a customer.",
+    invalid_type_error: "Por favor selecciona un cliente.",
   }),
   amount: z.coerce
     .number()
-    .gt(0, { message: "Please enter an amount greater than $0." }),
+    .gt(0, { message: "Por favor introduce un monto mayor a $0." }),
 
   status: z.enum(["Pendiente", "Pagada", "Proforma"], {
     invalid_type_error: "Please select an invoice status.",
@@ -479,3 +480,28 @@ export async function updateUserCss(css: string) {
     throw new Error("Failed to update user CSS.");
   }
 }
+
+export async function uploadImage(formData: FormData) {
+  const file = formData.get('file') as File | null;
+  if (!file || !file.name || file.name === "undefined") {
+    return null;
+  }
+
+  try {
+    // Sube la imagen a Vercel Blob usando put
+    const blob = await put(file.name, file, { 
+      access: 'public',
+      // Esto hace que si subes archivos con el mismo nombre, les añade caracteres random al final para que no se sobreescriban
+      addRandomSuffix: true 
+    });
+
+    console.log(`Imagen guardada correctamente en Vercel Blob: ${blob.url}`);
+
+    // Devolvemos SOLAMENTE el nombre de guardado (pathname) para la BD
+    return blob.pathname;
+  } catch (error) {
+    console.error("Error al guardar la imagen en Blob:", error);
+    return null;
+  }
+}
+

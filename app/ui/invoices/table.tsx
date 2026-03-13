@@ -4,6 +4,8 @@ import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredInvoices } from '@/app/lib/data';
 
+const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || 'https://tqqqihkzj4uwev0c.public.blob.vercel-storage.com';
+
 export default async function InvoicesTable({
   query,
   currentPage,
@@ -24,7 +26,15 @@ export default async function InvoicesTable({
               <div>
                 <div className="mb-2 flex items-center">
                   <Image
-                    src={invoice.image_url}
+                    src={
+                      invoice.image_url && invoice.image_url.startsWith('http')
+                        ? invoice.image_url
+                        : invoice.image_url && invoice.image_url.startsWith('/')
+                        ? invoice.image_url
+                        : invoice.image_url
+                          ? `${BLOB_URL}/${invoice.image_url}`
+                          : `https://ui-avatars.com/api/?name=${invoice.name}&background=random`
+                    }
                     className="mr-2 rounded-full"
                     width={28}
                     height={28}
@@ -83,7 +93,15 @@ export default async function InvoicesTable({
               <td className="whitespace-nowrap py-3 pl-6 pr-3">
                 <div className="flex items-center gap-3">
                   <Image
-                    src={invoice.image_url}
+                    src={
+                      invoice.image_url && invoice.image_url.startsWith('http')
+                        ? invoice.image_url
+                        : invoice.image_url && invoice.image_url.startsWith('/')
+                        ? invoice.image_url
+                        : invoice.image_url
+                          ? `${BLOB_URL}/${invoice.image_url}`
+                          : `https://ui-avatars.com/api/?name=${invoice.name}&background=random`
+                    }
                     className="rounded-full"
                     width={28}
                     height={28}

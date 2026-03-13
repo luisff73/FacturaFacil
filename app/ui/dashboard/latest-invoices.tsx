@@ -1,8 +1,10 @@
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { fetchLatestInvoices } from '@/app/lib/data';
-export default async function LatestInvoices() {
 
+const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || 'https://tqqqihkzj4uwev0c.public.blob.vercel-storage.com';
+
+export default async function LatestInvoices() {
   const latestInvoices = await fetchLatestInvoices();
 
   return (
@@ -17,7 +19,15 @@ export default async function LatestInvoices() {
               <div key={invoice.id} className="flex flex-row items-center justify-between py-4 dark:border-gray-600">
                 <div className="flex items-center">
                   <Image
-                    src={invoice.image_url}
+                    src={
+                      invoice.image_url && invoice.image_url.startsWith('http')
+                        ? invoice.image_url
+                        : invoice.image_url && invoice.image_url.startsWith('/')
+                        ? invoice.image_url
+                        : invoice.image_url
+                          ? `${BLOB_URL}/${invoice.image_url}`
+                          : `https://ui-avatars.com/api/?name=${invoice.name}&background=random`
+                    }
                     alt={`${invoice.name}'s profile picture`}
                     className="mr-4 rounded-full"
                     width={32}

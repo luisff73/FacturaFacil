@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { createArticulo } from '@/app/lib/actions';
+import { createArticulo, uploadImage } from '@/app/lib/actions';
 import { ArticulosTableType } from '@/app/lib/definitions';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
@@ -12,23 +12,25 @@ interface FormProps {
 }
 
 const CreateArticulosForm: React.FC<FormProps> = () => {
+  const inputFileRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<{ errors: { codigo?: string[]; descripcion?: string[]; precio?: string[]; iva?: string[]; stock?: string[]; imagen?: string[] }, message: string }>({ errors: {}, message: '' });
   const router = useRouter();
 
   const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
-    const fileInput = formData.get('imagen') as File;
+    const fileInput = inputFileRef.current?.files?.[0];
     let imageUrl = '';
 
-    if (fileInput) {
-      // Aquí se podría manejar la carga del archivo y obtener la ruta local
-      // Por simplicidad, asumimos que el archivo se guarda en una carpeta 'uploads'
-      const filePath = `/articulos/${fileInput.name}`;
-      imageUrl = filePath;
-
-      // Aquí podríamos agregar la lógica para guardar el archivo en el servidor
-      // Por ejemplo, usando una API para subir el archivo
+    if (fileInput && fileInput.size > 0) {
+      // Crear un FormData con solo el archivo para enviarlo a la Server Action
+      const uploadData = new FormData();
+      uploadData.append('file', fileInput);
+      
+      const uploadedPath = await uploadImage(uploadData);
+      if (uploadedPath) {
+        imageUrl = uploadedPath;
+      }
     }
 
     const data = {
@@ -37,7 +39,7 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
       precio: parseFloat(formData.get('precio') as string),
       iva: parseFloat(formData.get('iva') as string),
       stock: parseFloat(formData.get('stock') as string),
-      imagen: [{ id: 1, ruta: imageUrl }]
+      imagen: imageUrl ? [{ id: 1, ruta: imageUrl }] : null
     };
 
     try {
@@ -190,9 +192,10 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
           <div className="relative">
             <input
               id="imagen"
-              name="imagen"
+              name="file"
+              ref={inputFileRef}
               type="file"
-              placeholder="Introduce la imagen del artículo"
+              accept="image/jpeg, image/png, image/webp"
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="imagen-error"
             />

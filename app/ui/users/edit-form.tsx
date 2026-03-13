@@ -44,7 +44,7 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
         {/* User Name */}
         <div className="mb-4">
           <label htmlFor="name" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            Name
+            Nombre
           </label>
           <div className="relative">
             <input
@@ -52,7 +52,7 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               name="name"
               type="text"
               defaultValue={user.name}
-              placeholder="Enter user name"
+              placeholder="Introduce el nombre del usuario"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="name-error"
             />
@@ -77,7 +77,7 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               name="email"
               type="email"
               defaultValue={user.email}
-              placeholder="Enter user email"
+              placeholder="Introduce el email del usuario"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="email-error"
             />
@@ -94,7 +94,7 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
         {/* User Password */}
         <div className="mb-4">
           <label htmlFor="password" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            Password
+            Contraseña
           </label>
           <div className="relative">
             <input
@@ -102,7 +102,7 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               name="password"
               type="password"
               defaultValue={user.password}
-              placeholder="Enter user password"
+              placeholder="Introduce la contraseña del usuario"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="password-error"
             />
@@ -127,7 +127,7 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               name="token"
               type="text"
               defaultValue={user.token}
-              placeholder="Enter user token"
+              placeholder="Introduce el token del usuario"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="token-error"
             />
@@ -144,18 +144,20 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
         {/* User Type */}
         <div className="mb-4">
           <label htmlFor="type" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            Type
+            Selecciona rol de usuario
           </label>
           <div className="relative">
-            <input
+            <select
               id="type"
               name="type"
-              type="text"
               defaultValue={user.type}
-              placeholder="Enter user type"
-              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="type-error"
-            />
+              required
+            >
+              <option value="admin">admin</option>
+              <option value="user">user</option>
+            </select>
           </div>
           <div id="type-error" aria-live="polite" aria-atomic="true">
             {state.errors?.type?.map((error: string) => (

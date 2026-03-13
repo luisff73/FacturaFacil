@@ -1,17 +1,20 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateArticulo, deleteArticuloImage } from '@/app/lib/actions';
+import { updateArticulo, deleteArticuloImage, uploadImage } from '@/app/lib/actions';
 import { ArticulosTableType } from '@/app/lib/definitions';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
+
+const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || 'https://tqqqihkzj4uwev0c.public.blob.vercel-storage.com';
 
 interface EditFormProps {
   articulo: ArticulosTableType;
 }
 
 const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
+  const inputFileRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<{ errors: { codigo?: string[]; descripcion?: string[]; precio?: string[]; iva?: string[]; stock?: string[]; imagen?: string[] }, message: string }>({ errors: {}, message: '' });
   const [images, setImages] = useState(articulo.imagen);
   const router = useRouter();
@@ -19,15 +22,17 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
   const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
-    const fileInput = formData.get('imagen') as File;
+    const fileInput = inputFileRef.current?.files?.[0];
 
     let imageUrl = '';
-    if (fileInput && fileInput.name) {
-      // Aquí va la ruta local
-      const filePath = `/articulos/${fileInput.name}`;
-      imageUrl = filePath;
-
-      // Aquí puede ir la lógica para guardar el archivo en el servidor
+    if (fileInput && fileInput.size > 0) {
+      const uploadData = new FormData();
+      uploadData.append('file', fileInput);
+      
+      const uploadedPath = await uploadImage(uploadData);
+      if (uploadedPath) {
+        imageUrl = uploadedPath;
+      }
     }
 
     const newImage = imageUrl ? { id: (images?.length || 0) + 1, ruta: imageUrl } : null;
@@ -214,7 +219,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
                     ×
                   </button>
                   <Image
-                    src={img.ruta.startsWith('/') ? img.ruta : `/${img.ruta}`}
+                    src={img.ruta.startsWith('http') ? img.ruta : (img.ruta.startsWith('/') ? img.ruta : `${BLOB_URL}/${img.ruta}`)}
                     alt={`Imagen ${index + 1}`}
                     layout="fill"
                     objectFit="contain"
@@ -234,9 +239,10 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
           <div className="relative">
             <input
               id="imagen"
-              name="imagen"
+              name="file"
+              ref={inputFileRef}
               type="file"
-              placeholder="Introduce la imagen del artículo"
+              accept="image/jpeg, image/png, image/webp"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="imagen-error"
             />

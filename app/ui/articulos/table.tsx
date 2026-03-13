@@ -3,6 +3,8 @@ import Image from 'next/image';
 import { UpdateArticulo, DeleteArticulo } from '@/app/ui/articulos/buttons';
 import Search from '@/app/ui/search';
 
+const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || 'https://tqqqihkzj4uwev0c.public.blob.vercel-storage.com';
+
 interface ArticulosTableProps {
   articulos: ArticulosTableType[];
 }
@@ -26,7 +28,15 @@ export default function ArticulosTable({ articulos }: ArticulosTableProps) {
                         <div className="mb-2 flex items-center">
                           <div className="flex items-center gap-3">
                             <Image
-                              src={articulo.imagen && articulo.imagen[0] && articulo.imagen[0]?.ruta.startsWith('/') ? articulo.imagen[0].ruta : articulo.imagen && articulo.imagen[0] ? `/${articulo.imagen[0]?.ruta}` : ''}
+                              src={
+                                articulo.imagen && articulo.imagen[0]
+                                  ? articulo.imagen[0].ruta.startsWith('http')
+                                    ? articulo.imagen[0].ruta
+                                    : articulo.imagen[0].ruta.startsWith('/')
+                                    ? articulo.imagen[0].ruta
+                                    : `${BLOB_URL}/${articulo.imagen[0].ruta}`
+                                  : ''
+                              }
                               alt={articulo.descripcion}
                               width={50}
                               height={50}
@@ -93,7 +103,15 @@ export default function ArticulosTable({ articulos }: ArticulosTableProps) {
                       <td className="whitespace-nowrap bg-white dark:bg-gray-900 py-5 pl-4 pr-3 text-sm text-black dark:text-white group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-center gap-3">
                           <Image
-                            src={articulo.imagen && articulo.imagen[0] && articulo.imagen[0]?.ruta.startsWith('/') ? articulo.imagen[0].ruta : articulo.imagen && articulo.imagen[0] ? `/${articulo.imagen[0]?.ruta}` : ''}
+                            src={
+                              articulo.imagen && articulo.imagen[0]
+                                ? articulo.imagen[0].ruta.startsWith('http')
+                                  ? articulo.imagen[0].ruta
+                                  : articulo.imagen[0].ruta.startsWith('/')
+                                  ? articulo.imagen[0].ruta
+                                  : `${BLOB_URL}/${articulo.imagen[0].ruta}`
+                                : ''
+                            }
                             alt={articulo.descripcion}
                             width={28}
                             height={28}

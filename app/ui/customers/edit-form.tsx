@@ -1,7 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateCustomer } from '@/app/lib/actions';
+import { updateCustomer, uploadImage } from '@/app/lib/actions';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
 import { Customer } from '@/app/lib/definitions';
@@ -11,21 +11,23 @@ interface EditFormProps {
 }
 
 const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
+  const inputFileRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<{ errors: { name?: string[]; email?: string[]; image_url?: string[]; direccion?: string[]; c_postal?: string[]; poblacion?: string[]; provincia?: string[]; telefono?: string[]; cif?: string[]; pais?: string[]; id_empresa?: number[]; }, message: string }>({ errors: {}, message: '' });
   const router = useRouter();
 
   const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
-    const fileInput = formData.get('image_url') as File;
+    const fileInput = inputFileRef.current?.files?.[0];
     let imageUrl = customer.image_url;
 
-    if (fileInput && fileInput.name) {
-      // Aquí puedes manejar la carga del archivo y obtener la ruta local
-      const filePath = `/uploads/${fileInput.name}`;
-      imageUrl = filePath;
-
-      // Aquí puedes agregar la lógica para guardar el archivo en el servidor
+    if (fileInput && fileInput.name && fileInput.size > 0) {
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', fileInput);
+      const uploadedPathname = await uploadImage(uploadFormData);
+      if (uploadedPathname) {
+        imageUrl = uploadedPathname;
+      }
     }
 
     const data = {
@@ -116,9 +118,10 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
           <div className="relative">
             <input
               id="image_url"
-              name="image_url"
+              name="file"
+              ref={inputFileRef}
               type="file"
-              placeholder="Introduce la URL de la imagen del cliente"
+              accept="image/jpeg, image/png, image/webp"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="image_url-error"
             />
