@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { createEmpresa } from '@/app/lib/actions';
+import { createEmpresa, uploadImage } from '@/app/lib/actions';
 import Cookies from 'js-cookie';
 import { Empresas, User } from '@/app/lib/definitions';
 import Link from 'next/link';
@@ -44,6 +44,7 @@ const FIELDS: Array<{
   ];
 
 const CreateEmpresaForm: React.FC = () => {
+  const inputFileRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [message, setMessage] = useState('');
   const router = useRouter();
@@ -76,7 +77,19 @@ const CreateEmpresaForm: React.FC = () => {
       type: 'admin' as const,
       token: Cookies.get('token') || '',
       css: '#4CAF50',
+      image_url: '',
     };
+
+    const fileInput = inputFileRef.current?.files?.[0];
+    if (fileInput && fileInput.size > 0) {
+      const uploadData = new FormData();
+      uploadData.append('file', fileInput);
+      
+      const uploadedPath = await uploadImage(uploadData);
+      if (uploadedPath) {
+        initialUser.image_url = uploadedPath;
+      }
+    }
 
     try {
       await createEmpresa(empresaData, initialUser);
@@ -166,6 +179,24 @@ const CreateEmpresaForm: React.FC = () => {
               />
             </div>
             <ErrorMessages field="user_password" errors={errors.user_password} />
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="user_image" className="mb-2 block text-sm font-medium dark:text-gray-200">
+              Imagen de perfil del administrador
+            </label>
+            <div className="relative">
+              <input
+                id="user_image"
+                name="file"
+                ref={inputFileRef}
+                type="file"
+                accept="image/jpeg, image/png, image/webp"
+                className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+                aria-describedby="user_image-error"
+              />
+            </div>
+            <ErrorMessages field="user_image" errors={errors.user_image} />
           </div>
         </div>
 

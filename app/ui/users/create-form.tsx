@@ -1,9 +1,9 @@
 'use client';
 // Luis
 // filepath: /c:/DAW/desenvolupament web client/next/nextjs-dashboard/app/ui/users/create-form.tsx
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { createUser } from '@/app/lib/actions';
+import { createUser, uploadImage } from '@/app/lib/actions';
 import { User } from '@/app/lib/definitions';
 // Importa la interfaz User desde definitions.ts
 import Link from 'next/link';
@@ -18,6 +18,7 @@ interface CreateUserFormProps {
 }
 
 const CreateUserForm: React.FC<CreateUserFormProps> = () => {
+  const inputFileRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<{
     errors: {
       name?: string[];
@@ -25,6 +26,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
       password?: string[];
       type?: string[];
       id_empresa?: string[];
+      image_url?: string[];
     },
     message: string
   }>({ errors: {}, message: '' });
@@ -34,15 +36,28 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
   const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
+    const fileInput = inputFileRef.current?.files?.[0];
+    let imageUrl = '';
+
+    if (fileInput && fileInput.size > 0) {
+      const uploadData = new FormData();
+      uploadData.append('file', fileInput);
+      
+      const uploadedPath = await uploadImage(uploadData);
+      if (uploadedPath) {
+        imageUrl = uploadedPath;
+      }
+    }
 
     const data: Omit<User, "id"> = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       password: formData.get('password') as string,
-      token: Cookies.get('token') as string,
+      token: Cookies.get('token') as string || '',
       type: formData.get('type') as 'admin' | 'user',
       id_empresa: Number(formData.get('id_empresa')),
       css: '#4CAF50',
+      image_url: imageUrl,
     };
 
     try {
@@ -128,6 +143,32 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
           <div id="password-error" aria-live="polite" aria-atomic="true">
             {state.errors?.password &&
               state.errors.password.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
+        {/* User Image */}
+        <div className="mb-4">
+          <label htmlFor="image_url" className="mb-2 block text-sm font-medium dark:text-gray-200">
+            Imagen de perfil
+          </label>
+          <div className="relative">
+            <input
+              id="image_url"
+              name="file"
+              ref={inputFileRef}
+              type="file"
+              accept="image/jpeg, image/png, image/webp"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+              aria-describedby="image_url-error"
+            />
+          </div>
+          <div id="image_url-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.image_url &&
+              state.errors.image_url.map((error: string) => (
                 <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                   {error}
                 </p>

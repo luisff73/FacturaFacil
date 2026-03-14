@@ -1,7 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateUser } from '@/app/lib/actions';
+import { updateUser, uploadImage } from '@/app/lib/actions';
 import { User } from '@/app/lib/definitions';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
@@ -11,12 +11,25 @@ interface EditFormProps {
 }
 
 const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
+  const inputFileRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<{ errors: Partial<Record<keyof User, string[]>>; message: string }>({ errors: {}, message: '' });
   const router = useRouter();
 
   const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
+    const fileInput = inputFileRef.current?.files?.[0];
+    let imageUrl = user.image_url;
+
+    if (fileInput && fileInput.size > 0) {
+      const uploadData = new FormData();
+      uploadData.append('file', fileInput);
+      
+      const uploadedPath = await uploadImage(uploadData);
+      if (uploadedPath) {
+        imageUrl = uploadedPath;
+      }
+    }
 
     const data: Omit<User, 'id'> = {
       id_empresa: user.id_empresa,
@@ -26,6 +39,7 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
       token: formData.get('token') as string || '',
       type: formData.get('type') as 'admin' | 'user',
       css: user.css,
+      image_url: imageUrl,
     };
 
     try {
@@ -119,24 +133,24 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
           </div>
         </div>
 
-        {/* User Token */}
+ {/* User Image URL */}
         <div className="mb-4">
-          <label htmlFor="token" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            Token
+          <label htmlFor="image_url" className="mb-2 block text-sm font-medium dark:text-gray-200">
+            URL de la imagen del usuario
           </label>
           <div className="relative">
             <input
-              id="token"
-              name="token"
-              type="text"
-              defaultValue={user.token}
-              placeholder="Introduce el token del usuario"
+              id="image_url"
+              name="file"
+              ref={inputFileRef}
+              type="file"
+              accept="image/jpeg, image/png, image/webp"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-              aria-describedby="token-error"
+              aria-describedby="image_url-error"
             />
           </div>
-          <div id="token-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.token?.map((error: string) => (
+          <div id="image_url-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.image_url?.map((error: string) => (
               <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                 {error}
               </p>

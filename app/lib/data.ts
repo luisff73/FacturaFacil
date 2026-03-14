@@ -413,7 +413,8 @@ export async function fetchFilteredUsers(query: string) {
         password,
         type,
         token,
-        css
+        css,
+        image_url
       FROM users
       WHERE users.id_empresa = ${idEmpresa} AND (
         name ILIKE ${`%${query}%`} OR
@@ -443,7 +444,8 @@ export async function fetchUsersById(id: string): Promise<User | null> {
         password,
         type,
         token,
-        css
+        css,
+        image_url
       FROM users
       WHERE users.id_empresa = ${idEmpresa} AND id = ${id};
     `;

@@ -8,11 +8,12 @@ interface ImageProps {
     height: number;
     className?: string;
     alt: string;
+    priority?: boolean;
 }
 
-const Image: React.FC<ImageProps> = ({ src, width, height, className, alt }) => {
+const Image: React.FC<ImageProps> = ({ src, width, height, className, alt, priority }) => {
     return (
-        <NextImage src={src} width={width} height={height} className={className} alt={alt} />
+        <NextImage src={src} width={width} height={height} className={className} alt={alt} priority={priority} />
     );
 };
 

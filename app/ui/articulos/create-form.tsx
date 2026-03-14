@@ -39,7 +39,7 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
       precio: parseFloat(formData.get('precio') as string),
       iva: parseFloat(formData.get('iva') as string),
       stock: parseFloat(formData.get('stock') as string),
-      imagen: imageUrl ? [{ id: 1, ruta: imageUrl }] : null
+      imagen: imageUrl ? [{ id: 1, ruta: imageUrl }] : [{ id: 1, ruta: 'articulo.png' }]
     };
 
     try {

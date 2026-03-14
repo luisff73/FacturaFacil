@@ -312,7 +312,7 @@ export async function deleteUser(id: string) {
 
 // Función para actualizar un usuario
 export async function updateUser(id: string, data: Omit<User, "id">) {
-  const { name, email, password, type, token, css } = data;
+  const { name, email, password, type, token, css, image_url } = data;
 
   // Encriptar la contraseña
   const saltRounds = 5; // nivel de encriptacion (más alto = más seguro, pero más lento)
@@ -327,9 +327,10 @@ export async function updateUser(id: string, data: Omit<User, "id">) {
       password = ${hashedPassword}, 
       type = ${type}, 
       token = ${token},
-      css = ${css}
+      css = ${css},
+      image_url = ${image_url}
     WHERE id = ${id}
-    RETURNING id, name, email, password, type, token, css;
+    RETURNING id, name, email, password, type, token, css, image_url;
   `;
 
   // Devolver el usuario actualizado
@@ -337,7 +338,7 @@ export async function updateUser(id: string, data: Omit<User, "id">) {
 }
 
 export async function createUser(data: Omit<User, "id">) {
-  let { name, email, password, type, token, id_empresa, css } = data;
+  let { name, email, password, type, token, id_empresa, css, image_url } = data;
 
   if (!id_empresa) {
     id_empresa = await requireEmpresaId();
@@ -348,9 +349,9 @@ export async function createUser(data: Omit<User, "id">) {
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
   const result = await sql`
-    INSERT INTO users (name, email, password, type, token, id_empresa, css)
-    VALUES (${name}, ${email}, ${hashedPassword}, ${type}, ${token}, ${id_empresa}, ${css})
-    RETURNING id, name, email, password, type, token, id_empresa, css;
+    INSERT INTO users (name, email, password, type, token, id_empresa, css, image_url)
+    VALUES (${name}, ${email}, ${hashedPassword}, ${type}, ${token}, ${id_empresa}, ${css}, ${image_url})
+    RETURNING id, name, email, password, type, token, id_empresa, css, image_url;
   `;
 
   // Devolver el usuario creado

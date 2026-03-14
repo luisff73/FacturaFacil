@@ -20,7 +20,7 @@ export default async function SideNav() {
           <button className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-gray-100 dark:bg-gray-800 p-3 text-sm font-medium hover:bg-green-200 dark:hover:bg-grey-700 hover:text-green-600 dark:text-white md:flex-none md:justify-start md:p-2 md:px-3">
 
             <PowerIcon className="w-6" />
-            <div className="hidden md:block">Sign Out</div>
+            <span className="hidden md:block">Sign Out</span>
           </button>
         </form>
       </div>

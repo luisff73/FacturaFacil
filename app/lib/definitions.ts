@@ -11,6 +11,7 @@ export type User = {
   token: string;
   type: "admin" | "user";
   css: string;
+  image_url: string;
 };
 
 

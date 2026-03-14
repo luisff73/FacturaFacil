@@ -29,7 +29,6 @@ export default function NavLinks({ user }: { user?: { type?: 'admin' | 'user' } 
   const visibleLinks = links.filter(link => {
     // Si el enlace tiene adminOnly, solo lo mostramos si el usuario es admin
     if (link.adminOnly) {
-      console.log('Tipo de usuario:', user?.type);
       return user?.type === 'admin';
     }
     // Si no tiene adminOnly, lo mostramos siempre
