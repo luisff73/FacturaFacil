@@ -36,6 +36,25 @@ const FormSchema = z.object({
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ date: true, id: true });
 
+// Esquema para Clientes y validacion de campos zod
+const CustomerSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, { message: "El nombre es obligatorio." }),
+  email: z.string().email({ message: "Introduce un email válido." }),
+  image_url: z.string().optional(),
+  direccion: z.string().min(1, { message: "La dirección es obligatoria." }),
+  c_postal: z.string().min(1, { message: "El código postal es obligatorio." }),
+  poblacion: z.string().min(1, { message: "La población es obligatoria." }),
+  provincia: z.string().min(1, { message: "La provincia es obligatoria." }),
+  telefono: z.string().optional(),
+  cif: z.string().optional(),
+  pais: z.string().optional(),
+  id_empresa: z.number().optional(),
+});
+
+const CreateCustomer = CustomerSchema.omit({ id: true });
+const UpdateCustomer = CustomerSchema.omit({ id: true });
+
 
 export type State = {
   errors?: {
@@ -47,12 +66,7 @@ export type State = {
 };
 
 export async function createInvoice(prevState: State, formData: FormData) {
-  // Log the formData values
-  console.log("customerId:", formData.get("customerId"));
-  console.log("amount:", formData.get("amount"));
-  console.log("status:", formData.get("status"));
-  console.log("FormData entries:", Array.from(formData.entries()));
-  console.log("empresaId: ojo con la empresa");
+
 
   // Valida los campos del formulario. usando zod
   const validatedFields = CreateInvoice.safeParse({
