@@ -12,10 +12,13 @@ import { Button } from '@/app/ui/button';
 import { createInvoice, State } from '@/app/lib/actions'; //importa el createInvoice del archivo actions.ts
 import { useActionState } from 'react';
 import InvoiceLinesForm from '@/app/ui/invoices/invoice-lines-form';
+import React from 'react'; // Added React import
 
-export default function Form({ customers }: { customers: Customer[] }) {
+export default function Form({ customers, empresaIva }: { customers: Customer[], empresaIva: number }) {
   const initialState: State = { message: '', errors: {} };
   const [state, formAction] = useActionState(createInvoice, initialState);
+  const [selectedCustomerId, setSelectedCustomerId] = React.useState('');
+  const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
 
   return (
     // Formulario para crear una factura
@@ -32,6 +35,7 @@ export default function Form({ customers }: { customers: Customer[] }) {
               name="customerId"
               className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               defaultValue=""
+              onChange={(e) => setSelectedCustomerId(e.target.value)}
               aria-describedby="customer-error"
             >
               <option value="" disabled>
@@ -56,7 +60,7 @@ export default function Form({ customers }: { customers: Customer[] }) {
         </div>
 
         {/* Invoice Lines Subform */}
-        <InvoiceLinesForm />
+        <InvoiceLinesForm customer={selectedCustomer} empresaIva={empresaIva} />
 
         <div className="mt-6 flex flex-col md:flex-row gap-6 justify-between items-start md:items-end">
           {/* Invoice Status */}
@@ -123,29 +127,55 @@ export default function Form({ customers }: { customers: Customer[] }) {
             </div>
           </fieldset>
 
-          {/* Invoice Total Display */}
-          <div className="w-full md:w-auto">
-            <label className="mb-2 block text-sm font-medium">
-              Total Factura
-            </label>
-            <div className="relative rounded-md border border-gray-200 bg-white px-4 py-3 shadow-sm min-w-[160px]">
-              <div className="flex items-center gap-2">
-                <span
-                  className="flex items-center gap-1 text-base font-extrabold text-green-600"
-                >
-                  <span id="amount-display">0.00</span>
-                  <CurrencyEuroIcon className="h-4 w-4" />
-                </span>
+          {/* Invoice Totals Breakdown */}
+          <div className="w-full md:w-auto mt-6 md:mt-0">
+            <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-6 shadow-sm min-w-[280px]">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">Base Imponible</span>
+                  <div className="flex items-center gap-1 font-bold text-gray-700">
+                    <span id="base_imponible-display">0.00</span>
+                    <CurrencyEuroIcon className="h-4 w-4" />
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">IVA ({empresaIva}%)</span>
+                  <div className="flex items-center gap-1 font-bold text-gray-700">
+                    <span id="total_iva-display">0.00</span>
+                    <CurrencyEuroIcon className="h-4 w-4" />
+                  </div>
+                </div>
+
+                {selectedCustomer?.tiene_re && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">Recargo (RE)</span>
+                    <div className="flex items-center gap-1 font-bold text-gray-700">
+                      <span id="total_recargo-display">0.00</span>
+                      <CurrencyEuroIcon className="h-4 w-4" />
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-3 border-t border-gray-200 flex justify-between items-end">
+                  <span className="text-gray-900 font-extrabold uppercase tracking-widest text-[12px] mb-1">Total Factura</span>
+                  <div className="flex items-center gap-1 text-2xl font-black text-green-600">
+                    <span id="total_factura-display">0.00</span>
+                    <CurrencyEuroIcon className="h-6 w-6" />
+                  </div>
+                </div>
               </div>
+
               <input
-                id="amount"
-                name="amount"
+                id="base_imponible"
+                name="base_imponible"
                 type="hidden"
                 defaultValue="0"
               />
-              <div id="amount-error" aria-live="polite" aria-atomic="true">
-                {state.errors?.amount &&
-                  state.errors.amount.map((error: string) => (
+
+              <div id="base_imponible-error" aria-live="polite" aria-atomic="true">
+                {state.errors?.base_imponible &&
+                  state.errors.base_imponible.map((error: string) => (
                     <p className="mt-2 text-sm text-red-500" key={error}>
                       {error}
                     </p>

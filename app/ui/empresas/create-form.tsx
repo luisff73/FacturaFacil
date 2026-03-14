@@ -40,7 +40,6 @@ const FIELDS: Array<{
     { name: 'cif', label: 'CIF', type: 'text', placeholder: 'Introduce el CIF de la empresa' },
     { name: 'email', label: 'Email', type: 'email', placeholder: 'Introduce el email de la empresa', autoComplete: 'email' },
     { name: 'iva', label: 'IVA', type: 'number', placeholder: 'Introduce el IVA de la empresa' },
-    { name: 'recargo_equivalencia', label: 'Recargo de Equivalencia', type: 'number', placeholder: 'Introduce el recargo de equivalencia de la empresa' },
   ];
 
 const CreateEmpresaForm: React.FC = () => {
@@ -63,7 +62,6 @@ const CreateEmpresaForm: React.FC = () => {
       cif: (form.cif as HTMLInputElement).value.trim(),
       email: (form.email as HTMLInputElement).value.trim(),
       iva: parseFloat((form.iva as HTMLInputElement).value) || 0,
-      recargo_equivalencia: parseFloat((form.recargo_equivalencia as HTMLInputElement).value) || 0,
       password: (form.password as HTMLInputElement).value,
       activa: (form.activa as HTMLInputElement).checked,
       fecha_creacion: new Date(),

@@ -22,7 +22,7 @@ const FormSchema = z.object({
   customerId: z.string({
     invalid_type_error: "Por favor selecciona un cliente.",
   }),
-  amount: z.coerce
+  base_imponible: z.coerce
     .number()
     .gt(0, { message: "Por favor introduce un importe mayor a $0." }),
 
@@ -52,6 +52,8 @@ const CustomerSchema = z.object({
   }),
   pais: z.string().min(1, { message: "El país es obligatorio." }),
   id_empresa: z.number().optional(),
+  tiene_iva: z.boolean().default(true),
+  tiene_re: z.boolean().default(false),
 });
 
 const CreateCustomer = CustomerSchema.omit({ id: true });
@@ -61,7 +63,7 @@ const CreateCustomer = CustomerSchema.omit({ id: true });
 export type State = {
   errors?: {
     customerId?: string[];
-    amount?: string[];
+    base_imponible?: string[];
     status?: string[];
     lines?: string[];
     name?: string[];
@@ -82,7 +84,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
   // Valida los campos del formulario. usando zod
   const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get("customerId"),
-    amount: formData.get("amount"),
+    base_imponible: formData.get("base_imponible"),
     status: formData.get("status"),
     lines: formData.get("lines"),
   });
@@ -96,16 +98,36 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
   }
 
   // Prepare data for insertion into the database
-  const { customerId, amount, status, lines } = validatedFields.data;
-  const amountInCents = Math.round(amount * 100); //convierte el valor de amount a centavos
-  const date = new Date().toISOString().split("T")[0]; //obtiene la fecha actual en formato aaa-mm-dd
-  
+  const { customerId, base_imponible, status, lines } = validatedFields.data;
+  const idEmpresa = await requireEmpresaId();
+
+  // Obtener datos del cliente y de la empresa para calcular impuestos
+  const [customerResult, empresaResult] = await Promise.all([
+    sql`SELECT tiene_iva, tiene_re FROM customers WHERE id = ${customerId} AND id_empresa = ${idEmpresa}`,
+    sql`SELECT iva FROM empresas WHERE id = ${idEmpresa}`,
+  ]);
+
+  const customer = customerResult.rows[0];
+  const ivaEmpresa = Number(empresaResult.rows[0].iva) || 21;
+  const reRate = ivaEmpresa === 21 ? 5.2 : (ivaEmpresa === 10 ? 1.4 : 0.5);
+
+  const base_imponibleInCents = Math.round(base_imponible * 100); // BI
+  let taxInCents = 0;
+  let surchargeInCents = 0;
+
+  if (customer.tiene_iva) {
+    taxInCents = Math.round(base_imponibleInCents * (ivaEmpresa / 100));
+    if (customer.tiene_re) {
+      surchargeInCents = Math.round(base_imponibleInCents * (reRate / 100));
+    }
+  }
+
+  const totalInCents = base_imponibleInCents + taxInCents + surchargeInCents;
+
   try {
-    const idEmpresa = await requireEmpresaId();
-    // Inserta una nueva factura en la base de datos y recupera su ID
     const result = await sql`
-      INSERT INTO invoices (customer_id, amount, status, date, id_empresa) 
-      VALUES (${customerId}, ${amountInCents}, ${status}, ${date}, ${idEmpresa})
+      INSERT INTO invoices (customer_id, base_imponible, status, date, id_empresa, total_iva, total_recargo, total_factura)
+      VALUES (${customerId}, ${base_imponibleInCents}, ${status}, CURRENT_DATE, ${idEmpresa}, ${taxInCents}, ${surchargeInCents}, ${totalInCents})
       RETURNING id
     `;
     
@@ -141,7 +163,7 @@ export async function updateInvoice(
 ): Promise<State> {
   const validatedFields = UpdateInvoice.safeParse({
     customerId: formData.get("customerId"),
-    amount: formData.get("amount"),
+    base_imponible: formData.get("base_imponible"),
     status: formData.get("status"),
     lines: formData.get("lines"),
   });
@@ -153,14 +175,36 @@ export async function updateInvoice(
     };
   }
 
-  const { customerId, amount, status, lines } = validatedFields.data;
-  const amountInCents = Math.round(amount * 100);
+  const { customerId, base_imponible, status, lines } = validatedFields.data;
+  const idEmpresa = await requireEmpresaId();
+
+  // Obtener datos del cliente y de la empresa para calcular impuestos
+  const [customerResult, empresaResult] = await Promise.all([
+    sql`SELECT tiene_iva, tiene_re FROM customers WHERE id = ${customerId} AND id_empresa = ${idEmpresa}`,
+    sql`SELECT iva FROM empresas WHERE id = ${idEmpresa}`,
+  ]);
+
+  const customer = customerResult.rows[0];
+  const ivaEmpresa = Number(empresaResult.rows[0].iva) || 21;
+  const reRate = ivaEmpresa === 21 ? 5.2 : (ivaEmpresa === 10 ? 1.4 : 0.5);
+
+  const base_imponibleInCents = Math.round(base_imponible * 100); // BI
+  let taxInCents = 0;
+  let surchargeInCents = 0;
+
+  if (customer.tiene_iva) {
+    taxInCents = Math.round(base_imponibleInCents * (ivaEmpresa / 100));
+    if (customer.tiene_re) {
+      surchargeInCents = Math.round(base_imponibleInCents * (reRate / 100));
+    }
+  }
+
+  const totalInCents = base_imponibleInCents + taxInCents + surchargeInCents;
 
   try {
-    const idEmpresa = await requireEmpresaId();
     await sql`
         UPDATE invoices
-        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+        SET customer_id = ${customerId}, base_imponible = ${base_imponibleInCents}, status = ${status}, total_iva = ${taxInCents}, total_recargo = ${surchargeInCents}, total_factura = ${totalInCents}
         WHERE id = ${id} AND id_empresa = ${idEmpresa}
       `;
 
@@ -213,6 +257,8 @@ export async function createCustomer(data: Omit<Customer, "id">): Promise<State>
     telefono,
     cif,
     pais,
+    tiene_iva,
+    tiene_re,
   } = validatedFields.data;
   
   const id_empresa = await requireEmpresaId();
@@ -220,8 +266,8 @@ export async function createCustomer(data: Omit<Customer, "id">): Promise<State>
   try {
     // Consulta SQL para insertar un nuevo cliente
     await sql`
-      INSERT INTO customers (name, email, image_url, direccion,c_postal,poblacion,provincia,telefono,cif,pais, id_empresa)
-      VALUES (${name}, ${email}, ${image_url}, ${direccion},${c_postal},${poblacion},${provincia},${telefono},${cif},${pais}, ${id_empresa})
+      INSERT INTO customers (name, email, image_url, direccion,c_postal,poblacion,provincia,telefono,cif,pais, id_empresa, tiene_iva, tiene_re)
+      VALUES (${name}, ${email}, ${image_url}, ${direccion},${c_postal},${poblacion},${provincia},${telefono},${cif},${pais}, ${id_empresa}, ${tiene_iva}, ${tiene_re})
     `;
 
     // Devolver el cliente creado
@@ -251,18 +297,28 @@ export async function updateCustomer(id: string, data: Omit<Customer, "id">) {
     telefono,
     cif,
     pais,
+    tiene_iva,
+    tiene_re,
   } = data;
+  try {
+    // Consulta SQL para actualizar un cliente
+    await sql`
+      UPDATE customers
+      SET name = ${name}, email = ${email}, image_url = ${image_url}, direccion = ${direccion}, c_postal = ${c_postal}, poblacion = ${poblacion}, provincia = ${provincia}, telefono = ${telefono}, cif = ${cif}, pais = ${pais}, tiene_iva = ${tiene_iva}, tiene_re = ${tiene_re}
+      WHERE id = ${id}
+    `;
 
-  // Consulta SQL para actualizar un cliente
-  const result = await sql`
-    UPDATE customers
-    SET name = ${name}, email = ${email}, image_url = ${image_url}, direccion = ${direccion}, c_postal = ${c_postal}, poblacion = ${poblacion}, provincia = ${provincia}, telefono = ${telefono}, cif = ${cif}, pais = ${pais}
-    WHERE id = ${id}
-    RETURNING id, name, email, image_url ,direccion,c_postal,poblacion,provincia,telefono,cif,pais;
-  `;
-
-  // Devolver el cliente actualizado
-  return result.rows[0];
+    return {
+      success: true,
+      message: "Cliente actualizado correctamente.",
+    };
+  } catch (error) {
+    console.error("Database Error:", error);
+    return {
+      success: false,
+      message: "Error de base de datos: No se pudo actualizar el cliente.",
+    };
+  }
 }
 
 export async function deleteCustomers(id: string) {
@@ -450,7 +506,6 @@ export async function updateEmpresa(id: string, data: Omit<Empresas, "id">) {
     email,
     iva,
     activa,
-    recargo_equivalencia,
     password,
   } = data;
 
@@ -471,11 +526,10 @@ export async function updateEmpresa(id: string, data: Omit<Empresas, "id">) {
       cif = ${cif},
       email = ${email},
       iva = ${iva},
-      recargo_equivalencia = ${recargo_equivalencia},
       activa = ${activa},
       password = ${hashedPassword}
     WHERE id = ${id}
-    RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, recargo_equivalencia, password;
+    RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, password;
   `;
 
   // Devolver la empresa actualizada
@@ -498,7 +552,6 @@ export async function createEmpresa(
     cif,
     email,
     iva,
-    recargo_equivalencia,
     password,
     activa,
   } = data;
@@ -509,9 +562,9 @@ export async function createEmpresa(
 
   // Insertar la empresa
   const result = await sql`
-    INSERT INTO empresas (nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, recargo_equivalencia, password, activa)
-    VALUES (${nombre}, ${direccion}, ${c_postal}, ${poblacion}, ${provincia}, ${telefono}, ${cif}, ${email}, ${iva}, ${recargo_equivalencia}, ${hashedPassword}, ${activa})
-    RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, recargo_equivalencia, password;
+    INSERT INTO empresas (nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, password, activa)
+    VALUES (${nombre}, ${direccion}, ${c_postal}, ${poblacion}, ${provincia}, ${telefono}, ${cif}, ${email}, ${iva}, ${hashedPassword}, ${activa})
+    RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, password;
   `;
 
   const empresa = result.rows[0];

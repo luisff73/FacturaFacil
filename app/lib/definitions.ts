@@ -28,6 +28,8 @@ export type Customer = {
   telefono: string;
   cif: string;
   pais: string;
+  tiene_iva: boolean;
+  tiene_re: boolean;
 };
 
 
@@ -40,15 +42,18 @@ export type CustomersTableType = Customer & {
 };
 
 export type Invoice = {
-  // definicion base de la tabla de facturas sin formatear, con el amount como number
+  // definicion base de la tabla de facturas sin formatear, con el base_imponible como number
   id: string;
   id_empresa: number;
   customer_id: string;
-  amount: number;
+  base_imponible: number;
   // In TypeScript, this is called a string union type.
   // It means that the "status" property can only be one of the two strings: 'Pendiente' or 'Pagada'.
   status: "Pendiente" | "Pagada" | "Proforma";
   date: string;
+  total_iva: number;
+  total_recargo: number;
+  total_factura: number;
 };
 
 export type LatestInvoice = {
@@ -57,7 +62,8 @@ export type LatestInvoice = {
   name: string;
   image_url: string;
   email: string;
-  amount: string;
+  base_imponible: string;
+  total_factura: string;
 };
 
 export type InvoicesTable = {
@@ -68,8 +74,11 @@ export type InvoicesTable = {
   email: string;
   image_url: string;
   date: string;
-  amount: number;
+  base_imponible: number;
   status: "Pendiente" | "Pagada" | "Proforma";
+  total_iva: number;
+  total_recargo: number;
+  total_factura: number;
 };
 
 export type invoices_lines = {
@@ -91,9 +100,9 @@ export type Revenue = {
   revenue: number;
 };
 
-// The database returns a number for amount, but we later format it to a string with the formatCurrency function
-export type LatestInvoiceRaw = Omit<LatestInvoice, "amount"> & {
-  amount: number;
+// The database returns a number for base_imponible, but we later format it to a string with the formatCurrency function
+export type LatestInvoiceRaw = Omit<LatestInvoice, "base_imponible"> & {
+  base_imponible: number;
 };
 
 export type FormattedCustomersTable = {
@@ -130,7 +139,6 @@ export type Empresas = {
   telefono: string;
   email: string;
   iva: number;
-  recargo_equivalencia: number;
   password: string;
   fecha_creacion: Date;
   activa: boolean;

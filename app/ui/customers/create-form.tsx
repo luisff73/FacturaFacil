@@ -46,6 +46,8 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
       telefono: (formData.get('telefono') as string) || '',
       cif: (formData.get('cif') as string) || '',
       id_empresa: 1,
+      tiene_iva: (formData.get('tiene_iva') === 'on'),
+      tiene_re: (formData.get('tiene_re') === 'on'),
     };
 
     try {
@@ -70,7 +72,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
         {/* Customer Name */}
         <div className="mb-4">
           <label htmlFor="name" className="mb-2 block text-sm font-medium dark:text-white">
-            Nombre del cliente
+            Nombre
           </label>
           <div className="relative">
             <input
@@ -273,7 +275,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
         {/* Customer Email */}
         <div className="mb-4">
           <label htmlFor="email" className="mb-2 block text-sm font-medium dark:text-white">
-            Correo electrónico del cliente
+            Correo electrónico
           </label>
           <div className="relative">
             <input
@@ -299,7 +301,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
         {/* Customer Image URL */}
         <div className="mb-4">
           <label htmlFor="image_url" className="mb-2 block text-sm font-medium dark:text-white">
-            URL de la imagen del cliente
+            Imagen
           </label>
           <div className="relative">
             <input
@@ -322,6 +324,37 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
           </div>
         </div>
 
+        {/* Tax Options */}
+        <fieldset className="mb-4">
+          <legend className="mb-2 block text-sm font-medium dark:text-white">
+            Opciones de Impuestos
+          </legend>
+          <div className="flex gap-6 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-900 px-4 py-2">
+            <div className="flex items-center">
+              <input
+                id="tiene_iva"
+                name="tiene_iva"
+                type="checkbox"
+                defaultChecked
+                className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-green-600 focus:ring-2"
+              />
+              <label htmlFor="tiene_iva" className="ml-2 text-sm font-medium text-gray-600 dark:text-gray-300 cursor-pointer">
+                ¿Aplica IVA?
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="tiene_re"
+                name="tiene_re"
+                type="checkbox"
+                className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-green-600 focus:ring-2"
+              />
+              <label htmlFor="tiene_re" className="ml-2 text-sm font-medium text-gray-600 dark:text-gray-300 cursor-pointer">
+                ¿Aplica Recargo (RE)?
+              </label>
+            </div>
+          </div>
+        </fieldset>
       </div>
       <div className="mt-6 flex flex-wrap justify-end gap-4">
         <Link

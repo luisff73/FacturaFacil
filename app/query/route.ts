@@ -4,10 +4,10 @@ const client = await db.connect(); // Conexion a la base de datos.
 
 async function listInvoices() { // Función que realiza la consulta a la base de datos.
 	const data = await client.sql`
-    SELECT invoices.amount, customers.name
+    SELECT invoices.base_imponible, customers.name
     FROM invoices
     JOIN customers ON invoices.customer_id = customers.id
-    WHERE invoices.amount = 666;
+    WHERE invoices.base_imponible = 666;
   `;
 
 	return data.rows;

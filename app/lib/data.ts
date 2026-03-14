@@ -50,7 +50,7 @@ export async function fetchLatestInvoices() {
     //Cambiar el 1 por el id de la empresa que quieras mostrar las facturas
     const data = await sql<LatestInvoiceRaw>`
       SELECT 
-        invoices.amount,
+        invoices.base_imponible,
         customers.name,
         customers.image_url,
         customers.email,
@@ -63,7 +63,7 @@ export async function fetchLatestInvoices() {
 
     const latestInvoices = data.rows.map((invoice) => ({
       ...invoice,
-      amount: formatCurrency(invoice.amount),
+      base_imponible: formatCurrency(invoice.base_imponible),
     }));
     return latestInvoices;
   } catch (error) {
@@ -81,9 +81,9 @@ export async function fetchCardData() {
     const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices where invoices.id_empresa = ${idEmpresa}`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers where customers.id_empresa = ${idEmpresa}`;
     const invoiceStatusPromise = sql`SELECT
-         SUM(CASE WHEN status = 'Pagada' THEN amount ELSE 0 END) AS "Pagada",
-         SUM(CASE WHEN status = 'Pendiente' THEN amount ELSE 0 END) AS "Pendiente",
-         SUM(CASE WHEN status = 'Proforma' THEN amount ELSE 0 END) AS "Proforma"
+         SUM(CASE WHEN status = 'Pagada' THEN base_imponible ELSE 0 END) AS "Pagada",
+         SUM(CASE WHEN status = 'Pendiente' THEN base_imponible ELSE 0 END) AS "Pendiente",
+         SUM(CASE WHEN status = 'Proforma' THEN base_imponible ELSE 0 END) AS "Proforma"
          FROM invoices where invoices.id_empresa = ${idEmpresa}`;
 
     const data = await Promise.all([
@@ -127,9 +127,12 @@ export async function fetchFilteredInvoices(
     const invoices = await sql<InvoicesTable>`
       SELECT
         invoices.id,
-        invoices.amount,
+        invoices.base_imponible,
         invoices.date,
         invoices.status,
+        invoices.total_iva,
+        invoices.total_recargo,
+        invoices.total_factura,
         customers.name,
         customers.email,
         customers.image_url
@@ -138,7 +141,7 @@ export async function fetchFilteredInvoices(
       where invoices.id_empresa = ${idEmpresa} AND (
         customers.name ILIKE ${`%${query}%`} OR
         customers.email ILIKE ${`%${query}%`} OR
-        invoices.amount::text ILIKE ${`%${query}%`} OR
+        invoices.base_imponible::text ILIKE ${`%${query}%`} OR
         invoices.date::text ILIKE ${`%${query}%`} OR
         invoices.status ILIKE ${`%${query}%`})
       ORDER BY invoices.date DESC
@@ -161,7 +164,7 @@ export async function fetchInvoicesPages(query: string) {
     where invoices.id_empresa = ${idEmpresa} AND (
       customers.name ILIKE ${`%${query}%`} OR
       customers.email ILIKE ${`%${query}%`} OR
-      invoices.amount::text ILIKE ${`%${query}%`} OR
+      invoices.base_imponible::text ILIKE ${`%${query}%`} OR
       invoices.date::text ILIKE ${`%${query}%`} OR
       invoices.status ILIKE ${`%${query}%`})
   `;
@@ -181,16 +184,24 @@ export async function fetchInvoiceById(id: string) {
       SELECT
         invoices.id,
         invoices.customer_id,
-        invoices.amount,
-        invoices.status
+        invoices.base_imponible,
+        invoices.status,
+        invoices.date,
+        invoices.id_empresa,
+        invoices.total_iva,
+        invoices.total_recargo,
+        invoices.total_factura
       FROM invoices where invoices.id_empresa = ${idEmpresa}
       and invoices.id = ${id};
     `;
 
     const invoice = data.rows.map((invoice) => ({
       ...invoice,
-      // Convert amount from cents to dollars
-      amount: invoice.amount / 100,
+      // Convert base_imponibles from cents to units
+      base_imponible: invoice.base_imponible / 100,
+      total_iva: invoice.total_iva / 100,
+      total_recargo: invoice.total_recargo / 100,
+      total_factura: invoice.total_factura / 100,
     }));
     console.log(invoice); // Devolvera Invoice que es un array vacio []
     return invoice[0];
@@ -227,7 +238,9 @@ export async function fetchCustomers() {
     const data = await sql<Customer>`
       SELECT
         id,
-        name
+        name,
+        tiene_iva,
+        tiene_re
       FROM customers where customers.id_empresa = ${idEmpresa}
       ORDER BY name ASC
     `;
@@ -290,9 +303,9 @@ export async function fetchFilteredCustomers(query: string) {
 		  customers.email,
 		  customers.image_url,
 		  COUNT(invoices.id) AS total_invoices,
-		  SUM(CASE WHEN invoices.status = 'Pendiente' THEN invoices.amount ELSE 0 END) AS total_pendiente,
-		  SUM(CASE WHEN invoices.status = 'Pagada' THEN invoices.amount ELSE 0 END) AS total_pagada,
-      SUM(CASE WHEN invoices.status = 'Proforma' THEN invoices.amount ELSE 0 END) AS total_proforma
+		  SUM(CASE WHEN invoices.status = 'Pendiente' THEN invoices.base_imponible ELSE 0 END) AS total_pendiente,
+		  SUM(CASE WHEN invoices.status = 'Pagada' THEN invoices.base_imponible ELSE 0 END) AS total_pagada,
+      SUM(CASE WHEN invoices.status = 'Proforma' THEN invoices.base_imponible ELSE 0 END) AS total_proforma
 		FROM customers
 		LEFT JOIN invoices ON customers.id = invoices.customer_id
     WHERE customers.id_empresa = ${idEmpresa} AND (
@@ -497,7 +510,6 @@ export async function fetchEmpresaById(id: string): Promise<Empresas | null> {
         telefono,
         email,
         iva,
-        recargo_equivalencia,
         activa,
         password,
         fecha_creacion

@@ -1,7 +1,7 @@
 import { Revenue } from './definitions';
 
-export const formatCurrency = (amount: number) => {
-  return (amount / 100).toLocaleString('es-ES', {
+export const formatCurrency = (base_imponible: number) => {
+  return (base_imponible / 100).toLocaleString('es-ES', {
     style: 'currency',
     currency: 'EUR',
   });

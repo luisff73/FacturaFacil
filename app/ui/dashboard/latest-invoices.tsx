@@ -23,10 +23,10 @@ export default async function LatestInvoices() {
                       invoice.image_url && invoice.image_url.startsWith('http')
                         ? invoice.image_url
                         : invoice.image_url && invoice.image_url.startsWith('/')
-                        ? invoice.image_url
-                        : invoice.image_url
-                          ? `${BLOB_URL}/${invoice.image_url}`
-                          : `https://ui-avatars.com/api/?name=${invoice.name}&background=random`
+                          ? invoice.image_url
+                          : invoice.image_url
+                            ? `${BLOB_URL}/${invoice.image_url}`
+                            : `https://ui-avatars.com/api/?name=${invoice.name}&background=random`
                     }
                     alt={`${invoice.name}'s profile picture`}
                     className="mr-4 rounded-full"
@@ -43,7 +43,7 @@ export default async function LatestInvoices() {
                   </div>
                 </div>
                 <p className="truncate text-sm font-medium dark:text-white">
-                  {invoice.amount}
+                  {invoice.base_imponible}
                 </p>
               </div>
             );

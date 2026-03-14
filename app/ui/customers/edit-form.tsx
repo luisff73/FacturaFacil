@@ -43,7 +43,8 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
       telefono: formData.get('telefono') as string,
       cif: formData.get('cif') as string,
       id_empresa: customer.id_empresa,
-
+      tiene_iva: formData.get('tiene_iva') === 'on',
+      tiene_re: formData.get('tiene_re') === 'on',
     };
 
     try {
@@ -63,7 +64,7 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
         {/* Customer Name */}
         <div className="mb-4">
           <label htmlFor="name" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            Nombre del cliente
+            Nombre
           </label>
           <div className="relative">
             <input
@@ -89,7 +90,7 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
         {/* Customer Email */}
         <div className="mb-4">
           <label htmlFor="email" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            Correo electrónico del cliente
+            Correo electrónico
           </label>
           <div className="relative">
             <input
@@ -115,7 +116,7 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
         {/* Customer Image URL */}
         <div className="mb-4">
           <label htmlFor="image_url" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            URL de la imagen del cliente
+            Imagen
           </label>
           <div className="relative">
             <input
@@ -311,6 +312,39 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
             ))}
           </div>
         </div>
+
+        {/* Tax Options */}
+        <fieldset className="mb-4">
+          <legend className="mb-2 block text-sm font-medium dark:text-gray-200">
+            Opciones de Impuestos
+          </legend>
+          <div className="flex gap-6 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-900 px-4 py-2">
+            <div className="flex items-center">
+              <input
+                id="tiene_iva"
+                name="tiene_iva"
+                type="checkbox"
+                defaultChecked={customer.tiene_iva}
+                className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-green-600 focus:ring-2"
+              />
+              <label htmlFor="tiene_iva" className="ml-2 text-sm font-medium text-gray-600 dark:text-gray-300 cursor-pointer">
+                ¿Aplica IVA?
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="tiene_re"
+                name="tiene_re"
+                type="checkbox"
+                defaultChecked={customer.tiene_re}
+                className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-green-600 focus:ring-2"
+              />
+              <label htmlFor="tiene_re" className="ml-2 text-sm font-medium text-gray-600 dark:text-gray-300 cursor-pointer">
+                ¿Aplica Recargo (RE)?
+              </label>
+            </div>
+          </div>
+        </fieldset>
 
         <div aria-live="polite" aria-atomic="true">
           {state.message && (

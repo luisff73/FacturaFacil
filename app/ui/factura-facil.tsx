@@ -5,7 +5,7 @@ import { auth } from '@/auth';
 import { fetchEmpresaById } from '@/app/lib/data';
 import { fetchUsersById } from '@/app/lib/data';
 
-const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL;
+const BLOB_URL = (process.env.NEXT_PUBLIC_BLOB_URL || '').replace(/"/g, '');
 
 export default async function FacturaFacilLogo({ size = 'large' }: { size?: 'small' | 'large' }) {
   let nombreEmpresa = null;

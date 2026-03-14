@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { PlusIcon, TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { invoices_lines, ArticulosTableType } from '@/app/lib/definitions';
+import { invoices_lines, ArticulosTableType, Customer } from '@/app/lib/definitions';
 import { getArticulosForInvoice } from '@/app/lib/actions';
 import Image from 'next/image';
 
@@ -10,14 +10,24 @@ const BLOB_URL = (process.env.NEXT_PUBLIC_BLOB_URL || 'https://tqqqihkzj4uwev0c.
 
 interface InvoiceLinesFormProps {
   initialLines?: invoices_lines[];
+  customer?: Customer;
+  invoice?: any; // Usamos any para evitar problemas de tipos circulares o simplemente Invoice
+  empresaIva?: number;
 }
 
-export default function InvoiceLinesForm({ initialLines = [] }: InvoiceLinesFormProps) {
+export default function InvoiceLinesForm({ initialLines = [], customer, invoice, empresaIva = 21 }: InvoiceLinesFormProps) {
   const [lines, setLines] = useState<Partial<invoices_lines>[]>(
     initialLines.length > 0
       ? initialLines
       : [{ linea: 1, descripcion: '', observaciones: '', cantidad: 1, precio: 0, total: 0, id_articulo: 0 }]
   );
+
+  const [taxDetails, setTaxDetails] = useState({
+    bi: 0,
+    iva: 0,
+    re: 0,
+    total: 0
+  });
 
   const [searchResults, setSearchResults] = useState<ArticulosTableType[]>([]);
   const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(null);
@@ -38,17 +48,41 @@ export default function InvoiceLinesForm({ initialLines = [] }: InvoiceLinesForm
   };
 
   useEffect(() => {
-    const totalSuma = lines.reduce((acc, line) => acc + (Number(line.total) || 0), 0);
-    const amountInput = document.querySelector('input[name="amount"]') as HTMLInputElement;
-    const amountDisplay = document.querySelector('#amount-display');
-    
-    if (amountInput) {
-      amountInput.value = totalSuma.toFixed(2);
+    const bi = lines.reduce((acc, line) => acc + (Number(line.total) || 0), 0);
+    let tax = 0;
+    let surcharge = 0;
+
+    // Priorizar los campos de la factura si existen (para edición), si no, usar los del cliente seleccionado
+    const hasIva = invoice ? (Number(invoice.total_iva) > 0) : customer?.tiene_iva;
+    const hasRe = invoice ? (Number(invoice.total_recargo) > 0) : customer?.tiene_re;
+
+    if (hasIva) {
+      tax = bi * (empresaIva / 100);
+      if (hasRe) {
+        // Tasa de RE aproximada según IVA
+        const reRate = empresaIva === 21 ? 5.2 : (empresaIva === 10 ? 1.4 : 0.5);
+        surcharge = bi * (reRate / 100);
+      }
     }
-    if (amountDisplay) {
-      amountDisplay.textContent = totalSuma.toFixed(2);
-    }
-  }, [lines]);
+
+    const total = bi + tax + surcharge;
+
+    setTaxDetails({ bi, iva: tax, re: surcharge, total });
+
+    // Actualizar campos del formulario principal mediante el DOM para reflejar el desglose
+    const biInput = document.querySelector('input[name="base_imponible"]') as HTMLInputElement;
+    const biDisplay = document.querySelector('#base_imponible-display');
+    const ivaDisplay = document.querySelector('#total_iva-display');
+    const reDisplay = document.querySelector('#total_recargo-display');
+    const totalDisplay = document.querySelector('#total_factura-display');
+
+    if (biInput) biInput.value = bi.toFixed(2);
+    if (biDisplay) biDisplay.textContent = bi.toFixed(2);
+    if (ivaDisplay) ivaDisplay.textContent = tax.toFixed(2);
+    if (reDisplay) reDisplay.textContent = surcharge.toFixed(2);
+    if (totalDisplay) totalDisplay.textContent = total.toFixed(2);
+
+  }, [lines, customer, empresaIva]);
 
   const addLine = () => {
     setLines([
@@ -112,9 +146,9 @@ export default function InvoiceLinesForm({ initialLines = [] }: InvoiceLinesForm
         <div className="hidden md:grid md:grid-cols-12 gap-2 px-4 pb-1 border-b dark:border-gray-700 text-[10px] font-semibold uppercase text-gray-500 tracking-wider">
           <div className="md:col-span-4">Artículo / Descripción</div>
           <div className="md:col-span-3">Observaciones</div>
-          <div className="md:col-span-1 text-center">Cant.</div>
+          <div className="md:col-span-1 text-center">Cantidad</div>
           <div className="md:col-span-2 text-center">Precio</div>
-          <div className="md:col-span-1 text-center">Total</div>
+          <div className="md:col-span-1 text-center">Total línea</div>
           <div className="md:col-span-1"></div>
         </div>
 
@@ -137,7 +171,7 @@ export default function InvoiceLinesForm({ initialLines = [] }: InvoiceLinesForm
                   />
                   <MagnifyingGlassIcon className="absolute right-2 top-1.5 h-3.5 w-3.5 text-gray-400" />
                 </div>
-                
+
                 {activeSearchIndex === index && searchResults.length > 0 && (
                   <ul className="absolute z-20 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mt-1 shadow-2xl max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden animate-in fade-in zoom-in duration-200">
                     {searchResults.map((art) => (
@@ -149,7 +183,7 @@ export default function InvoiceLinesForm({ initialLines = [] }: InvoiceLinesForm
                         <div className="flex items-center gap-3">
                           <div className="flex-shrink-0 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-md overflow-hidden relative">
                             {art.imagen && art.imagen[0] ? (
-                              <Image 
+                              <Image
                                 src={art.imagen[0].ruta.startsWith('http') ? art.imagen[0].ruta : `${BLOB_URL}/${art.imagen[0].ruta}`}
                                 alt={art.descripcion}
                                 fill
@@ -177,10 +211,10 @@ export default function InvoiceLinesForm({ initialLines = [] }: InvoiceLinesForm
                     ))}
                   </ul>
                 )}
-                
+
                 {activeSearchIndex === index && (
-                  <div 
-                    className="fixed inset-0 z-10" 
+                  <div
+                    className="fixed inset-0 z-10"
                     onClick={() => {
                       setSearchResults([]);
                       setActiveSearchIndex(null);
@@ -202,7 +236,7 @@ export default function InvoiceLinesForm({ initialLines = [] }: InvoiceLinesForm
 
               {/* Cantidad */}
               <div className="md:col-span-1">
-                <label className="block text-xs font-medium text-gray-500 mb-1 leading-none md:hidden">Cant.</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1 leading-none md:hidden">Cantidad</label>
                 <input
                   type="number"
                   value={line.cantidad || 1}
@@ -225,7 +259,7 @@ export default function InvoiceLinesForm({ initialLines = [] }: InvoiceLinesForm
 
               {/* Total */}
               <div className="md:col-span-1 text-center">
-                <label className="block text-xs font-medium text-gray-500 mb-1 leading-none md:hidden">Total</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1 leading-none md:hidden">Total línea</label>
                 <div className="text-sm font-semibold md:pt-0 dark:text-white">
                   {line.total}€
                 </div>
@@ -255,6 +289,24 @@ export default function InvoiceLinesForm({ initialLines = [] }: InvoiceLinesForm
       >
         <PlusIcon className="h-4 w-4" /> Añadir línea
       </button>
+
+      {/* Resumen de totales */}
+      <div className="mt-6 flex justify-end">
+        <div className="w-full md:w-64 space-y-2 border-t dark:border-gray-700 pt-4">
+          {taxDetails.iva > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500 dark:text-gray-400">IVA ({empresaIva}%):</span>
+              <span className="font-medium dark:text-white">{taxDetails.iva.toFixed(2)}€</span>
+            </div>
+          )}
+          {taxDetails.re > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500 dark:text-gray-400">Recargo (RE):</span>
+              <span className="font-medium dark:text-white">{taxDetails.re.toFixed(2)}€</span>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Input oculto para enviar las líneas como JSON */}
       <input type="hidden" name="lines" value={JSON.stringify(lines)} />

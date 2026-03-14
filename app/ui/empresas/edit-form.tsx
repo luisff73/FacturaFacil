@@ -28,7 +28,6 @@ const EditEmpresasForm: React.FC<EditFormProps> = ({ empresa }) => {
       email: formData.get('email') as string || '',
       iva: parseFloat(formData.get('iva') as string) || 0.0,
       activa: formData.get('activa') === 'true',
-      recargo_equivalencia: parseFloat(formData.get('recargo_equivalencia') as string) || 0,
       password: formData.get('password') as string || '',
       fecha_creacion: empresa.fecha_creacion,
     };
@@ -267,31 +266,6 @@ const EditEmpresasForm: React.FC<EditFormProps> = ({ empresa }) => {
           </div>
           <div id="iva-error" aria-live="polite" aria-atomic="true">
             {state.errors?.iva?.map((error: string) => (
-              <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
-                {error}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        {/* Empresa Recargo Equivalencia */}
-        <div className="mb-4">
-          <label htmlFor="recargoEquivalencia" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            Recargo de Equivalencia
-          </label>
-          <div className="relative">
-            <input
-              id="recargo_equivalencia"
-              name="recargo_equivalencia"
-              type="text"
-              defaultValue={empresa.recargo_equivalencia}
-              placeholder="Introduzca el recargo de equivalencia de la empresa"
-              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-              aria-describedby="recargo_equivalencia-error"
-            />
-          </div>
-          <div id="recargo_equivalencia-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.recargo_equivalencia?.map((error: string) => (
               <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                 {error}
               </p>

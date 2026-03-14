@@ -1,6 +1,6 @@
 import Form from '@/app/ui/invoices/edit-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
-import { fetchInvoiceById, fetchCustomers, fetchinvoices_lines } from '@/app/lib/data';
+import { fetchInvoiceById, fetchCustomers, fetchinvoices_lines, fetchEmpresaById } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
@@ -21,6 +21,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     notFound();
   }
 
+  const empresa = await fetchEmpresaById(invoice.id_empresa.toString());
+
   return (
     <main>
       <Breadcrumbs
@@ -33,7 +35,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           },
         ]}
       />
-      <Form invoice={invoice} customers={customers} lines={lines} />
+      <Form invoice={invoice} customers={customers} lines={lines} empresaIva={empresa?.iva || 21} />
     </main>
   );
 }
