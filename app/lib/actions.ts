@@ -112,22 +112,22 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
   const reRate = ivaEmpresa === 21 ? 5.2 : (ivaEmpresa === 10 ? 1.4 : 0.5);
 
   const base_imponibleInCents = Math.round(base_imponible * 100); // BI
-  let taxInCents = 0;
-  let surchargeInCents = 0;
+  let tax_ivaInCents = 0;
+  let tax_rec_equivalenciaInCents = 0;
 
   if (customer.tiene_iva) {
-    taxInCents = Math.round(base_imponibleInCents * (ivaEmpresa / 100));
+    tax_ivaInCents = Math.round(base_imponibleInCents * (ivaEmpresa / 100));
     if (customer.tiene_re) {
-      surchargeInCents = Math.round(base_imponibleInCents * (reRate / 100));
+      tax_rec_equivalenciaInCents = Math.round(base_imponibleInCents * (reRate / 100));
     }
   }
 
-  const totalInCents = base_imponibleInCents + taxInCents + surchargeInCents;
+  const totalInCents = base_imponibleInCents + tax_ivaInCents + tax_rec_equivalenciaInCents;
 
   try {
     const result = await sql`
       INSERT INTO invoices (customer_id, base_imponible, status, date, id_empresa, total_iva, total_recargo, total_factura)
-      VALUES (${customerId}, ${base_imponibleInCents}, ${status}, CURRENT_DATE, ${idEmpresa}, ${taxInCents}, ${surchargeInCents}, ${totalInCents})
+      VALUES (${customerId}, ${base_imponibleInCents}, ${status}, CURRENT_DATE, ${idEmpresa}, ${tax_ivaInCents}, ${tax_rec_equivalenciaInCents}, ${totalInCents})
       RETURNING id
     `;
     
@@ -189,22 +189,22 @@ export async function updateInvoice(
   const reRate = ivaEmpresa === 21 ? 5.2 : (ivaEmpresa === 10 ? 1.4 : 0.5);
 
   const base_imponibleInCents = Math.round(base_imponible * 100); // BI
-  let taxInCents = 0;
-  let surchargeInCents = 0;
+  let tax_ivaInCents = 0;
+  let tax_rec_equivalenciaInCents = 0;
 
   if (customer.tiene_iva) {
-    taxInCents = Math.round(base_imponibleInCents * (ivaEmpresa / 100));
+    tax_ivaInCents = Math.round(base_imponibleInCents * (ivaEmpresa / 100));
     if (customer.tiene_re) {
-      surchargeInCents = Math.round(base_imponibleInCents * (reRate / 100));
+      tax_rec_equivalenciaInCents = Math.round(base_imponibleInCents * (reRate / 100));
     }
   }
 
-  const totalInCents = base_imponibleInCents + taxInCents + surchargeInCents;
+  const totalInCents = base_imponibleInCents + tax_ivaInCents + tax_rec_equivalenciaInCents;
 
   try {
     await sql`
         UPDATE invoices
-        SET customer_id = ${customerId}, base_imponible = ${base_imponibleInCents}, status = ${status}, total_iva = ${taxInCents}, total_recargo = ${surchargeInCents}, total_factura = ${totalInCents}
+        SET customer_id = ${customerId}, base_imponible = ${base_imponibleInCents}, status = ${status}, total_iva = ${tax_ivaInCents}, total_recargo = ${tax_rec_equivalenciaInCents}, total_factura = ${totalInCents}
         WHERE id = ${id} AND id_empresa = ${idEmpresa}
       `;
 

@@ -20,9 +20,32 @@ export default function Form({ customers, empresaIva }: { customers: Customer[],
   const [selectedCustomerId, setSelectedCustomerId] = React.useState('');
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter') {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'TEXTAREA' || 
+        (target.tagName === 'BUTTON' && (target as HTMLButtonElement).type === 'submit')
+      ) {
+        return;
+      }
+
+      e.preventDefault();
+      const form = e.currentTarget;
+      const focusableElements = Array.from(
+        form.querySelectorAll('input:not([type="hidden"]), select, textarea, button:not([disabled])')
+      ) as HTMLElement[];
+      
+      const index = focusableElements.indexOf(target);
+      if (index > -1 && index < focusableElements.length - 1) {
+        focusableElements[index + 1].focus();
+      }
+    }
+  };
+
   return (
     // Formulario para crear una factura
-    <form action={formAction}>
+    <form action={formAction} onKeyDown={handleKeyDown}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">

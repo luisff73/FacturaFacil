@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import tinycolor from 'tinycolor2';
 import { updateUserCss } from '@/app/lib/actions';
 
@@ -8,12 +8,7 @@ const SelectorColores: React.FC<{
 }> = ({ onColorChange, initialColor }) => {
     const [baseColor, setBaseColor] = useState(initialColor); // Usar el color de la BD
 
-    // Efecto para aplicar el color inicial al montar el componente (al refrescar página)
-    useEffect(() => {
-        applyColors(initialColor);
-    }, [initialColor]);
-
-    const applyColors = (selectedColor: string) => {
+    const applyColors = useCallback((selectedColor: string) => {
         const colors = {
             100: tinycolor(selectedColor).lighten(60).toString(), // Un tono muy claro
             200: tinycolor(selectedColor).lighten(40).toString(), // Un tono claro
@@ -28,7 +23,12 @@ const SelectorColores: React.FC<{
         Object.keys(colors).forEach((key) => {
             document.documentElement.style.setProperty(`--bg-green-${key}`, colors[key as unknown as keyof typeof colors]);
         });
-    };
+    }, [onColorChange]);
+
+    // Efecto para aplicar el color inicial al montar el componente (al refrescar página)
+    useEffect(() => {
+        applyColors(initialColor);
+    }, [initialColor, applyColors]);
 
     const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedColor = event.target.value;

@@ -22,7 +22,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       : [{ linea: 1, descripcion: '', observaciones: '', cantidad: 1, precio: 0, total: 0, id_articulo: 0 }]
   );
 
-  const [taxDetails, setTaxDetails] = useState({
+  const [tax_ivaDetails, settax_ivaDetails] = useState({
     bi: 0,
     iva: 0,
     re: 0,
@@ -49,25 +49,25 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
 
   useEffect(() => {
     const bi = lines.reduce((acc, line) => acc + (Number(line.total) || 0), 0);
-    let tax = 0;
-    let surcharge = 0;
+    let tax_iva = 0;
+    let rec_equivalencia = 0;
 
     // Priorizar los campos de la factura si existen (para edición), si no, usar los del cliente seleccionado
     const hasIva = invoice ? (Number(invoice.total_iva) > 0) : customer?.tiene_iva;
     const hasRe = invoice ? (Number(invoice.total_recargo) > 0) : customer?.tiene_re;
 
     if (hasIva) {
-      tax = bi * (empresaIva / 100);
+      tax_iva = bi * (empresaIva / 100);
       if (hasRe) {
         // Tasa de RE aproximada según IVA
         const reRate = empresaIva === 21 ? 5.2 : (empresaIva === 10 ? 1.4 : 0.5);
-        surcharge = bi * (reRate / 100);
+        rec_equivalencia = bi * (reRate / 100);
       }
     }
 
-    const total = bi + tax + surcharge;
+    const total = bi + tax_iva + rec_equivalencia;
 
-    setTaxDetails({ bi, iva: tax, re: surcharge, total });
+    settax_ivaDetails({ bi, iva: tax_iva, re: rec_equivalencia, total });
 
     // Actualizar campos del formulario principal mediante el DOM para reflejar el desglose
     const biInput = document.querySelector('input[name="base_imponible"]') as HTMLInputElement;
@@ -78,11 +78,11 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
 
     if (biInput) biInput.value = bi.toFixed(2);
     if (biDisplay) biDisplay.textContent = bi.toFixed(2);
-    if (ivaDisplay) ivaDisplay.textContent = tax.toFixed(2);
-    if (reDisplay) reDisplay.textContent = surcharge.toFixed(2);
+    if (ivaDisplay) ivaDisplay.textContent = tax_iva.toFixed(2);
+    if (reDisplay) reDisplay.textContent = rec_equivalencia.toFixed(2);
     if (totalDisplay) totalDisplay.textContent = total.toFixed(2);
 
-  }, [lines, customer, empresaIva]);
+  }, [lines, customer, empresaIva, invoice]);
 
   const addLine = () => {
     setLines([
@@ -250,7 +250,6 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                 <label className="block text-xs font-medium text-gray-500 mb-1 leading-none md:hidden">Precio</label>
                 <input
                   type="number"
-                  step="0.01"
                   value={line.precio || 0}
                   onChange={(e) => updateLine(index, 'precio', e.target.value)}
                   className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 text-center"
@@ -293,16 +292,16 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       {/* Resumen de totales */}
       <div className="mt-6 flex justify-end">
         <div className="w-full md:w-64 space-y-2 border-t dark:border-gray-700 pt-4">
-          {taxDetails.iva > 0 && (
+          {tax_ivaDetails.iva > 0 && (
             <div className="flex justify-between text-sm">
               <span className="text-gray-500 dark:text-gray-400">IVA ({empresaIva}%):</span>
-              <span className="font-medium dark:text-white">{taxDetails.iva.toFixed(2)}€</span>
+              <span className="font-medium dark:text-white">{tax_ivaDetails.iva.toFixed(2)}€</span>
             </div>
           )}
-          {taxDetails.re > 0 && (
+          {tax_ivaDetails.re > 0 && (
             <div className="flex justify-between text-sm">
               <span className="text-gray-500 dark:text-gray-400">Recargo (RE):</span>
-              <span className="font-medium dark:text-white">{taxDetails.re.toFixed(2)}€</span>
+              <span className="font-medium dark:text-white">{tax_ivaDetails.re.toFixed(2)}€</span>
             </div>
           )}
         </div>

@@ -82,7 +82,7 @@ const CreateEmpresaForm: React.FC = () => {
     if (fileInput && fileInput.size > 0) {
       const uploadData = new FormData();
       uploadData.append('file', fileInput);
-      
+
       const uploadedPath = await uploadImage(uploadData);
       if (uploadedPath) {
         initialUser.image_url = uploadedPath;
@@ -103,7 +103,7 @@ const CreateEmpresaForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
-        {FIELDS.map(({ name, label, type, placeholder, autoComplete }) => (
+        {FIELDS.map(({ name, label, type, placeholder }) => (
           <div key={name} className="mb-4">
             <label htmlFor={name} className="mb-2 block text-sm font-medium dark:text-gray-200">
               {label}

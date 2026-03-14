@@ -57,7 +57,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
       } else {
         setState(result);
       }
-    } catch (error) {
+    } catch {
       setState({
         errors: {},
         message: 'Error inesperado al intentar crear el cliente.',
@@ -66,9 +66,33 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter') {
+      const target = e.target as HTMLElement;
+      // No evitar el comportamiento por defecto en textareas o en el botón de submit
+      if (
+        target.tagName === 'TEXTAREA' || 
+        (target.tagName === 'BUTTON' && (target as HTMLButtonElement).type === 'submit')
+      ) {
+        return;
+      }
+
+      e.preventDefault();
+      const form = e.currentTarget;
+      const focusableElements = Array.from(
+        form.querySelectorAll('input:not([type="hidden"]), select, textarea, button:not([disabled])')
+      ) as HTMLElement[];
+      
+      const index = focusableElements.indexOf(target);
+      if (index > -1 && index < focusableElements.length - 1) {
+        focusableElements[index + 1].focus();
+      }
+    }
+  };
+
   return (
-    <form onSubmit={formAction}>
-      <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
+    <form onSubmit={formAction} onKeyDown={handleKeyDown}>
+      <div className="rounded-md bg-green-50/30 dark:bg-gray-800/50 border border-green-100/50 dark:border-gray-700 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
           <label htmlFor="name" className="mb-2 block text-sm font-medium dark:text-white">
@@ -324,12 +348,12 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
           </div>
         </div>
 
-        {/* Tax Options */}
+        {/* tax_iva Options */}
         <fieldset className="mb-4">
           <legend className="mb-2 block text-sm font-medium dark:text-white">
             Opciones de Impuestos
           </legend>
-          <div className="flex gap-6 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-900 px-4 py-2">
+          <div className="flex gap-6 rounded-md border border-green-400 dark:border-green-700 bg-green-100 dark:bg-green-700/20 px-4 py-2">
             <div className="flex items-center">
               <input
                 id="tiene_iva"
@@ -338,8 +362,8 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
                 defaultChecked
                 className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-green-600 focus:ring-2"
               />
-              <label htmlFor="tiene_iva" className="ml-2 text-sm font-medium text-gray-600 dark:text-gray-300 cursor-pointer">
-                ¿Aplica IVA?
+              <label htmlFor="tiene_iva" className="ml-2 text-sm font-medium text-green-700 dark:text-green-300 cursor-pointer">
+                IVA
               </label>
             </div>
             <div className="flex items-center">
@@ -349,8 +373,8 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
                 type="checkbox"
                 className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-green-600 focus:ring-2"
               />
-              <label htmlFor="tiene_re" className="ml-2 text-sm font-medium text-gray-600 dark:text-gray-300 cursor-pointer">
-                ¿Aplica Recargo (RE)?
+              <label htmlFor="tiene_re" className="ml-2 text-sm font-medium text-green-700 dark:text-green-300 cursor-pointer">
+                RE
               </label>
             </div>
           </div>

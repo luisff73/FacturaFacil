@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { SunIcon, MoonIcon, PencilIcon } from '@heroicons/react/24/outline';
 import SelectorColores from '@/components/selector_colores'; // componente para seleccionar colores
 import tinycolor from 'tinycolor2'; // librería para generar colores dinámicos
@@ -55,10 +55,10 @@ export default function BarraTemas({ initialColor }: { initialColor: string }) {
      * Esta función se pasa al componente SelectorColores.
      * Cuando el usuario elige un color, el hijo le devuelve la paleta completa.
      */
-    const handleColorChange = (colors: { [key: string]: string }) => {
+    const handleColorChange = useCallback((colors: { [key: string]: string }) => {
         const color = colors['700']; // Escogemos el tono oscuro para seguimiento
         setBgColor(color); // Actualizamos el estado para reflejar el cambio
-    };
+    }, []);
 
     return (
         <div className="flex space-x-2 bg-green-000">
