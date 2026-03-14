@@ -3,15 +3,13 @@ import Credentials from "next-auth/providers/credentials"; // proveedor de auten
 import bcrypt from "bcrypt";
 import { sql } from "@vercel/postgres";
 import { z } from "zod";
-import type { JWT } from "next-auth/jwt";
 import type { User } from "@/app/lib/definitions";
 import { authConfig } from "./auth.config";
-import type { AdapterUser } from "next-auth/adapters"; // Importar el tipo AdapterUser
 
 // esta función obtiene un usuario de la base de datos por su email
 async function getUser(email: string): Promise<User | undefined> {
   try {
-    const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
+    const user = await sql<User>`SELECT * FROM users WHERE LOWER(email) = LOWER(${email})`;
     return user.rows[0];
   } catch (error) {
     console.error("Failed to fetch user:", error);
@@ -33,8 +31,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const { email, password } = parsedCredentials.data;
 
           const user = await getUser(email);
-          if (!user) return null;
+          if (!user) {
+            console.log("Usuario no encontrado:", email);
+            return null;
+          }
           const passwordsMatch = await bcrypt.compare(password, user.password);
+          console.log("¿Contraseña coincide?:", passwordsMatch);
           if (passwordsMatch)
             return {
               id: user.id,
