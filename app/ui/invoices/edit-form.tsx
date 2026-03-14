@@ -1,23 +1,26 @@
 'use client';
-import { Customer, Invoice } from '@/app/lib/definitions';
+import { Customer, Invoice, invoices_lines } from '@/app/lib/definitions';
 import {
   CheckIcon,
   ClockIcon,
   CloudIcon,
-  CurrencyDollarIcon,
+  CurrencyEuroIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { updateInvoice, State } from '@/app/lib/actions';
 import { useActionState } from 'react';
+import InvoiceLinesForm from '@/app/ui/invoices/invoice-lines-form';
 
 export default function EditInvoiceForm({
   invoice,
   customers,
+  lines,
 }: {
   invoice: Invoice;
   customers: Customer[];
+  lines: invoices_lines[];
 }) {
   const initialState: State = { message: null, errors: {} };
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
@@ -29,7 +32,7 @@ export default function EditInvoiceForm({
         {/* Customer Name */}
         <div className="mb-4">
           <label htmlFor="customer" className="mb-2 block text-sm font-medium">
-            Choose customer
+            Seleccione un cliente
           </label>
           <div className="relative">
             <select
@@ -40,7 +43,7 @@ export default function EditInvoiceForm({
               aria-describedby="customer-error"
             >
               <option value="" disabled>
-                Select a customer
+                Seleccione un cliente
               </option>
               {customers.map((customer) => (
                 <option key={customer.id} value={customer.id}>
@@ -61,103 +64,110 @@ export default function EditInvoiceForm({
           </div>
         </div>
 
-        {/* Invoice Amount */}
-        <div className="mb-4">
-          <label htmlFor="amount" className="mb-2 block text-sm font-medium">
-            Choose an amount
-          </label>
-          <div className="relative mt-2 rounded-md">
-            <div className="relative">
+
+
+        {/* Invoice Lines Subformulario */}
+        <InvoiceLinesForm initialLines={lines} />
+
+        <div className="mt-6 flex flex-col md:flex-row gap-6 justify-between items-start md:items-end">
+          {/* Invoice Status */}
+          <fieldset className="w-full md:w-auto">
+            <legend className="mb-2 block text-sm font-medium">
+              Estado de la factura
+            </legend>
+            <div className="rounded-md border border-gray-200 bg-white px-4 py-3 shadow-sm">
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center">
+                  <input
+                    id="Pendiente"
+                    name="status"
+                    type="radio"
+                    value="Pendiente"
+                    defaultChecked={invoice.status === 'Pendiente'}
+                    className="h-4 w-4 border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
+                  />
+                  <label
+                    htmlFor="Pendiente"
+                    className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600"
+                  >
+                    Pendiente <ClockIcon className="h-4 w-4" />
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    id="Proforma"
+                    name="status"
+                    type="radio"
+                    value="Proforma"
+                    defaultChecked={invoice.status === 'Proforma'}
+                    className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
+                  />
+                  <label
+                    htmlFor="Proforma"
+                    className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600"
+                  >
+                    Proforma <CloudIcon className="h-4 w-4" />
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    id="Pagada"
+                    name="status"
+                    type="radio"
+                    value="Pagada"
+                    defaultChecked={invoice.status === 'Pagada'}
+                    className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
+                  />
+                  <label
+                    htmlFor="Pagada"
+                    className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white"
+                  >
+                    Pagada <CheckIcon className="h-4 w-4" />
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div id="status-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.status &&
+                state.errors.status.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
+            </div>
+          </fieldset>
+
+          {/* Invoice Total */}
+          <div className="w-full md:w-auto">
+            <label className="mb-2 block text-sm font-medium">
+              Total Factura
+            </label>
+            <div className="relative rounded-md border border-gray-200 bg-white px-4 py-3 shadow-sm min-w-[160px]">
+              <div className="flex items-center gap-2">
+                <span 
+                  className="flex items-center gap-1 text-base font-extrabold text-green-600"
+                >
+                  <span id="amount-display">{invoice.amount}</span>
+                  <CurrencyEuroIcon className="h-4 w-4" />
+                </span>
+              </div>
               <input
                 id="amount"
                 name="amount"
-                type="number"
+                type="hidden"
                 defaultValue={invoice.amount}
-                step="0.01"
-                placeholder="Enter USD amount"
-                className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                aria-describedby="amount-error"
               />
-              <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+              <div id="amount-error" aria-live="polite" aria-atomic="true">
+                {state.errors?.amount &&
+                  state.errors.amount.map((error: string) => (
+                    <p className="mt-2 text-sm text-red-500" key={error}>
+                      {error}
+                    </p>
+                  ))}
+              </div>
             </div>
-          </div>
-
-          <div id="amount-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.amount &&
-              state.errors.amount.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
           </div>
         </div>
-
-        {/* Invoice Status */}
-        <fieldset>
-          <legend className="mb-2 block text-sm font-medium">
-            Selecciona el estado de la factura
-          </legend>
-          <div className="rounded-md border border-gray-200 bg-white px-[14px] py-3">
-            <div className="flex gap-4">
-              <div className="flex items-center">
-                <input
-                  id="Pendiente"
-                  name="status"
-                  type="radio"
-                  value="Pendiente"
-                  defaultChecked={invoice.status === 'Pendiente'}
-                  className="h-4 w-4 border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                />
-                <label
-                  htmlFor="Pendiente"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600"
-                >
-                  Pendiente <ClockIcon className="h-4 w-4" />
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  id="Proforma"
-                  name="status"
-                  type="radio"
-                  value="Proforma"
-                  defaultChecked={invoice.status === 'Proforma'}
-                  className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                />
-                <label
-                  htmlFor="Proforma"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600"
-                >
-                  Proforma <CloudIcon className="h-4 w-4" />
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  id="Pagada"
-                  name="status"
-                  type="radio"
-                  value="Pagada"
-                  defaultChecked={invoice.status === 'Pagada'}
-                  className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-400 text-gray-600 focus:ring-2"
-                />
-                <label
-                  htmlFor="Pagada"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white"
-                >
-                  Pagada <CheckIcon className="h-4 w-4" />
-                </label>
-              </div>
-            </div>
-          </div>
-          <div id="status-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.status &&
-              state.errors.status.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
-          </div>
-        </fieldset>
 
         <div aria-live="polite" aria-atomic="true">
           {state.message ? (
@@ -170,9 +180,9 @@ export default function EditInvoiceForm({
           href="/dashboard/invoices"
           className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
         >
-          Cancel
+          Cancelar
         </Link>
-        <Button type="submit">Editar Factura</Button>
+        <Button type="submit">Actualizar Factura</Button>
       </div>
     </form>
   );

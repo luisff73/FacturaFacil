@@ -72,6 +72,19 @@ export type InvoicesTable = {
   status: "Pendiente" | "Pagada" | "Proforma";
 };
 
+export type invoices_lines = {
+  id: number;
+  linea: number;
+  descripcion: string;
+  observaciones: string;
+  cantidad: number;
+  precio: number;
+  total: number;
+  id_articulo: number;
+  id_invoice: number;
+  id_empresa: number;
+};
+
 export type Revenue = {
   id_empresa: number;
   month: string;

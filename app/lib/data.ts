@@ -16,6 +16,7 @@ import {
   ArticulosTableType,
   User,
   Empresas,
+  invoices_lines,
 } from "./definitions";
 
 import { formatCurrency } from "./utils";
@@ -196,6 +197,27 @@ export async function fetchInvoiceById(id: string) {
   } catch (error) {
     console.error("Database Error:", error);
     throw new Error("Error en el fetch facturas.");
+  }
+}
+
+export async function fetchinvoices_lines(invoiceId: string) {
+  try {
+    const data = await sql<invoices_lines>`
+      SELECT *
+      FROM invoices_lines
+      WHERE id_invoice = ${invoiceId}
+      ORDER BY linea ASC
+    `;
+
+    return data.rows.map((line) => ({
+      ...line,
+      precio: Number(line.precio),
+      cantidad: Number(line.cantidad),
+      total: Number(line.total),
+    }));
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Error en el fetch de las líneas de factura.");
   }
 }
 

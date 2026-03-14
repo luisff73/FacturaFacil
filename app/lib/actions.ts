@@ -30,24 +30,12 @@ const FormSchema = z.object({
     invalid_type_error: "Please select an invoice status.",
   }),
   date: z.string(),
+  lines: z.string().optional(),
 });
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ date: true, id: true });
-// const CreateCustomer = z.object({
-//   name: z.string(),
-//   email: z.string().email(),
-//   image_url: z.string(),
-//   direccion: z.string(),
-//   c_postal: z.string(),
-//   poblacion: z.string(),
-//   provincia: z.string(),
-//   telefono: z.string(),
-//   cif: z.string(),
-//   pais: z.string(),
-// });
 
-// const UpdateCustomer = CreateCustomer.omit({ image_url: true });
 
 export type State = {
   errors?: {
@@ -71,27 +59,48 @@ export async function createInvoice(prevState: State, formData: FormData) {
     customerId: formData.get("customerId"),
     amount: formData.get("amount"),
     status: formData.get("status"),
+    lines: formData.get("lines"),
   });
 
   // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: "Missing Fields. Failed to Create Invoice.",
+      message: "Missing Fields. Failed to Crear Factura.",
     };
   }
 
   // Prepare data for insertion into the database
-  const { customerId, amount, status } = validatedFields.data;
+  const { customerId, amount, status, lines } = validatedFields.data;
   const amountInCents = Math.round(amount * 100); //convierte el valor de amount a centavos
   const date = new Date().toISOString().split("T")[0]; //obtiene la fecha actual en formato aaa-mm-dd
+  
   try {
     const idEmpresa = await requireEmpresaId();
-    // Inserta una nueva factura en la base de datos.
-    await sql`INSERT INTO invoices (customer_id, amount, status, date, id_empresa) VALUES (${customerId}, ${amountInCents}, ${status}, ${date}, ${idEmpresa})`;
+    // Inserta una nueva factura en la base de datos y recupera su ID
+    const result = await sql`
+      INSERT INTO invoices (customer_id, amount, status, date, id_empresa) 
+      VALUES (${customerId}, ${amountInCents}, ${status}, ${date}, ${idEmpresa})
+      RETURNING id
+    `;
+    
+    const invoiceId = result.rows[0].id;
+
+    // Insertar las líneas de la factura si existen
+    if (lines) {
+      const parsedLines = JSON.parse(lines);
+      for (const line of parsedLines) {
+        await sql`
+          INSERT INTO invoices_lines (id_invoice, linea, descripcion, observaciones, cantidad, precio, total, id_articulo, id_empresa)
+          VALUES (${invoiceId}, ${line.linea}, ${line.descripcion}, ${line.observaciones}, ${line.cantidad}, ${line.precio}, ${line.total}, ${line.id_articulo}, ${idEmpresa})
+        `;
+      }
+    }
   } catch (error) {
     console.error("Error al crear la factura:", error);
-    throw new Error("No se pudo crear la factura");
+    return {
+      message: "Database Error: Failed to Crear Factura.",
+    };
   }
 
   //Una vez actualizada la base de datos, /dashboard/invoices se volverá a validar la ruta y se obtendrán
@@ -109,6 +118,7 @@ export async function updateInvoice(
     customerId: formData.get("customerId"),
     amount: formData.get("amount"),
     status: formData.get("status"),
+    lines: formData.get("lines"),
   });
 
   if (!validatedFields.success) {
@@ -118,19 +128,33 @@ export async function updateInvoice(
     };
   }
 
-  const { customerId, amount, status } = validatedFields.data;
-  const amountInCents = amount * 100;
+  const { customerId, amount, status, lines } = validatedFields.data;
+  const amountInCents = Math.round(amount * 100);
 
   try {
+    const idEmpresa = await requireEmpresaId();
     await sql`
-      UPDATE invoices
-      SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-      WHERE id = ${id}
-    `;
-  } catch (error) {
-    return { message: "Database Error: Failed to Update Invoice." + error };
-  }
+        UPDATE invoices
+        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+        WHERE id = ${id} AND id_empresa = ${idEmpresa}
+      `;
 
+    // Actualizar líneas: borrar las viejas e insertar las nuevas (estrategia simple)
+    await sql`DELETE FROM invoices_lines WHERE id_invoice = ${id} AND id_empresa = ${idEmpresa}`;
+
+    if (lines) {
+      const parsedLines = JSON.parse(lines);
+      for (const line of parsedLines) {
+        await sql`
+          INSERT INTO invoices_lines (id_invoice, linea, descripcion, observaciones, cantidad, precio, total, id_articulo, id_empresa)
+          VALUES (${id}, ${line.linea}, ${line.descripcion}, ${line.observaciones}, ${line.cantidad}, ${line.precio}, ${line.total}, ${line.id_articulo}, ${idEmpresa})
+        `;
+      }
+    }
+  } catch (error) {
+    console.error("Error al actualizar la factura:", error);
+    return { message: "Database Error: Failed to Update Invoice." };
+  }
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
 }
@@ -504,5 +528,10 @@ export async function uploadImage(formData: FormData) {
     console.error("Error al guardar la imagen en Blob:", error);
     return null;
   }
+}
+
+export async function getArticulosForInvoice(query: string) {
+  const { fetchFilteredArticulos } = await import("./data");
+  return await fetchFilteredArticulos(query);
 }
 

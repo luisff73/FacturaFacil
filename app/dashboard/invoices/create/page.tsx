@@ -4,7 +4,7 @@ import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Create Invoice',
+  title: 'Creación de facturas',
 };
 
 export default async function Page() {
@@ -16,7 +16,7 @@ export default async function Page() {
         breadcrumbs={[
           { label: 'Invoices', href: '/dashboard/invoices' },
           {
-            label: 'Create Invoice',
+            label: 'Creación de factura',
             href: '/dashboard/invoices/create',
             active: true,
           },

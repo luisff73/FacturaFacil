@@ -16,6 +16,8 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
   const [state, setState] = useState<{ errors: { name?: string[]; email?: string[]; image_url?: string[]; direccion?: string[]; c_postal?: string[]; poblacion?: string[]; provincia?: string[]; telefono?: string[]; cif?: string[]; pais?: string[] }, message: string }>({ errors: {}, message: '' });
   const router = useRouter();
 
+  const [redirectPath, setRedirectPath] = useState('/dashboard/customers');
+
   const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
@@ -47,7 +49,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
 
     try {
       await createCustomer(data);
-      router.push('/dashboard/customers');
+      router.push(redirectPath);
     } catch (error) {
       if (error instanceof Error) {
         setState({ errors: (error as any).errors || {}, message: error.message });
@@ -317,14 +319,26 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
           ) : null}
         </div>
       </div>
-      <div className="mt-6 flex justify-end gap-4">
+      <div className="mt-6 flex flex-wrap justify-end gap-4">
         <Link
           href="/dashboard/customers"
           className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-700 px-4 text-sm font-medium text-gray-600 dark:text-gray-200 transition-colors hover:bg-gray-200 dark:hover:bg-gray-600"
         >
           Cancelar
         </Link>
-        <Button type="submit">Crear Cliente</Button>
+        <Button 
+          type="submit" 
+          onClick={() => setRedirectPath('/dashboard/customers')}
+        >
+          Crear Cliente
+        </Button>
+        <Button 
+          type="submit" 
+          onClick={() => setRedirectPath('/dashboard/invoices')}
+          className="!bg-green-400 dark:!bg-green-700 !text-white dark:!text-white hover:!bg-green-200 dark:hover:!bg-gray-600"
+        >
+          Crear Factura
+        </Button>
       </div>
     </form>
   );
