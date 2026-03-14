@@ -1,5 +1,5 @@
 import { fetchFilteredCustomers, fetchCustomersPages } from '@/app/lib/data';
-import Pagination from '@/app/ui/invoices/pagination';
+import Pagination from '@/app/ui/pagination';
 import CustomersTable from '@/app/ui/customers/table';
 import { CreateCustomer } from '@/app/ui/customers/buttons';
 import { lusitana } from '@/app/ui/fonts';

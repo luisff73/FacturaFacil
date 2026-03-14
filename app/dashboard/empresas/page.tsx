@@ -1,4 +1,4 @@
-import Pagination from '@/app/ui/empresas/pagination';
+import Pagination from '@/app/ui/pagination';
 import Search from '@/app/ui/search';
 import Table from '@/app/ui/empresas/table';
 import { CreateEmpresa } from '@/app/ui/empresas/buttons';

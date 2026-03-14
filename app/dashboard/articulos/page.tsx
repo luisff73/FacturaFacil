@@ -1,5 +1,5 @@
 import { fetchFilteredArticulos, fetchArticulosPages } from '@/app/lib/data';
-import Pagination from '@/app/ui/invoices/pagination';
+import Pagination from '@/app/ui/pagination';
 import ArticulosTable from '@/app/ui/articulos/table';
 import { CreateArticulo } from '@/app/ui/articulos/buttons';
 import { lusitana } from '@/app/ui/fonts';

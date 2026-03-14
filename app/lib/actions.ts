@@ -24,10 +24,10 @@ const FormSchema = z.object({
   }),
   amount: z.coerce
     .number()
-    .gt(0, { message: "Por favor introduce un monto mayor a $0." }),
+    .gt(0, { message: "Por favor introduce un importe mayor a $0." }),
 
   status: z.enum(["Pendiente", "Pagada", "Proforma"], {
-    invalid_type_error: "Please select an invoice status.",
+    invalid_type_error: "Por favor selecciona un estado de factura.",
   }),
   date: z.string(),
   lines: z.string().optional(),
@@ -47,13 +47,15 @@ const CustomerSchema = z.object({
   poblacion: z.string().min(1, { message: "La población es obligatoria." }),
   provincia: z.string().min(1, { message: "La provincia es obligatoria." }),
   telefono: z.string().optional(),
-  cif: z.string().optional(),
-  pais: z.string().optional(),
+  cif: z.string().regex(/^[ABCDEFGHJNPQRSUVW]\d{7}[0-9A-J]$/i, {
+    message: "El formato del CIF no es válido (ej: A1234567B).",
+  }),
+  pais: z.string().min(1, { message: "El país es obligatorio." }),
   id_empresa: z.number().optional(),
 });
 
 const CreateCustomer = CustomerSchema.omit({ id: true });
-const UpdateCustomer = CustomerSchema.omit({ id: true });
+//const UpdateCustomer = CustomerSchema.omit({ id: true });
 
 
 export type State = {
@@ -61,11 +63,20 @@ export type State = {
     customerId?: string[];
     amount?: string[];
     status?: string[];
+    lines?: string[];
+    name?: string[];
+    email?: string[];
+    direccion?: string[];
+    c_postal?: string[];
+    poblacion?: string[];
+    provincia?: string[];
+    id_empresa?: string[];
   };
-  message?: string | null;
+  message: string;
+  success?: boolean;
 };
 
-export async function createInvoice(prevState: State, formData: FormData) {
+export async function createInvoice(prevState: State, formData: FormData): Promise<State> {
 
 
   // Valida los campos del formulario. usando zod
@@ -127,7 +138,7 @@ export async function updateInvoice(
   id: string,
   prevState: State,
   formData: FormData,
-) {
+): Promise<State> {
   const validatedFields = UpdateInvoice.safeParse({
     customerId: formData.get("customerId"),
     amount: formData.get("amount"),
@@ -138,7 +149,7 @@ export async function updateInvoice(
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: "Missing Fields. Failed to Update Invoice.",
+      message: "Faltan campos por rellenar. No se ha podido actualizar la factura.",
     };
   }
 
@@ -167,7 +178,7 @@ export async function updateInvoice(
     }
   } catch (error) {
     console.error("Error al actualizar la factura:", error);
-    return { message: "Database Error: Failed to Update Invoice." };
+    return { message: "Error en la base de datos: No se ha podido actualizar la factura." };
   }
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
@@ -179,7 +190,18 @@ export async function deleteInvoice(id: string) {
 }
 
 // Función para crear un cliente
-export async function createCustomer(data: Omit<Customer, "id">) {
+export async function createCustomer(data: Omit<Customer, "id">): Promise<State> {
+  // Validar campos con Zod
+  const validatedFields = CreateCustomer.safeParse(data);
+
+  if (!validatedFields.success) {
+    return {
+      success: false,
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Faltan campos obligatorios.",
+    };
+  }
+
   const {
     name,
     email,
@@ -191,19 +213,29 @@ export async function createCustomer(data: Omit<Customer, "id">) {
     telefono,
     cif,
     pais,
-  } = data;
+  } = validatedFields.data;
   
   const id_empresa = await requireEmpresaId();
 
-  // Consulta SQL para insertar un nuevo cliente
-  const result = await sql`
-    INSERT INTO customers (name, email, image_url, direccion,c_postal,poblacion,provincia,telefono,cif,pais, id_empresa)
-    VALUES (${name}, ${email}, ${image_url}, ${direccion},${c_postal},${poblacion},${provincia},${telefono},${cif},${pais}, ${id_empresa}) 
-    RETURNING id, name, email, image_url ,direccion,c_postal,poblacion,provincia,telefono,cif,pais, id_empresa;
-  `;
+  try {
+    // Consulta SQL para insertar un nuevo cliente
+    await sql`
+      INSERT INTO customers (name, email, image_url, direccion,c_postal,poblacion,provincia,telefono,cif,pais, id_empresa)
+      VALUES (${name}, ${email}, ${image_url}, ${direccion},${c_postal},${poblacion},${provincia},${telefono},${cif},${pais}, ${id_empresa})
+    `;
 
-  // Devolver el cliente creado
-  return result.rows[0];
+    // Devolver el cliente creado
+    return {
+      success: true,
+      message: "Cliente creado correctamente.",
+    };
+  } catch (error) {
+    console.error("Database Error:", error);
+    return {
+      success: false,
+      message: "Error de base de datos: No se pudo crear el cliente.",
+    };
+  }
 }
 
 // Función para actualizar un cliente

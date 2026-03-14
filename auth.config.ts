@@ -13,6 +13,7 @@ export const authConfig = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.id = user.id;
         token.type = user.type;
         token.id_empresa = user.id_empresa;
         token.css = (user as any).css;
@@ -20,9 +21,10 @@ export const authConfig = {
       return token;
     },
     async session({ session, token }) {
-      if (session.user && token.id_empresa) {
-        session.user.id_empresa = token.id_empresa;
-        session.user.type = token.type;
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.id_empresa = token.id_empresa as number;
+        session.user.type = token.type as "admin" | "user";
         (session.user as any).css = (token as any).css;
       }
       return session;

@@ -13,7 +13,8 @@ interface FormProps {
 
 const CreateCustomerForm: React.FC<FormProps> = () => {
   const inputFileRef = useRef<HTMLInputElement>(null);
-  const [state, setState] = useState<{ errors: { name?: string[]; email?: string[]; image_url?: string[]; direccion?: string[]; c_postal?: string[]; poblacion?: string[]; provincia?: string[]; telefono?: string[]; cif?: string[]; pais?: string[] }, message: string }>({ errors: {}, message: '' });
+  const initialState: any = { errors: {}, message: '', success: false };
+  const [state, setState] = useState<any>(initialState);
   const router = useRouter();
 
   const [redirectPath, setRedirectPath] = useState('/dashboard/customers');
@@ -34,26 +35,32 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
     }
 
     const data = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
+      name: (formData.get('name') as string) || '',
+      email: (formData.get('email') as string) || '',
       image_url: imageUrl,
-      direccion: formData.get('direccion') as string,
-      c_postal: formData.get('c_postal') as string,
-      poblacion: formData.get('poblacion') as string,
-      provincia: formData.get('provincia') as string,
-      pais: formData.get('pais') as string,
-      telefono: formData.get('telefono') as string,
-      cif: formData.get('cif') as string,
-      id_empresa: 1, // hay que asignar esto de alguna manera, por ahora lo dejo fijo a 1
+      direccion: (formData.get('direccion') as string) || '',
+      c_postal: (formData.get('c_postal') as string) || '',
+      poblacion: (formData.get('poblacion') as string) || '',
+      provincia: (formData.get('provincia') as string) || '',
+      pais: (formData.get('pais') as string) || '',
+      telefono: (formData.get('telefono') as string) || '',
+      cif: (formData.get('cif') as string) || '',
+      id_empresa: 1,
     };
 
     try {
-      await createCustomer(data);
-      router.push(redirectPath);
-    } catch (error) {
-      if (error instanceof Error) {
-        setState({ errors: (error as any).errors || {}, message: error.message });
+      const result = await createCustomer(data);
+      if (result.success) {
+        router.push(redirectPath);
+      } else {
+        setState(result);
       }
+    } catch (error) {
+      setState({
+        errors: {},
+        message: 'Error inesperado al intentar crear el cliente.',
+        success: false
+      });
     }
   };
 
@@ -84,6 +91,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
                 </p>
               ))}
           </div>
+
         </div>
 
         {/* Customer Direccion */}
@@ -196,9 +204,10 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
               id="pais"
               name="pais"
               type="text"
-              placeholder="Introduce el país del cliente"
+              //placeholder="Introduce el país del cliente"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:bg-gray-900 dark:text-white"
               aria-describedby="pais-error"
+              defaultValue="España"
             />
           </div>
           <div id="pais-error" aria-live="polite" aria-atomic="true">
@@ -313,11 +322,6 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
           </div>
         </div>
 
-        <div aria-live="polite" aria-atomic="true">
-          {state.message ? (
-            <p className="mt-2 text-sm text-red-500">{state.message}</p>
-          ) : null}
-        </div>
       </div>
       <div className="mt-6 flex flex-wrap justify-end gap-4">
         <Link
@@ -326,14 +330,14 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
         >
           Cancelar
         </Link>
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           onClick={() => setRedirectPath('/dashboard/customers')}
         >
           Crear Cliente
         </Button>
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           onClick={() => setRedirectPath('/dashboard/invoices')}
           className="!bg-green-400 dark:!bg-green-700 !text-white dark:!text-white hover:!bg-green-200 dark:hover:!bg-gray-600"
         >

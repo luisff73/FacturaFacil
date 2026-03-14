@@ -14,7 +14,7 @@ import { useActionState } from 'react';
 import InvoiceLinesForm from '@/app/ui/invoices/invoice-lines-form';
 
 export default function Form({ customers }: { customers: Customer[] }) {
-  const initialState: State = { message: null, errors: {} };
+  const initialState: State = { message: '', errors: {} };
   const [state, formAction] = useActionState(createInvoice, initialState);
 
   return (
