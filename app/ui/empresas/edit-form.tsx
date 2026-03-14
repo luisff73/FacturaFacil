@@ -58,6 +58,7 @@ const EditEmpresasForm: React.FC<EditFormProps> = ({ empresa }) => {
               type="text"
               defaultValue={empresa.nombre}
               placeholder="Introduzca el nombre de la empresa"
+              autoComplete="organization"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="nombre-error"
             />
@@ -234,6 +235,7 @@ const EditEmpresasForm: React.FC<EditFormProps> = ({ empresa }) => {
               type="email"
               defaultValue={empresa.email}
               placeholder="Introduzca el email de la empresa"
+              autoComplete="email"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="email-error"
             />
@@ -308,6 +310,7 @@ const EditEmpresasForm: React.FC<EditFormProps> = ({ empresa }) => {
               name="password"
               type="password"
               placeholder="Introduzca la nueva contraseña de la empresa (opcional)"
+              autoComplete="new-password"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="password-error"
             />

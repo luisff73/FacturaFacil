@@ -29,18 +29,18 @@ const FIELDS: Array<{
   label: string;
   type: string;
   placeholder: string;
+  autoComplete?: string;
 }> = [
-    { name: 'nombre', label: 'Nombre', type: 'text', placeholder: 'Introduce el nombre de la empresa' },
-    { name: 'direccion', label: 'Dirección', type: 'text', placeholder: 'Introduce la dirección de la empresa' },
-    { name: 'c_postal', label: 'Código Postal', type: 'text', placeholder: 'Introduce el código postal de la empresa' },
-    { name: 'poblacion', label: 'Población', type: 'text', placeholder: 'Introduce la población de la empresa' },
-    { name: 'provincia', label: 'Provincia', type: 'text', placeholder: 'Introduce la provincia de la empresa' },
-    { name: 'telefono', label: 'Teléfono', type: 'text', placeholder: 'Introduce el teléfono de la empresa' },
+    { name: 'nombre', label: 'Nombre', type: 'text', placeholder: 'Introduce el nombre de la empresa', autoComplete: 'organization' },
+    { name: 'direccion', label: 'Dirección', type: 'text', placeholder: 'Introduce la dirección de la empresa', autoComplete: 'address-line1' },
+    { name: 'c_postal', label: 'Código Postal', type: 'text', placeholder: 'Introduce el código postal de la empresa', autoComplete: 'postal-code' },
+    { name: 'poblacion', label: 'Población', type: 'text', placeholder: 'Introduce la población de la empresa', autoComplete: 'address-level2' },
+    { name: 'provincia', label: 'Provincia', type: 'text', placeholder: 'Introduce la provincia de la empresa', autoComplete: 'address-level1' },
+    { name: 'telefono', label: 'Teléfono', type: 'text', placeholder: 'Introduce el teléfono de la empresa', autoComplete: 'tel' },
     { name: 'cif', label: 'CIF', type: 'text', placeholder: 'Introduce el CIF de la empresa' },
-    { name: 'email', label: 'Email', type: 'email', placeholder: 'Introduce el email de la empresa' },
+    { name: 'email', label: 'Email', type: 'email', placeholder: 'Introduce el email de la empresa', autoComplete: 'email' },
     { name: 'iva', label: 'IVA', type: 'number', placeholder: 'Introduce el IVA de la empresa' },
     { name: 'recargo_equivalencia', label: 'Recargo de Equivalencia', type: 'number', placeholder: 'Introduce el recargo de equivalencia de la empresa' },
-
   ];
 
 const CreateEmpresaForm: React.FC = () => {
@@ -92,7 +92,7 @@ const CreateEmpresaForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
-        {FIELDS.map(({ name, label, type, placeholder }) => (
+        {FIELDS.map(({ name, label, type, placeholder, autoComplete }) => (
           <div key={name} className="mb-4">
             <label htmlFor={name} className="mb-2 block text-sm font-medium dark:text-gray-200">
               {label}
@@ -123,6 +123,7 @@ const CreateEmpresaForm: React.FC = () => {
                 id="user_name"
                 name="user_name"
                 type="text"
+                autoComplete="name"
                 placeholder="Introduce nombre del usuario admin"
                 className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
                 aria-describedby="user_name-error"
@@ -140,6 +141,7 @@ const CreateEmpresaForm: React.FC = () => {
                 id="user_email"
                 name="user_email"
                 type="email"
+                autoComplete="email"
                 placeholder="Introduce email del usuario admin"
                 className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
                 aria-describedby="user_email-error"
@@ -157,6 +159,7 @@ const CreateEmpresaForm: React.FC = () => {
                 id="user_password"
                 name="user_password"
                 type="password"
+                autoComplete="new-password"
                 placeholder="Contraseña para el usuario admin"
                 className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
                 aria-describedby="user_password-error"

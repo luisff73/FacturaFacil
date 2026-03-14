@@ -53,6 +53,7 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               type="text"
               defaultValue={user.name}
               placeholder="Introduce el nombre del usuario"
+              autoComplete="name"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="name-error"
             />
@@ -78,6 +79,7 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               type="email"
               defaultValue={user.email}
               placeholder="Introduce el email del usuario"
+              autoComplete="email"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="email-error"
             />
@@ -103,6 +105,7 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               type="password"
               defaultValue={user.password}
               placeholder="Introduce la contraseña del usuario"
+              autoComplete="new-password"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="password-error"
             />

@@ -72,6 +72,7 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
               type="text"
               defaultValue={customer.name}
               placeholder="Introduce el nombre del cliente"
+              autoComplete="name"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="name-error"
             />
@@ -97,6 +98,7 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
               type="email"
               defaultValue={customer.email}
               placeholder="Introduce el correo electrónico del cliente"
+              autoComplete="email"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="email-error"
             />
