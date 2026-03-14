@@ -6,6 +6,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.3.1",
     "@tailwindcss/forms": "^0.5.10",
@@ -35,8 +36,8 @@
     "@types/bcrypt": "^5.0.2",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "22.10.7",
-    "@types/react": "19.0.7",
-    "@types/react-dom": "19.0.3",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
     "@types/tinycolor2": "^1.4.6",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "eslint": "^9.19.0",
