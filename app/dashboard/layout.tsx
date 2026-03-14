@@ -9,7 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <div className="flex h-screen flex-col">
             <div className="w-full flex-none flex justify-between items-end bg-green-500">
-                <FacturaFacilLogo />
+                <FacturaFacilLogo size="small" /> {/* pasamos el parametro size para que el logo se muestre en tamaño pequeño */}
                 <FacturaFacilUser />
             </div>
             <div className="flex flex-grow flex-col md:flex-row md:overflow-hidden">
