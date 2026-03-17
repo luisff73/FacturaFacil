@@ -1,4 +1,5 @@
 import PrintButton from '@/app/ui/invoices/print-button';
+import ExportPDFButton from '@/app/ui/invoices/export-pdf-button';
 import Link from 'next/link';
 import { fetchInvoiceById, fetchinvoices_lines, fetchCustomersById, fetchEmpresaById } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
@@ -35,7 +36,17 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           </svg>
           Volver a facturas
         </Link>
-        <PrintButton />
+        <div className="flex gap-4">
+          <PrintButton />
+          {invoice && customer && empresa && (
+            <ExportPDFButton 
+              invoice={invoice} 
+              lines={lines} 
+              customer={customer} 
+              empresa={empresa} 
+            />
+          )}
+        </div>
       </div>
 
       {/* Contenido principal flexible */}

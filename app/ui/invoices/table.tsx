@@ -38,9 +38,13 @@ export default async function InvoicesTable({
                         className="mr-2 rounded-full"
                         width={28}
                         height={28}
+                        style={{ height: 'auto' }}
                         alt={`${invoice.name}'s profile picture`}
                       />
-                      <p className="dark:text-white">{invoice.name}</p>
+                      <p className="dark:text-white font-bold">
+                        {new Date(invoice.date).getFullYear()}/{invoice.invoice_number}
+                      </p>
+                      <p className="dark:text-white ml-2">{invoice.name}</p>
                     </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">{invoice.email}</p>
                   </div>
@@ -66,17 +70,18 @@ export default async function InvoicesTable({
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-4 py-5 font-medium dark:text-gray-200 sm:pl-6">
-                  Cliente
-                </th>
-                <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
-                  Correo electrónico
-                </th>
-                <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
-                  Total
+                  Nº Factura
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
                   Fecha
                 </th>
+                <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
+                  Cliente
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
+                  Total
+                </th>
+
                 <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
                   Estado
                 </th>
@@ -92,6 +97,14 @@ export default async function InvoicesTable({
                   className="w-full border-b dark:border-gray-700 py-3 text-sm last-of-type:border-none hover:bg-gray-100 dark:hover:bg-gray-800 [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                    <span className="font-bold">
+                      {new Date(invoice.date).getFullYear()}/{invoice.invoice_number}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {formatDateToLocal(invoice.date)}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
                     <div className="flex items-center gap-3">
                       <Image
                         src={
@@ -106,20 +119,16 @@ export default async function InvoicesTable({
                         className="rounded-full"
                         width={28}
                         height={28}
+                        style={{ height: 'auto' }}
                         alt={`${invoice.name}'s profile picture`}
                       />
                       <p className="dark:text-white">{invoice.name}</p>
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3 dark:text-gray-200">
-                    {invoice.email}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-3 dark:text-gray-200">
                     {formatCurrency(invoice.total_factura)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 dark:text-gray-200">
-                    {formatDateToLocal(invoice.date)}
-                  </td>
+ 
                   <td className="whitespace-nowrap px-3 py-3">
                     <InvoiceStatus status={invoice.status} />
                   </td>

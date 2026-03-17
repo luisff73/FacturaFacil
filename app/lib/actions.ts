@@ -29,12 +29,12 @@ const FormSchema = z.object({
   status: z.enum(["Pendiente", "Pagada", "Proforma"], {
     invalid_type_error: "Por favor selecciona un estado de factura.",
   }),
-  date: z.string(),
+  fecha: z.string().min(1, { message: "Por favor selecciona una fecha para la factura." }),
   lines: z.string().optional(),
 });
 
-const CreateInvoice = FormSchema.omit({ id: true, date: true });
-const UpdateInvoice = FormSchema.omit({ date: true, id: true });
+const CreateInvoice = FormSchema.omit({ id: true });
+const UpdateInvoice = FormSchema.omit({ id: true });
 
 // Esquema para Clientes y validacion de campos zod
 const CustomerSchema = z.object({
@@ -73,6 +73,7 @@ export type State = {
     poblacion?: string[];
     provincia?: string[];
     id_empresa?: string[];
+    fecha?: string[];
   };
   message: string;
   success?: boolean;
@@ -87,6 +88,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
     base_imponible: formData.get("base_imponible"),
     status: formData.get("status"),
     lines: formData.get("lines"),
+    fecha: formData.get("fecha"),
   });
 
   // If form validation fails, return errors early. Otherwise, continue.
@@ -98,7 +100,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
   }
 
   // Prepare data for insertion into the database
-  const { customerId, base_imponible, status, lines } = validatedFields.data;
+  const { customerId, base_imponible, status, lines, fecha } = validatedFields.data;
   const idEmpresa = await requireEmpresaId();
 
   // Obtener datos del cliente y de la empresa para calcular impuestos
@@ -109,7 +111,10 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
 
   const customer = customerResult.rows[0];
   const ivaEmpresa = Number(empresaResult.rows[0].iva) || 21;
-  const reRate = ivaEmpresa === 21 ? 5.2 : (ivaEmpresa === 10 ? 1.4 : 0.5);
+  let reRate = 0.5;
+  if (ivaEmpresa === 21) reRate = 5.2;
+  else if (ivaEmpresa === 10) reRate = 1.4;
+  else if (ivaEmpresa === 4) reRate = 0.5;
 
   const base_imponibleInCents = Math.round(base_imponible * 100); // BI
   let tax_ivaInCents = 0;
@@ -126,12 +131,36 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
 
   try {
     const result = await sql`
-      INSERT INTO invoices (customer_id, base_imponible, status, date, id_empresa, total_iva, total_recargo, total_factura)
-      VALUES (${customerId}, ${base_imponibleInCents}, ${status}, CURRENT_DATE, ${idEmpresa}, ${tax_ivaInCents}, ${tax_rec_equivalenciaInCents}, ${totalInCents})
-      RETURNING id
+      INSERT INTO invoices (
+        customer_id, 
+        base_imponible, 
+        status, 
+        date, 
+        id_empresa, 
+        total_iva, 
+        total_recargo, 
+        total_factura, 
+        invoice_number
+      )
+      VALUES (
+        ${customerId}, 
+        ${base_imponibleInCents}, 
+        ${status}, 
+        ${fecha}, 
+        ${idEmpresa}, 
+        ${tax_ivaInCents}, 
+        ${tax_rec_equivalenciaInCents}, 
+        ${totalInCents}, 
+        (SELECT COALESCE(MAX(invoice_number), 0) + 1 
+         FROM invoices 
+         WHERE id_empresa = ${idEmpresa} 
+         AND date_part('year', date) = date_part('year', ${fecha}::date))
+      )
+      RETURNING id, invoice_number;
     `;
     
-    const invoiceId = result.rows[0].id;
+    const invoiceId = result.rows[0].id;  // Obtiene el ID de la factura recién insertada
+    //const invoiceNumber = result.rows[0].invoice_number;  // Obtiene el número de la factura recién insertada
 
     // Insertar las líneas de la factura si existen
     if (lines) {
@@ -166,6 +195,7 @@ export async function updateInvoice(
     base_imponible: formData.get("base_imponible"),
     status: formData.get("status"),
     lines: formData.get("lines"),
+    fecha: formData.get("fecha"),
   });
 
   if (!validatedFields.success) {
@@ -175,7 +205,7 @@ export async function updateInvoice(
     };
   }
 
-  const { customerId, base_imponible, status, lines } = validatedFields.data;
+  const { customerId, base_imponible, status, lines, fecha } = validatedFields.data;
   const idEmpresa = await requireEmpresaId();
 
   // Obtener datos del cliente y de la empresa para calcular impuestos
@@ -186,7 +216,10 @@ export async function updateInvoice(
 
   const customer = customerResult.rows[0];
   const ivaEmpresa = Number(empresaResult.rows[0].iva) || 21;
-  const reRate = ivaEmpresa === 21 ? 5.2 : (ivaEmpresa === 10 ? 1.4 : 0.5);
+  let reRate = 0.5;
+  if (ivaEmpresa === 21) reRate = 5.2;
+  else if (ivaEmpresa === 10) reRate = 1.4;
+  else if (ivaEmpresa === 4) reRate = 0.5;
 
   const base_imponibleInCents = Math.round(base_imponible * 100); // BI
   let tax_ivaInCents = 0;
@@ -204,7 +237,13 @@ export async function updateInvoice(
   try {
     await sql`
         UPDATE invoices
-        SET customer_id = ${customerId}, base_imponible = ${base_imponibleInCents}, status = ${status}, total_iva = ${tax_ivaInCents}, total_recargo = ${tax_rec_equivalenciaInCents}, total_factura = ${totalInCents}
+        SET customer_id = ${customerId}, 
+            base_imponible = ${base_imponibleInCents}, 
+            status = ${status}, 
+            date = ${fecha}, 
+            total_iva = ${tax_ivaInCents}, 
+            total_recargo = ${tax_rec_equivalenciaInCents}, 
+            total_factura = ${totalInCents}
         WHERE id = ${id} AND id_empresa = ${idEmpresa}
       `;
 

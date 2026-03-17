@@ -21,12 +21,11 @@ import {
 
 import { formatCurrency } from "./utils";
 
-// helper que extrae id_empresa del usuario autenticado
+// Extrae id_empresa del usuario autenticado
 export async function requireEmpresaId(): Promise<number> {
   const session = await auth();
   if (!session || !session.user || !session.user.id_empresa) {
-    // He habilitado la ruta /dashboard/empresas como pública, así que 
-    // cuando no haya usuario retornara un ID ficticio (0) que los queries de SQL
+    // si no hay usuario retornara un id ficticio (0) que los queries de SQL
     // buscarán sin romper el build en vez de forzar una intercepción por código.
     return 0;
   }
@@ -34,8 +33,9 @@ export async function requireEmpresaId(): Promise<number> {
 }
 
 export async function fetchRevenue() {
+  const idEmpresa = await requireEmpresaId();
   try {
-    const data = await sql<Revenue>`SELECT * FROM revenue`;
+    const data = await sql<Revenue>`SELECT * FROM revenue where id_empresa = ${idEmpresa}`;
 
     return data.rows;
   } catch (error) {
@@ -133,6 +133,7 @@ export async function fetchFilteredInvoices(
         invoices.total_iva,
         invoices.total_recargo,
         invoices.total_factura,
+        invoices.invoice_number,
         customers.name,
         customers.email,
         customers.image_url
@@ -144,7 +145,7 @@ export async function fetchFilteredInvoices(
         invoices.base_imponible::text ILIKE ${`%${query}%`} OR
         invoices.date::text ILIKE ${`%${query}%`} OR
         invoices.status ILIKE ${`%${query}%`})
-      ORDER BY invoices.date DESC
+      ORDER BY invoices.date DESC, invoices.invoice_number DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
@@ -169,11 +170,46 @@ export async function fetchInvoicesPages(query: string) {
       invoices.status ILIKE ${`%${query}%`})
   `;
 
-    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(Number(count.rows[0].count) / 6); // ITEMS_PER_PAGE is 6
     return totalPages;
   } catch (error) {
     console.error("Database Error:", error);
     throw new Error("Error en el fetch total number de facturas.");
+  }
+}
+
+export async function fetchAllFilteredInvoices(query: string) {
+  const idEmpresa = await requireEmpresaId();
+
+  try {
+    const invoices = await sql<InvoicesTable>`
+      SELECT
+        invoices.id,
+        invoices.base_imponible,
+        invoices.date,
+        invoices.status,
+        invoices.total_iva,
+        invoices.total_recargo,
+        invoices.total_factura,
+        invoices.invoice_number,
+        customers.name,
+        customers.email,
+        customers.image_url
+      FROM invoices 
+      JOIN customers ON invoices.customer_id = customers.id
+      where invoices.id_empresa = ${idEmpresa} AND (
+        customers.name ILIKE ${`%${query}%`} OR
+        customers.email ILIKE ${`%${query}%`} OR
+        invoices.base_imponible::text ILIKE ${`%${query}%`} OR
+        invoices.date::text ILIKE ${`%${query}%`} OR
+        invoices.status ILIKE ${`%${query}%`})
+      ORDER BY invoices.date DESC, invoices.invoice_number DESC
+    `;
+
+    return invoices.rows;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Error en el fetch todas las facturas filtradas.");
   }
 }
 
@@ -190,7 +226,8 @@ export async function fetchInvoiceById(id: string) {
         invoices.id_empresa,
         invoices.total_iva,
         invoices.total_recargo,
-        invoices.total_factura
+        invoices.total_factura,
+        invoices.invoice_number
       FROM invoices where invoices.id_empresa = ${idEmpresa}
       and invoices.id = ${id};
     `;
@@ -212,11 +249,12 @@ export async function fetchInvoiceById(id: string) {
 }
 
 export async function fetchinvoices_lines(invoiceId: string) {
+  const idEmpresa = await requireEmpresaId();
   try {
     const data = await sql<invoices_lines>`
       SELECT *
       FROM invoices_lines
-      WHERE id_invoice = ${invoiceId}
+      WHERE id_invoice = ${invoiceId} and id_empresa = ${idEmpresa}
       ORDER BY linea ASC
     `;
 
@@ -330,7 +368,6 @@ export async function fetchFilteredCustomers(query: string) {
 }
 export async function fetchFilteredArticulos(query: string) {
   const idEmpresa = await requireEmpresaId();
-  // const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
     const data = await sql<ArticulosTableType>`
@@ -395,7 +432,7 @@ export async function fetchArticulosById(
       precio: parseFloat(articulo.precio as unknown as string),
       iva: parseFloat(articulo.iva as unknown as string),
       stock: parseFloat(articulo.stock as unknown as string),
-      imagen: articulo.imagen, // Ya no necesitas JSON.parse aquí
+      imagen: articulo.imagen,
     }));
 
     return articulos[0] || null;

@@ -11,8 +11,8 @@ export const metadata: Metadata = {
     default: "Panel FacturaFacil",
   },
   description: "Tu programa de gestión autónomo FacturaFacil.",
-  metadataBase: new URL("https://proyecto-next-git-vercel-react-server-c-1c3ef9-jvrluis-projects.vercel.app/"), // Actualiza esto con tu dominio real
-  manifest: "/manifest.json", // Añade esto para el manifiesto de la PWA
+  metadataBase: new URL("https://proyecto-next-git-vercel-react-server-c-1c3ef9-jvrluis-projects.vercel.app/"), // Actualizar esto con el dominio real
+  manifest: "/manifest.json", // Añadir esto para el manifiesto de la PWA
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -35,7 +35,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const session = await auth();
-  const userColor = (session?.user as any)?.css || '#4CAF50';
+  const Color_usuario = (session?.user as any)?.css || '#4CAF50';
 
   return (
     <html lang="es" className="light" suppressHydrationWarning>
@@ -44,7 +44,7 @@ export default async function RootLayout({
         className={`${inter.className} antialiased dark:bg-gray-900 dark:text-white min-h-screen transition-colors duration-300`}
       >
         <div className="fixed top-4 right-4 z-50 print:hidden">
-          <BarraTemas initialColor={userColor} />
+          <BarraTemas initialColor={Color_usuario} />
         </div>
         {children}
         {/* <RegisterSW /> */}

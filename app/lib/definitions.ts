@@ -54,6 +54,7 @@ export type Invoice = {
   total_iva: number;
   total_recargo: number;
   total_factura: number;
+  invoice_number: number;
 };
 
 export type LatestInvoice = {
@@ -79,6 +80,7 @@ export type InvoicesTable = {
   total_iva: number;
   total_recargo: number;
   total_factura: number;
+  invoice_number:number;  
 };
 
 export type invoices_lines = {
@@ -100,7 +102,9 @@ export type Revenue = {
   revenue: number;
 };
 
-// The database returns a number for base_imponible, but we later format it to a string with the formatCurrency function
+// La base de datos devuelve un número para base_imponible,
+// pero luego lo formateamos a una cadena con la función formatCurrency 
+// para mostrarlo en la tabla
 export type LatestInvoiceRaw = Omit<LatestInvoice, "base_imponible"> & {
   base_imponible: number;
 };

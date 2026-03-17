@@ -6,6 +6,7 @@ import {
   CloudIcon,
   CurrencyEuroIcon,
   UserCircleIcon,
+  CalendarIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
@@ -57,39 +58,73 @@ export default function EditInvoiceForm({
   return (
     <form action={formAction} onKeyDown={handleKeyDown}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        {/* Customer Name */}
-        <div className="mb-4">
-          <label htmlFor="customer" className="mb-2 block text-sm font-medium">
-            Seleccione un cliente
-          </label>
-          <div className="relative">
-            <select
-              id="customer"
-              name="customerId"
-              className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue={invoice.customer_id}
-              onChange={(e) => setSelectedCustomerId(e.target.value)}
-              aria-describedby="customer-error"
-            >
-              <option value="" disabled>
-                Seleccione un cliente
-              </option>
-              {customers.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.name}
+        {/* Nombre y fecha de la factura */}
+        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Customer Selection */}
+          <div className="flex flex-col">
+            <label htmlFor="customer" className="mb-2 block text-sm font-medium">
+              Seleccione un cliente
+            </label>
+            <div className="relative">
+              <select
+                id="customer"
+                name="customerId"
+                className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                defaultValue={invoice.customer_id}
+                onChange={(e) => setSelectedCustomerId(e.target.value)}
+                aria-describedby="customer-error"
+              >
+                <option value="" disabled>
+                  Seleccione un cliente
                 </option>
-              ))}
-            </select>
-            <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+                {customers.map((customer) => (
+                  <option key={customer.id} value={customer.id}>
+                    {customer.name}
+                  </option>
+                ))}
+              </select>
+              <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+            </div>
+            <div id="customer-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.customerId &&
+                state.errors.customerId.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
+            </div>
           </div>
 
-          <div id="customer-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.customerId &&
-              state.errors.customerId.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
+          {/* Date Selection */}
+          <div className="flex flex-col">
+            <label htmlFor="fecha" className="mb-2 block text-sm font-medium">
+              Fecha de la factura
+            </label>
+            <div className="relative">
+              <input
+                id="fecha"
+                name="fecha"
+                type="date"
+                className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                defaultValue={
+                  invoice.date 
+                  ? (typeof invoice.date === 'string' 
+                     ? invoice.date.split('T')[0] 
+                     : (invoice.date as any).toISOString().split('T')[0]) 
+                  : ''
+                }
+                aria-describedby="fecha-error"
+              />
+              <CalendarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+            </div>
+            <div id="fecha-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.fecha &&
+                state.errors.fecha.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
+            </div>
           </div>
         </div>
 

@@ -1,5 +1,11 @@
 import { Revenue } from './definitions';
 
+// Función para obtener el color del usuario
+export const getUserColor = (session: any) => {
+  return (session?.user as any)?.css || '#4CAF50';
+};
+
+// Función para formatear la moneda
 export const formatCurrency = (base_imponible: number) => {
   return (base_imponible / 100).toLocaleString('es-ES', {
     style: 'currency',
@@ -7,6 +13,7 @@ export const formatCurrency = (base_imponible: number) => {
   });
 };
 
+// Función para formatear la fecha
 export const formatDateToLocal = (
   dateStr: string,
   locale: string = 'es-ES',
@@ -21,6 +28,7 @@ export const formatDateToLocal = (
   return formatter.format(date);
 };
 
+// Función para generar el eje Y
 export const generateYAxis = (revenue: Revenue[]) => {
   // Calculate what labels we need to display on the y-axis
   // based on highest record and in 1000s
@@ -35,28 +43,25 @@ export const generateYAxis = (revenue: Revenue[]) => {
   return { yAxisLabels, topLabel };
 };
 
+// Función para generar la paginación
 export const generatePagination = (currentPage: number, totalPages: number) => {
-  // If the total number of pages is 7 or less,
-  // display all pages without any ellipsis.
+
+  // Si el total de paginas es 7 o menos, muestra todas las paginas sin puntos suspensivos
   if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, i) => i + 1);
   }
 
-  // If the current page is among the first 3 pages,
-  // show the first 3, an ellipsis, and the last 2 pages.
+  // Si la pagina actual esta entre las primeras 3, muestra las primeras 3, puntos suspensivos y las ultimas 2
   if (currentPage <= 3) {
     return [1, 2, 3, '...', totalPages - 1, totalPages];
   }
 
-  // If the current page is among the last 3 pages,
-  // show the first 2, an ellipsis, and the last 3 pages.
+  // Si la pagina actual esta entre las ultimas 3, muestra las primeras 2, puntos suspensivos y las ultimas 3
   if (currentPage >= totalPages - 2) {
     return [1, 2, '...', totalPages - 2, totalPages - 1, totalPages];
   }
 
-  // If the current page is somewhere in the middle,
-  // show the first page, an ellipsis, the current page and its neighbors,
-  // another ellipsis, and the last page.
+  // Si la pagina actual esta en medio, muestra la primera pagina, puntos suspensivos, la pagina actual y sus vecinos, otros puntos suspensivos y la ultima pagina
   return [
     1,
     '...',
