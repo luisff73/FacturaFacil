@@ -40,7 +40,7 @@ export function DeleteInvoice({ id }: { id: string }) {
   const deleteInvoiceWithId = deleteInvoice.bind(null, id);
 
   return (
-    <form action={async () => { await deleteInvoiceWithId(); }}>
+    <form action={deleteInvoiceWithId as any}>
       <button className="rounded-md border p-2 hover:bg-gray-100">
         <span className="sr-only">Borrar</span>
         <TrashIcon className="w-5" />

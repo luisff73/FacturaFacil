@@ -275,7 +275,7 @@ export async function updateInvoice(
   redirect("/dashboard/invoices");
 }
 
-export async function deleteInvoice(id: string) {
+export async function deleteInvoice(id: string, formData?: FormData) {
   try {
     // Primero borramos las líneas asociadas para evitar el error de clave foránea
     await sql`DELETE FROM invoices_lines WHERE id_invoice = ${id}`;
