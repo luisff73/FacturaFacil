@@ -34,7 +34,12 @@ const FormSchema = z.object({
 });
 
 const CreateInvoice = FormSchema.omit({ id: true });
-const UpdateInvoice = FormSchema.omit({ id: true });
+const UpdateInvoice = FormSchema.omit({ id: true }).extend({
+  // Conviertimos el valor de invoiceNumber a número con el z.coerce
+  invoiceNumber: z.coerce.number({ 
+    invalid_type_error: "El número de factura debe ser un número.",
+  }).min(1, { message: "El número de factura es obligatorio." }),
+});
 
 // Esquema para Clientes y validacion de campos zod
 const CustomerSchema = z.object({
@@ -74,6 +79,7 @@ export type State = {
     provincia?: string[];
     id_empresa?: string[];
     fecha?: string[];
+    invoiceNumber?: string[];
   };
   message: string;
   success?: boolean;
@@ -196,6 +202,7 @@ export async function updateInvoice(
     status: formData.get("status"),
     lines: formData.get("lines"),
     fecha: formData.get("fecha"),
+    invoiceNumber: formData.get("invoiceNumber"),
   });
 
   if (!validatedFields.success) {
@@ -205,7 +212,7 @@ export async function updateInvoice(
     };
   }
 
-  const { customerId, base_imponible, status, lines, fecha } = validatedFields.data;
+  const { customerId, base_imponible, status, lines, fecha, invoiceNumber } = validatedFields.data;
   const idEmpresa = await requireEmpresaId();
 
   // Obtener datos del cliente y de la empresa para calcular impuestos
@@ -243,7 +250,8 @@ export async function updateInvoice(
             date = ${fecha}, 
             total_iva = ${tax_ivaInCents}, 
             total_recargo = ${tax_rec_equivalenciaInCents}, 
-            total_factura = ${totalInCents}
+            total_factura = ${totalInCents},
+            invoice_number = ${invoiceNumber}
         WHERE id = ${id} AND id_empresa = ${idEmpresa}
       `;
 
@@ -268,8 +276,18 @@ export async function updateInvoice(
 }
 
 export async function deleteInvoice(id: string) {
-  await sql`DELETE FROM invoices WHERE id = ${id}`;
-  revalidatePath("/dashboard/invoices");
+  try {
+    // Primero borramos las líneas asociadas para evitar el error de clave foránea
+    await sql`DELETE FROM invoices_lines WHERE id_invoice = ${id}`;
+    // Ahora podemos borrar la factura
+    await sql`DELETE FROM invoices WHERE id = ${id}`;
+    
+    revalidatePath("/dashboard/invoices");
+    return { message: "Factura eliminada correctamente." };
+  } catch (error) {
+    console.error("Error al eliminar la factura:", error);
+    return { message: "Error al borrar la factura y sus líneas." };
+  }
 }
 
 // Función para crear un cliente
@@ -285,20 +303,7 @@ export async function createCustomer(data: Omit<Customer, "id">): Promise<State>
     };
   }
 
-  const {
-    name,
-    email,
-    image_url,
-    direccion,
-    c_postal,
-    poblacion,
-    provincia,
-    telefono,
-    cif,
-    pais,
-    tiene_iva,
-    tiene_re,
-  } = validatedFields.data;
+  const {name, email, image_url, direccion, c_postal, poblacion, provincia, telefono, cif, pais, tiene_iva, tiene_re,} = validatedFields.data;
   
   const id_empresa = await requireEmpresaId();
 

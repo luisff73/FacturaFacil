@@ -133,7 +133,8 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               id="precio"
               name="precio"
               type="number"
-              step="0.01"
+              step="any"
+              lang="en"
               defaultValue={articulo.precio.toString()}
               placeholder="Introduce el precio del artículo"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
@@ -160,7 +161,8 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               id="iva"
               name="iva"
               type="number"
-              step="0.01"
+              step="any"
+              lang="en"
               defaultValue={articulo.iva.toString()}
               placeholder="Introduce el IVA del artículo"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
@@ -187,7 +189,8 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               id="stock"
               name="stock"
               type="number"
-              step="0.01"
+              step="any"
+              lang="en"
               defaultValue={articulo.stock.toString()}
               placeholder="Introduce el stock del artículo"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"

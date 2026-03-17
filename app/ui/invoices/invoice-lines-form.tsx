@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PlusIcon, TrashIcon, MagnifyingGlassIcon, ChatBubbleLeftEllipsisIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { invoices_lines, ArticulosTableType, Customer } from '@/app/lib/definitions';
 import { getArticulosForInvoice } from '@/app/lib/actions';
@@ -22,7 +22,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       : [{ linea: 1, descripcion: '', observaciones: '', cantidad: 1, precio: 0, total: 0, id_articulo: 0 }]
   );
 
-  const [tax_ivaDetails, settax_ivaDetails] = useState({
+  const [ settax_ivaDetails] = useState({
     bi: 0,
     iva: 0,
     re: 0,
@@ -73,7 +73,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
 
     const total = bi + tax_iva + rec_equivalencia;
 
-    settax_ivaDetails({ bi, iva: tax_iva, re: rec_equivalencia, total });
+    // settax_ivaDetails({ bi, iva: tax_iva, re: rec_equivalencia, total });
 
     // Actualizar campos del formulario principal mediante el DOM para reflejar el desglose
     const biInput = document.querySelector('input[name="base_imponible"]') as HTMLInputElement;
@@ -255,6 +255,8 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                   <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">Cant.</label>
                   <input
                     type="number"
+                    step="any" // permite decimales
+                    lang="en" // fuerza el uso del punto como separador decimal
                     value={line.cantidad || 1}
                     onChange={(e) => updateLine(index, 'cantidad', e.target.value)}
                     className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 text-center"
@@ -266,6 +268,8 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                   <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">Precio</label>
                   <input
                     type="number"
+                    step="any" // permite decimales
+                    lang="en" // fuerza el uso del punto como separador decimal
                     value={line.precio || 0}
                     onChange={(e) => updateLine(index, 'precio', e.target.value)}
                     className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 text-center"
@@ -305,24 +309,6 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       >
         <PlusIcon className="h-4 w-4" /> Añadir línea
       </button>
-
-      {/* Resumen de totales */}
-      <div className="mt-6 flex justify-end">
-        <div className="w-full md:w-64 space-y-2 border-t dark:border-gray-700 pt-4">
-          {tax_ivaDetails.iva > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500 dark:text-gray-400">IVA ({empresaIva}%):</span>
-              <span className="font-medium dark:text-white">{tax_ivaDetails.iva.toFixed(2)}€</span>
-            </div>
-          )}
-          {tax_ivaDetails.re > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500 dark:text-gray-400">Recargo (RE):</span>
-              <span className="font-medium dark:text-white">{tax_ivaDetails.re.toFixed(2)}€</span>
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* Modal para observaciones */}
       {observacionesIndex !== null && (

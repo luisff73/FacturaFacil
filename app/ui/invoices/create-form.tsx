@@ -21,6 +21,12 @@ export default function Form({ customers, empresaIva }: { customers: Customer[],
   const [selectedCustomerId, setSelectedCustomerId] = React.useState('');
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
 
+  // Calcular la tasa de RE basada en el IVA (Estándares en España)
+  let empresaRe = 0.5;
+  if (empresaIva === 21) empresaRe = 5.2;
+  else if (empresaIva === 10) empresaRe = 1.4;
+  else if (empresaIva === 5 || empresaIva === 4) empresaRe = 0.5;
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
     if (e.key === 'Enter') {
       const target = e.target as HTMLElement;
@@ -203,7 +209,7 @@ export default function Form({ customers, empresaIva }: { customers: Customer[],
 
                 {selectedCustomer?.tiene_re && (
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">Recargo (RE)</span>
+                    <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">RE ({empresaRe}%)</span>
                     <div className="flex items-center gap-1 font-bold text-gray-700">
                       <span id="total_recargo-display">0.00</span>
                       <CurrencyEuroIcon className="h-4 w-4" />

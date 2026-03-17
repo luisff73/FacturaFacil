@@ -115,7 +115,7 @@ export async function fetchCardData() {
   }
 }
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 16;
 export async function fetchFilteredInvoices(
   query: string,
   currentPage: number,
@@ -170,7 +170,7 @@ export async function fetchInvoicesPages(query: string) {
       invoices.status ILIKE ${`%${query}%`})
   `;
 
-    const totalPages = Math.ceil(Number(count.rows[0].count) / 6); // ITEMS_PER_PAGE is 6
+    const totalPages = Math.ceil(Number(count.rows[0].count) / 16); // ITEMS_PER_PAGE is 16
     return totalPages;
   } catch (error) {
     console.error("Database Error:", error);

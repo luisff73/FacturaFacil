@@ -1,13 +1,6 @@
 'use client';
 import { Customer, Invoice, invoices_lines } from '@/app/lib/definitions';
-import {
-  CheckIcon,
-  ClockIcon,
-  CloudIcon,
-  CurrencyEuroIcon,
-  UserCircleIcon,
-  CalendarIcon,
-} from '@heroicons/react/24/outline';
+import { CheckIcon, ClockIcon, CloudIcon, CurrencyEuroIcon, UserCircleIcon, CalendarIcon,} from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { updateInvoice, State } from '@/app/lib/actions';
@@ -15,22 +8,23 @@ import { useActionState, useState } from 'react';
 import InvoiceLinesForm from '@/app/ui/invoices/invoice-lines-form';
 import React from 'react';
 
-export default function EditInvoiceForm({
-  invoice,
-  customers,
-  lines,
-  empresaIva,
-}: {
+export default function EditInvoiceForm({invoice, customers, lines, empresaIva,}: {
   invoice: Invoice;
   customers: Customer[];
   lines: invoices_lines[];
   empresaIva: number;
 }) {
   const initialState: State = { message: '', errors: {} };
-  const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
-  const [state, formAction] = useActionState(updateInvoiceWithId, initialState);
-  const [selectedCustomerId, setSelectedCustomerId] = useState(invoice.customer_id);
-  const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+  const updateInvoiceWithId = updateInvoice.bind(null, invoice.id); //bind para pasar el id de la factura
+  const [state, formAction] = useActionState(updateInvoiceWithId, initialState); //useActionState para manejar el estado de la accion de editar la factura
+  const [selectedCustomerId, setSelectedCustomerId] = useState(invoice.customer_id); //useState para manejar el id del cliente seleccionado
+  const selectedCustomer = customers.find(c => c.id === selectedCustomerId); //find para encontrar el cliente seleccionado
+
+  // Calcular la tasa de RE basada en el IVA (Estándares en España)
+  let empresaRe = 0.5;
+  if (empresaIva === 21) empresaRe = 5.2;
+  else if (empresaIva === 10) empresaRe = 1.4;
+  else if (empresaIva === 5 || empresaIva === 4) empresaRe = 0.5;
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
     if (e.key === 'Enter') {
@@ -58,10 +52,12 @@ export default function EditInvoiceForm({
   return (
     <form action={formAction} onKeyDown={handleKeyDown}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        {/* Nombre y fecha de la factura */}
-        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Customer Selection */}
-          <div className="flex flex-col">
+
+        {/* Nombre, fecha y numero de la factura */}
+        <div className="mb-4 grid grid-cols-1 md:grid-cols-12 gap-6">
+
+          {/* Seleccion de cliente */}
+          <div className="flex flex-col col-span-8">
             <label htmlFor="customer" className="mb-2 block text-sm font-medium">
               Seleccione un cliente
             </label>
@@ -95,8 +91,33 @@ export default function EditInvoiceForm({
             </div>
           </div>
 
-          {/* Date Selection */}
-          <div className="flex flex-col">
+        {/* Seleccion de numero de factura */}
+        <div className="mb-4 col-span-2">
+          <label htmlFor="invoiceNumber" className="mb-2 block text-sm font-medium">
+            Número de la factura
+          </label>
+          <input
+            id="invoiceNumber"
+            name="invoiceNumber"
+            type="number"
+            step="any"
+            lang="en"
+            className="peer block w-full rounded-md border border-gray-200 py-2 text-sm outline-2 placeholder:text-gray-500 text-center"
+            defaultValue={invoice.invoice_number}
+            aria-describedby="invoiceNumber-error"
+          />
+          <div id="invoiceNumber-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.invoiceNumber &&
+              state.errors.invoiceNumber.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
+
+          {/* Seleccion de fecha */}
+          <div className="col-span-2">
             <label htmlFor="fecha" className="mb-2 block text-sm font-medium">
               Fecha de la factura
             </label>
@@ -105,7 +126,7 @@ export default function EditInvoiceForm({
                 id="fecha"
                 name="fecha"
                 type="date"
-                className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                className="text-left peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-6 text-sm outline-2 placeholder:text-gray-500"
                 defaultValue={
                   invoice.date 
                   ? (typeof invoice.date === 'string' 
@@ -115,7 +136,7 @@ export default function EditInvoiceForm({
                 }
                 aria-describedby="fecha-error"
               />
-              <CalendarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+              {/*<CalendarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />*/}
             </div>
             <div id="fecha-error" aria-live="polite" aria-atomic="true">
               {state.errors?.fecha &&
@@ -130,11 +151,13 @@ export default function EditInvoiceForm({
 
 
 
-        {/* Invoice Lines Subformulario */}
+
+
+        {/* Subformulario lineas de factura */}
         <InvoiceLinesForm initialLines={lines} customer={selectedCustomer} invoice={invoice} empresaIva={empresaIva} />
 
         <div className="mt-6 flex flex-col md:flex-row gap-6 justify-between items-start md:items-end">
-          {/* Invoice Status */}
+          {/* Estado de la factura */}
           <fieldset className="w-full md:w-auto">
             <legend className="mb-2 block text-sm font-medium">
               Estado de la factura
@@ -201,7 +224,7 @@ export default function EditInvoiceForm({
             </div>
           </fieldset>
 
-          {/* Invoice Totals Breakdown */}
+          {/* Totales de la factura*/}
           <div className="w-full md:w-auto mt-6 md:mt-0">
             <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-6 shadow-sm min-w-[280px]">
               <div className="space-y-3">
@@ -221,9 +244,10 @@ export default function EditInvoiceForm({
                   </div>
                 </div>
 
+                
                 {(selectedCustomer?.tiene_re || (invoice && Number(invoice.total_recargo) > 0)) && (
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">Recargo (RE)</span>
+                    <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">RE ({empresaRe}%)</span>
                     <div className="flex items-center gap-1 font-bold text-gray-700">
                       <span id="total_recargo-display">{invoice.total_recargo}</span>
                       <CurrencyEuroIcon className="h-4 w-4" />
@@ -233,7 +257,7 @@ export default function EditInvoiceForm({
 
                 <div className="pt-3 border-t border-gray-200 flex justify-between items-end">
                   <span className="text-gray-900 font-extrabold uppercase tracking-widest text-[12px] mb-1">Total Factura</span>
-                  <div className="flex items-center gap-1 text-2xl font-black text-green-600">
+                  <div className="flex items-center gap-1 font-black text-green-600">
                     <span id="total_factura-display">{invoice.total_factura}</span>
                     <CurrencyEuroIcon className="h-6 w-6" />
                   </div>
