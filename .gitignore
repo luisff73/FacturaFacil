@@ -50,3 +50,5 @@ next-env.d.ts
 /public/worker-*.js
 /public/fallback-*.js
 /public/sw.js.map
+# Sentry Config File
+.env.sentry-build-plugin
