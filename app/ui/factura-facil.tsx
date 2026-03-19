@@ -67,9 +67,11 @@ export async function FacturaFacilUser() {
         nombreUsuario = usuario.name;
         if (usuario.image_url) {
           // Si ya es una URL completa o ruta absoluta, la dejamos. Si no, ponemos el prefijo del Blob
-          imagenUsuario = usuario.image_url.startsWith('http') || usuario.image_url.startsWith('/')
+          imagenUsuario = usuario.image_url.startsWith('http')
             ? usuario.image_url
-            : `${BLOB_URL}/${usuario.image_url}`;
+            : usuario.image_url === '/user.png'
+              ? usuario.image_url
+              : `${BLOB_URL}/${usuario.image_url.startsWith('/') ? usuario.image_url.slice(1) : usuario.image_url}`;
         }
       }
     }

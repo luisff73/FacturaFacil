@@ -7,7 +7,7 @@ import { Button } from '@/app/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || 'https://tqqqihkzj4uwev0c.public.blob.vercel-storage.com';
+const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || '';
 
 interface EditFormProps {
   articulo: ArticulosTableType;

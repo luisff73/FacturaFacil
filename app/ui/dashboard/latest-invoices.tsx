@@ -2,7 +2,7 @@ import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { fetchLatestInvoices } from '@/app/lib/data';
 
-const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || 'https://tqqqihkzj4uwev0c.public.blob.vercel-storage.com';
+const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || '';
 
 export default async function LatestInvoices() {
   const latestInvoices = await fetchLatestInvoices();

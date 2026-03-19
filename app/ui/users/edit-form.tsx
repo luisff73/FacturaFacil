@@ -117,8 +117,8 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               id="password"
               name="password"
               type="password"
-              defaultValue={user.password}
-              placeholder="Introduce la contraseña del usuario"
+              defaultValue=""
+              placeholder="Deja en blanco para no mantener la contraseña"
               autoComplete="new-password"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="password-error"

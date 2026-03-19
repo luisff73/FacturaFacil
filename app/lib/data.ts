@@ -134,6 +134,7 @@ export async function fetchFilteredInvoices(
         invoices.total_recargo,
         invoices.total_factura,
         invoices.invoice_number,
+        invoices.cif,
         customers.name,
         customers.email,
         customers.image_url
@@ -192,6 +193,7 @@ export async function fetchAllFilteredInvoices(query: string) {
         invoices.total_recargo,
         invoices.total_factura,
         invoices.invoice_number,
+        invoices.cif,
         customers.name,
         customers.email,
         customers.image_url
@@ -227,7 +229,8 @@ export async function fetchInvoiceById(id: string) {
         invoices.total_iva,
         invoices.total_recargo,
         invoices.total_factura,
-        invoices.invoice_number
+        invoices.invoice_number,
+        invoices.cif
       FROM invoices where invoices.id_empresa = ${idEmpresa}
       and invoices.id = ${id};
     `;

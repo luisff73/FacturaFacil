@@ -111,7 +111,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
 
   // Obtener datos del cliente y de la empresa para calcular impuestos
   const [customerResult, empresaResult] = await Promise.all([
-    sql`SELECT tiene_iva, tiene_re FROM customers WHERE id = ${customerId} AND id_empresa = ${idEmpresa}`,
+    sql`SELECT tiene_iva, tiene_re, cif FROM customers WHERE id = ${customerId} AND id_empresa = ${idEmpresa}`,
     sql`SELECT iva FROM empresas WHERE id = ${idEmpresa}`,
   ]);
 
@@ -146,7 +146,8 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
         total_iva, 
         total_recargo, 
         total_factura, 
-        invoice_number
+        invoice_number,
+        cif
       )
       VALUES (
         ${customerId}, 
@@ -160,7 +161,8 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
         (SELECT COALESCE(MAX(invoice_number), 0) + 1 
          FROM invoices 
          WHERE id_empresa = ${idEmpresa} 
-         AND date_part('year', date) = date_part('year', ${fecha}::date))
+         AND date_part('year', date) = date_part('year', ${fecha}::date)),
+        ${customer.cif}
       )
       RETURNING id, invoice_number;
     `;
@@ -217,7 +219,7 @@ export async function updateInvoice(
 
   // Obtener datos del cliente y de la empresa para calcular impuestos
   const [customerResult, empresaResult] = await Promise.all([
-    sql`SELECT tiene_iva, tiene_re FROM customers WHERE id = ${customerId} AND id_empresa = ${idEmpresa}`,
+    sql`SELECT tiene_iva, tiene_re, cif FROM customers WHERE id = ${customerId} AND id_empresa = ${idEmpresa}`,
     sql`SELECT iva FROM empresas WHERE id = ${idEmpresa}`,
   ]);
 
@@ -251,7 +253,8 @@ export async function updateInvoice(
             total_iva = ${tax_ivaInCents}, 
             total_recargo = ${tax_rec_equivalenciaInCents}, 
             total_factura = ${totalInCents},
-            invoice_number = ${invoiceNumber}
+            invoice_number = ${invoiceNumber},
+            cif = ${customer.cif}
         WHERE id = ${id} AND id_empresa = ${idEmpresa}
       `;
 
@@ -484,27 +487,30 @@ export async function deleteUser(id: string) {
 export async function updateUser(id: string, data: Omit<User, "id">) {
   const { name, email, password, type, token, css, image_url } = data;
 
-  // Encriptar la contraseña
-  const saltRounds = 5; // nivel de encriptacion (más alto = más seguro, pero más lento)
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-  // Consulta SQL para actualizar un USUARIO
-  const result = await sql`
-    UPDATE users
-    SET 
-      name = ${name}, 
-      email = ${email}, 
-      password = ${hashedPassword}, 
-      type = ${type}, 
-      token = ${token},
-      css = ${css},
-      image_url = ${image_url}
-    WHERE id = ${id}
-    RETURNING id, name, email, password, type, token, css, image_url;
-  `;
-
-  // Devolver el usuario actualizado
-  return result.rows[0];
+  // Encriptar la contraseña si se proporciona una nueva
+  if (password) {
+    const saltRounds = 5; // nivel de seguridad de bcrypt mas alto es 10 mas lento pero mas seguro
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    
+    // Consulta SQL para actualizar un usuario
+    const result = await sql`
+      UPDATE users
+      SET name = ${name}, email = ${email}, password = ${hashedPassword}, type = ${type}, token = ${token}, css = ${css}, image_url = ${image_url}
+      WHERE id = ${id}
+      RETURNING id, name, email, password, type, token, css, image_url;
+    `;
+    return result.rows[0];
+  } else {
+    const result = await sql`
+      UPDATE users
+      SET name = ${name}, email = ${email}, type = ${type}, token = ${token}, css = ${css}, image_url = ${image_url}
+      WHERE id = ${id}
+      RETURNING id, name, email, password, type, token, css, image_url;
+    `;
+    
+    // Devolver el usuario actualizado
+    return result.rows[0];
+  }
 }
 
 export async function createUser(data: Omit<User, "id">) {
@@ -539,45 +545,27 @@ export async function deleteEmpresa(id: string) {
 
 // Función para actualizar una empresa
 export async function updateEmpresa(id: string, data: Omit<Empresas, "id">) {
-  const {
-    nombre,
-    direccion,
-    c_postal,
-    poblacion,
-    provincia,
-    telefono,
-    cif,
-    email,
-    iva,
-    activa,
-    password,
-  } = data;
+  const { nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, activa, password } = data;
 
-  // Encriptar la contraseña
-  const saltRounds = 5; // nivel de encriptacion (más alto = más seguro, pero más lento)
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-  // Consulta SQL para actualizar una empresa
-  const result = await sql`
-    UPDATE empresas
-    SET 
-      nombre = ${nombre}, 
-      direccion = ${direccion}, 
-      c_postal = ${c_postal}, 
-      poblacion = ${poblacion}, 
-      provincia = ${provincia}, 
-      telefono = ${telefono}, 
-      cif = ${cif},
-      email = ${email},
-      iva = ${iva},
-      activa = ${activa},
-      password = ${hashedPassword}
-    WHERE id = ${id}
-    RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, password;
-  `;
-
-  // Devolver la empresa actualizada
-  return result.rows[0];
+  if (password) {
+    const saltRounds = 5;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const result = await sql`
+      UPDATE empresas
+      SET nombre = ${nombre}, direccion = ${direccion}, c_postal = ${c_postal}, poblacion = ${poblacion}, provincia = ${provincia}, telefono = ${telefono}, cif = ${cif}, email = ${email}, iva = ${iva}, activa = ${activa}, password = ${hashedPassword}
+      WHERE id = ${id}
+      RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, password;
+    `;
+    return result.rows[0];
+  } else {
+    const result = await sql`
+      UPDATE empresas
+      SET nombre = ${nombre}, direccion = ${direccion}, c_postal = ${c_postal}, poblacion = ${poblacion}, provincia = ${provincia}, telefono = ${telefono}, cif = ${cif}, email = ${email}, iva = ${iva}, activa = ${activa}
+      WHERE id = ${id}
+      RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, password;
+    `;
+    return result.rows[0];
+  }
 }
 
 // cuando llamamos desde el cliente aún no conocemos el id de la empresa, por lo que el usuario inicial puede omitirlo.  La función helper se encargará de fusionarlo automáticamente después de crear la empresa.  Por eso `initialUser` puede omitir tanto `id` como `id_empresa`.

@@ -4,7 +4,7 @@ import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredInvoices } from '@/app/lib/data';
 
-const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || 'https://tqqqihkzj4uwev0c.public.blob.vercel-storage.com';
+const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || '';
 
 export default async function InvoicesTable({
   query,
@@ -19,7 +19,7 @@ export default async function InvoicesTable({
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-2 md:pt-0">
-          <div className="md:hidden">
+          <div className="md:hidden"> {/* Este div es para móviles */}
             {invoices?.map((invoice) => (
               <div key={invoice.id} className="mb-2 w-full rounded-md bg-white dark:bg-gray-900 p-4">
                 <div className="flex items-center justify-between border-b dark:border-gray-700 pb-4">
@@ -31,9 +31,9 @@ export default async function InvoicesTable({
                             ? invoice.image_url
                             : invoice.image_url && invoice.image_url.startsWith('/')
                               ? invoice.image_url
-                              : invoice.image_url
+                            : invoice.image_url
                                 ? `${BLOB_URL}/${invoice.image_url}`
-                                : `https://ui-avatars.com/api/?name=${invoice.name}&background=random`
+                              : `https://ui-avatars.com/api/?name=${invoice.name}&background=random`
                         }
                         className="mr-2 rounded-full"
                         width={28}
@@ -66,8 +66,7 @@ export default async function InvoicesTable({
               </div>
             ))}
           </div>
-          <table className="hidden min-w-full text-gray-900 dark:text-white md:table">
-            <thead className="rounded-lg text-left text-sm font-normal">
+          <table className="hidden min-w-full text-gray-900 dark:text-white md:table"><thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-4 py-5 font-medium dark:text-gray-200 sm:pl-6">
                   Nº Factura
@@ -81,7 +80,6 @@ export default async function InvoicesTable({
                 <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
                   Total
                 </th>
-
                 <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
                   Estado
                 </th>
@@ -112,9 +110,9 @@ export default async function InvoicesTable({
                             ? invoice.image_url
                             : invoice.image_url && invoice.image_url.startsWith('/')
                               ? invoice.image_url
-                              : invoice.image_url
+                            : invoice.image_url
                                 ? `${BLOB_URL}/${invoice.image_url}`
-                                : `https://ui-avatars.com/api/?name=${invoice.name}&background=random`
+                              : `https://ui-avatars.com/api/?name=${invoice.name}&background=random`
                         }
                         className="rounded-full"
                         width={28}
@@ -128,7 +126,6 @@ export default async function InvoicesTable({
                   <td className="whitespace-nowrap px-3 py-3 dark:text-gray-200">
                     {formatCurrency(invoice.total_factura)}
                   </td>
- 
                   <td className="whitespace-nowrap px-3 py-3">
                     <InvoiceStatus status={invoice.status} />
                   </td>
@@ -144,6 +141,5 @@ export default async function InvoicesTable({
         </div>
       </div>
     </div>
-
   );
 }

@@ -71,6 +71,7 @@ export type InvoicesTable = {
   id: string;
   id_empresa: number;
   customer_id: string;
+  cif: string;
   name: string;
   email: string;
   image_url: string;

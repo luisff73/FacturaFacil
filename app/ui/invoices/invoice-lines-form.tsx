@@ -6,7 +6,7 @@ import { invoices_lines, ArticulosTableType, Customer } from '@/app/lib/definiti
 import { getArticulosForInvoice } from '@/app/lib/actions';
 import Image from 'next/image';
 
-const BLOB_URL = (process.env.NEXT_PUBLIC_BLOB_URL || 'https://tqqqihkzj4uwev0c.public.blob.vercel-storage.com').replace(/"/g, '');
+const BLOB_URL = (process.env.NEXT_PUBLIC_BLOB_URL || '').replace(/"/g, '');
 
 interface InvoiceLinesFormProps {
   initialLines?: invoices_lines[];

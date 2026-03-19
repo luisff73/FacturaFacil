@@ -3,7 +3,7 @@ import { User } from '@/app/lib/definitions';
 import { UpdateUser, DeleteUser } from '@/app/ui/users/buttons';
 import Image from 'next/image';
 
-const BLOB_URL = (process.env.NEXT_PUBLIC_BLOB_URL || 'https://tqqqihkzj4uwev0c.public.blob.vercel-storage.com').replace(/"/g, '');
+const BLOB_URL = (process.env.NEXT_PUBLIC_BLOB_URL || '').replace(/"/g, '');
 
 const getImageUrl = (image_url: string | null | undefined) => {
   if (!image_url) return '/user.png';

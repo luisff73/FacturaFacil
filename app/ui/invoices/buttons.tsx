@@ -8,7 +8,7 @@ export function CreateInvoice() {
       href="/dashboard/invoices/create"
       className="flex h-10 items-center rounded-lg bg-green-600 px-4 text-sm font-medium text-white transition-colors hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
     >
-      <span className="hidden md:block">Crear facturas</span>{' '}
+      <span className="hidden md:block">Nueva factura</span>{' '}
       <PlusIcon className="h-5 md:ml-4" />
     </Link>
   );
@@ -37,7 +37,7 @@ export function PrintInvoice({ id }: { id: string }) {
 }
 
 export function DeleteInvoice({ id }: { id: string }) {
-  const deleteInvoiceWithId = deleteInvoice.bind(null, id);
+  const deleteInvoiceWithId = deleteInvoice.bind(null, id); // bind es para pasarle el id a la función deleteInvoice
 
   return (
     <form action={deleteInvoiceWithId as any}>

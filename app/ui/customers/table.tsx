@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { UpdateCustomer, DeleteCustomer } from '@/app/ui/customers/buttons';
 import Search from '@/app/ui/search';
 
-const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || 'https://tqqqihkzj4uwev0c.public.blob.vercel-storage.com';
+const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || '';
 
 interface CustomersTableProps {
   customers: {

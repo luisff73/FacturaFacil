@@ -3,8 +3,8 @@
 'use client';
 
 import { Document, Page, Text, View, StyleSheet, Font, } from '@react-pdf/renderer';
-import { InvoicesTable } from '@/app/lib/definitions';
 import { formatCurrency, formatDateToLocal } from '@/app/lib/utils';
+import { InvoicesTable } from '@/app/lib/definitions';
 
 Font.register({
   family: 'Roboto',
@@ -24,9 +24,10 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'baseline'
+    alignItems: 'center'
   },
   title: { fontSize: 20, fontWeight: 700, color: '#111827' },
+  companyName: { fontSize: 13, color: '#4b5563', marginTop: 4 },
   date: { fontSize: 10, color: '#6b7280' },
   table: { width: 'auto' },
   tableHeader: {
@@ -46,12 +47,13 @@ const styles = StyleSheet.create({
   headerText: { fontSize: 10, fontWeight: 700, color: '#374151', textTransform: 'uppercase' },
   rowText: { fontSize: 9, color: '#4b5563' },
   colNum: { width: '10%' },
+  colCif: { width: '9%' },
   colName: { width: '30%' },
   colDate: { width: '12%', textAlign: 'left' },
   colBaseImponible: { width: '12%', textAlign: 'right' },
-  colIva: { width: '12%', textAlign: 'right' },
-  colRecargo: { width: '12%', textAlign: 'right' },
-  colAmount: { width: '12%', textAlign: 'right' },
+  colIva: { width: '9%', textAlign: 'right' },
+  colRecargo: { width: '9%', textAlign: 'right' },
+  colAmount: { width: '9%', textAlign: 'right' },
   summary: {
     marginTop: 20,
     paddingTop: 10,
@@ -61,38 +63,44 @@ const styles = StyleSheet.create({
   },
   summaryText: { fontSize: 12, fontWeight: 700, color: '#111827' }
 });
-
-export default function InvoicesListPDF({ invoices }: { invoices: InvoicesTable[] }) {
+export default function InvoicesListPDF({ invoices, companyName }: { invoices: InvoicesTable[], companyName: string }) {
   const totalAmount = invoices.reduce((acc, inv) => acc + inv.total_factura, 0);
 
   return (
     <Document title="Listado de Facturas">
       <Page size="A4" orientation="landscape" style={styles.page}>
         <View style={styles.header}>
-          <Text style={styles.title}>Listado de Facturas</Text>
+          <View style={{ alignItems: 'flex-start' }}>
+            <Text style={styles.title}>Listado de Facturas</Text>
+            {companyName ? <Text style={styles.companyName}>{companyName.trim().toUpperCase()}</Text> : null}
+          </View>
           <Text style={styles.date}>Generado el {new Date().toLocaleDateString()}</Text>
         </View>
 
         <View style={styles.table}>
           <View style={styles.tableHeader}>
             <Text style={[styles.headerText, styles.colNum]}>Nº Factura</Text>
-            <Text style={[styles.headerText, styles.colName]}>Cliente</Text>
             <Text style={[styles.headerText, styles.colDate]}>Fecha</Text>
+            <Text style={[styles.headerText, styles.colCif]}>CIF</Text>
+            <Text style={[styles.headerText, styles.colName]}>Cliente</Text>
             <Text style={[styles.headerText, styles.colBaseImponible]}>Base imp.</Text>
             <Text style={[styles.headerText, styles.colIva]}>IVA</Text>
             <Text style={[styles.headerText, styles.colRecargo]}>RE</Text>
             <Text style={[styles.headerText, styles.colAmount]}>Total</Text>
+
           </View>
 
           {invoices.map((invoice) => (
             <View key={invoice.id} style={styles.tableRow}>
               <Text style={[styles.rowText, styles.colNum]}>{new Date(invoice.date).getFullYear()}/{invoice.invoice_number}</Text>
-              <Text style={[styles.rowText, styles.colName]}>{invoice.name}</Text>
               <Text style={[styles.rowText, styles.colDate]}>{formatDateToLocal(invoice.date)}</Text>
+              <Text style={[styles.rowText, styles.colCif]}>{invoice.cif}</Text>
+              <Text style={[styles.rowText, styles.colName]}>{invoice.name}</Text>
               <Text style={[styles.rowText, styles.colBaseImponible]}>{formatCurrency(invoice.base_imponible)}</Text>
               <Text style={[styles.rowText, styles.colIva]}>{formatCurrency(invoice.total_iva)}</Text>
               <Text style={[styles.rowText, styles.colRecargo]}>{formatCurrency(invoice.total_recargo)}</Text>
               <Text style={[styles.rowText, styles.colAmount, { fontWeight: 700 }]}>{formatCurrency(invoice.total_factura)}</Text>
+
             </View>
           ))}
         </View>
