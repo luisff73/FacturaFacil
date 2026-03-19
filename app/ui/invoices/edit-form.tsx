@@ -1,6 +1,6 @@
 'use client';
 import { Customer, Invoice, invoices_lines } from '@/app/lib/definitions';
-import { CheckIcon, ClockIcon, CloudIcon, CurrencyEuroIcon, UserCircleIcon, CalendarIcon,} from '@heroicons/react/24/outline';
+import { CheckIcon, ClockIcon, CloudIcon, CurrencyEuroIcon, UserCircleIcon, CalendarIcon, HashtagIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { updateInvoice, State } from '@/app/lib/actions';
@@ -8,7 +8,7 @@ import { useActionState, useState } from 'react';
 import InvoiceLinesForm from '@/app/ui/invoices/invoice-lines-form';
 import React from 'react';
 
-export default function EditInvoiceForm({invoice, customers, lines, empresaIva,}: {
+export default function EditInvoiceForm({ invoice, customers, lines, empresaIva, }: {
   invoice: Invoice;
   customers: Customer[];
   lines: invoices_lines[];
@@ -17,8 +17,15 @@ export default function EditInvoiceForm({invoice, customers, lines, empresaIva,}
   const initialState: State = { message: '', errors: {} };
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id); //bind para pasar el id de la factura
   const [state, formAction] = useActionState(updateInvoiceWithId, initialState); //useActionState para manejar el estado de la accion de editar la factura
-  const [selectedCustomerId, setSelectedCustomerId] = useState(invoice.customer_id); //useState para manejar el id del cliente seleccionado
+  const [selectedCustomerId, setSelectedCustomerId] = useState(state.values?.customerId || invoice.customer_id); //useState para manejar el id del cliente seleccionado
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId); //find para encontrar el cliente seleccionado
+
+  // Sincronizar el cliente seleccionado si hay un error de validación
+  React.useEffect(() => {
+    if (state.values?.customerId) {
+      setSelectedCustomerId(state.values.customerId);
+    }
+  }, [state.values?.customerId]);
 
   // Calcular la tasa de RE basada en el IVA (Estándares en España)
   let empresaRe = 0.5;
@@ -30,7 +37,7 @@ export default function EditInvoiceForm({invoice, customers, lines, empresaIva,}
     if (e.key === 'Enter') {
       const target = e.target as HTMLElement;
       if (
-        target.tagName === 'TEXTAREA' || 
+        target.tagName === 'TEXTAREA' ||
         (target.tagName === 'BUTTON' && (target as HTMLButtonElement).type === 'submit')
       ) {
         return;
@@ -41,7 +48,7 @@ export default function EditInvoiceForm({invoice, customers, lines, empresaIva,}
       const focusableElements = Array.from(
         form.querySelectorAll('input:not([type="hidden"]), select, textarea, button:not([disabled])')
       ) as HTMLElement[];
-      
+
       const index = focusableElements.indexOf(target);
       if (index > -1 && index < focusableElements.length - 1) {
         focusableElements[index + 1].focus();
@@ -57,7 +64,7 @@ export default function EditInvoiceForm({invoice, customers, lines, empresaIva,}
         <div className="mb-4 grid grid-cols-1 md:grid-cols-12 gap-6">
 
           {/* Seleccion de cliente */}
-          <div className="flex flex-col col-span-8">
+          <div className="flex flex-col col-span-1 md:col-span-7">
             <label htmlFor="customer" className="mb-2 block text-sm font-medium">
               Seleccione un cliente
             </label>
@@ -66,7 +73,7 @@ export default function EditInvoiceForm({invoice, customers, lines, empresaIva,}
                 id="customer"
                 name="customerId"
                 className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                defaultValue={invoice.customer_id}
+                value={selectedCustomerId}
                 onChange={(e) => setSelectedCustomerId(e.target.value)}
                 aria-describedby="customer-error"
               >
@@ -91,30 +98,56 @@ export default function EditInvoiceForm({invoice, customers, lines, empresaIva,}
             </div>
           </div>
 
-        {/* Seleccion de numero de factura */}
-        <div className="mb-4 col-span-2">
-          <label htmlFor="invoiceNumber" className="mb-2 block text-sm font-medium">
-            Número de la factura
-          </label>
-          <input
-            id="invoiceNumber"
-            name="invoiceNumber"
-            type="number"
-            step="any"
-            lang="en"
-            className="peer block w-full rounded-md border border-gray-200 py-2 text-sm outline-2 placeholder:text-gray-500 text-center"
-            defaultValue={invoice.invoice_number}
-            aria-describedby="invoiceNumber-error"
-          />
-          <div id="invoiceNumber-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.invoiceNumber &&
-              state.errors.invoiceNumber.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-              ))}
+          {/* Seleccion de serie */}
+          <div className="mb-4 col-span-1 md:col-span-1">
+            <label htmlFor="invoice_serie" className="mb-2 block text-sm font-medium text-center">
+              Serie
+            </label>
+
+              <input
+                id="invoice_serie"
+                name="invoice_serie"
+                type="text"
+                placeholder="A, B..."
+                className="peer block w-full rounded-md border border-gray-200 py-2 text-sm outline-2 placeholder:text-gray-500 text-center"
+                defaultValue={state.values?.invoice_serie || invoice.invoice_serie}
+                aria-describedby="serie-error"
+              />
+
+            <div id="serie-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.invoice_serie &&
+                state.errors.invoice_serie.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
+            </div>
           </div>
-        </div>
+
+          {/* Seleccion de numero de factura */}
+          <div className="mb-4 col-span-1 md:col-span-2">
+            <label htmlFor="invoiceNumber" className="mb-2 block text-sm font-medium">
+              Número de la factura
+            </label>
+            <input
+              id="invoiceNumber"
+              name="invoiceNumber"
+              type="number"
+              step="any"
+              lang="en"
+              className="peer block w-full rounded-md border border-gray-200 py-2 text-sm outline-2 placeholder:text-gray-500 text-center"
+              defaultValue={invoice.invoice_number}
+              aria-describedby="invoiceNumber-error"
+            />
+            <div id="invoiceNumber-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.invoiceNumber &&
+                state.errors.invoiceNumber.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
+            </div>
+          </div>
 
           {/* Seleccion de fecha */}
           <div className="col-span-2">
@@ -128,11 +161,11 @@ export default function EditInvoiceForm({invoice, customers, lines, empresaIva,}
                 type="date"
                 className="text-left peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-6 text-sm outline-2 placeholder:text-gray-500"
                 defaultValue={
-                  invoice.date 
-                  ? (typeof invoice.date === 'string' 
-                     ? invoice.date.split('T')[0] 
-                     : (invoice.date as any).toISOString().split('T')[0]) 
-                  : ''
+                  state.values?.fecha || (invoice.date
+                    ? (typeof invoice.date === 'string'
+                      ? invoice.date.split('T')[0]
+                      : (invoice.date as any).toISOString().split('T')[0])
+                    : '')
                 }
                 aria-describedby="fecha-error"
               />
@@ -244,7 +277,7 @@ export default function EditInvoiceForm({invoice, customers, lines, empresaIva,}
                   </div>
                 </div>
 
-                
+
                 {(selectedCustomer?.tiene_re || (invoice && Number(invoice.total_recargo) > 0)) && (
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">RE ({empresaRe}%)</span>

@@ -79,6 +79,7 @@ export default function InvoicesListPDF({ invoices, companyName }: { invoices: I
 
         <View style={styles.table}>
           <View style={styles.tableHeader}>
+            <Text style={[styles.headerText, styles.colNum]}>Serie</Text>
             <Text style={[styles.headerText, styles.colNum]}>Nº Factura</Text>
             <Text style={[styles.headerText, styles.colDate]}>Fecha</Text>
             <Text style={[styles.headerText, styles.colCif]}>CIF</Text>
@@ -92,6 +93,7 @@ export default function InvoicesListPDF({ invoices, companyName }: { invoices: I
 
           {invoices.map((invoice) => (
             <View key={invoice.id} style={styles.tableRow}>
+              <Text style={[styles.rowText, styles.colNum]}>{invoice.invoice_serie}</Text>
               <Text style={[styles.rowText, styles.colNum]}>{new Date(invoice.date).getFullYear()}/{invoice.invoice_number}</Text>
               <Text style={[styles.rowText, styles.colDate]}>{formatDateToLocal(invoice.date)}</Text>
               <Text style={[styles.rowText, styles.colCif]}>{invoice.cif}</Text>

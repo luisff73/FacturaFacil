@@ -33,6 +33,13 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
   const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(null);
   const [observacionesIndex, setObservaciones] = useState<number | null>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Sincronizar líneas con las iniciales si estas cambian (por ejemplo, tras un error de validación)
+  useEffect(() => {
+    if (initialLines.length > 0) {
+      setLines(initialLines);
+    }
+  }, [initialLines]);
 
   const updateLine = (index: number, field: keyof invoices_lines, value: any) => {
     const newLines = [...lines];

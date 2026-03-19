@@ -8,6 +8,7 @@ import {
   CurrencyEuroIcon,
   UserCircleIcon,
   CalendarIcon,
+  HashtagIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
 import { createInvoice, State } from '@/app/lib/actions'; //importa el createInvoice del archivo actions.ts
@@ -18,8 +19,15 @@ import React from 'react'; // Added React import
 export default function Form({ customers, empresaIva }: { customers: Customer[], empresaIva: number }) {
   const initialState: State = { message: '', errors: {} };
   const [state, formAction] = useActionState(createInvoice, initialState);
-  const [selectedCustomerId, setSelectedCustomerId] = React.useState('');
+  const [selectedCustomerId, setSelectedCustomerId] = React.useState(state.values?.customerId || '');
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+
+  // Sincronizar el cliente seleccionado si hay un error de validación
+  React.useEffect(() => {
+    if (state.values?.customerId) {
+        setSelectedCustomerId(state.values.customerId);
+    }
+  }, [state.values?.customerId]);
 
   // Calcular la tasa de RE basada en el IVA (Estándares en España)
   let empresaRe = 0.5;
@@ -54,10 +62,10 @@ export default function Form({ customers, empresaIva }: { customers: Customer[],
     // Formulario para crear una factura
     <form action={formAction} onKeyDown={handleKeyDown}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        {/* Nombre y fecha de la factura */}
-        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Nombre, serie y fecha de la factura */}
+        <div className="mb-4 grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* Customer selection */}
-          <div className="flex flex-col">
+          <div className="flex flex-col md:col-span-7">
             <label htmlFor="customer" className="mb-2 block text-sm font-medium">
               Seleccione un cliente
             </label>
@@ -66,7 +74,7 @@ export default function Form({ customers, empresaIva }: { customers: Customer[],
                 id="customer"
                 name="customerId"
                 className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                defaultValue=""
+                value={selectedCustomerId}
                 onChange={(e) => setSelectedCustomerId(e.target.value)}
                 aria-describedby="customer-error"
               >
@@ -91,8 +99,34 @@ export default function Form({ customers, empresaIva }: { customers: Customer[],
             </div>
           </div>
 
+          {/* Serie selection */}
+          <div className="flex flex-col md:col-span-2 text-center">
+            <label htmlFor="invoice_serie" className="mb-2 block text-sm font-medium">
+              Serie
+            </label>
+            <div className="relative">
+              <input
+                id="invoice_serie"
+                name="invoice_serie"
+                type="text"
+                placeholder="Serie"
+                className="peer block w-full rounded-md border border-gray-200 py-2 text-sm outline-2 placeholder:text-gray-500 text-center"
+                defaultValue={state.values?.invoice_serie || ''}
+                aria-describedby="serie-error"
+              />
+            </div>
+            <div id="serie-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.invoice_serie &&
+                state.errors.invoice_serie.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
+            </div>
+          </div>
+
           {/* Date selection */}
-          <div className="flex flex-col">
+          <div className="flex flex-col md:col-span-3">
             <label htmlFor="fecha" className="mb-2 block text-sm font-medium">
               Fecha de la factura
             </label>
@@ -102,7 +136,7 @@ export default function Form({ customers, empresaIva }: { customers: Customer[],
                 name="fecha"
                 type="date"
                 className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                defaultValue={new Date().toISOString().split('T')[0]}
+                defaultValue={state.values?.fecha || new Date().toISOString().split('T')[0]}
                 aria-describedby="fecha-error"
               />
               <CalendarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
@@ -119,7 +153,11 @@ export default function Form({ customers, empresaIva }: { customers: Customer[],
         </div>
 
         {/* Subformulario lineas de factura */}
-        <InvoiceLinesForm customer={selectedCustomer} empresaIva={empresaIva} />
+        <InvoiceLinesForm 
+          customer={selectedCustomer} 
+          empresaIva={empresaIva} 
+          initialLines={state.values?.lines ? JSON.parse(state.values.lines) : []}
+        />
 
         <div className="mt-6 flex flex-col md:flex-row gap-6 justify-between items-start md:items-end">
           {/* Invoice Status */}
@@ -219,7 +257,7 @@ export default function Form({ customers, empresaIva }: { customers: Customer[],
 
                 <div className="pt-3 border-t border-gray-200 flex justify-between items-end">
                   <span className="text-gray-900 font-extrabold uppercase tracking-widest text-[12px] mb-1">Total Factura</span>
-                  <div className="flex items-center gap-1 text-2xl font-black text-green-600">
+                  <div className="flex items-center gap-1 font-black text-green-600">
                     <span id="total_factura-display">0.00</span>
                     <CurrencyEuroIcon className="h-6 w-6" />
                   </div>

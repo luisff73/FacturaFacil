@@ -31,6 +31,7 @@ const FormSchema = z.object({
   }),
   fecha: z.string().min(1, { message: "Por favor selecciona una fecha para la factura." }),
   lines: z.string().optional(),
+  invoice_serie: z.string().min(1, { message: "La serie es obligatoria." }).optional(),
 });
 
 const CreateInvoice = FormSchema.omit({ id: true });
@@ -80,9 +81,19 @@ export type State = {
     id_empresa?: string[];
     fecha?: string[];
     invoiceNumber?: string[];
+    invoice_serie?: string[];
   };
   message: string;
   success?: boolean;
+  values?: {
+    customerId?: string;
+    invoice_serie?: string;
+    status?: string;
+    fecha?: string;
+    base_imponible?: string;
+    invoiceNumber?: string;
+    lines?: string;
+  };
 };
 
 export async function createInvoice(prevState: State, formData: FormData): Promise<State> {
@@ -95,18 +106,27 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
     status: formData.get("status"),
     lines: formData.get("lines"),
     fecha: formData.get("fecha"),
+    invoice_serie: formData.get("invoice_serie"),
   });
 
   // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: "Missing Fields. Failed to Crear Factura.",
+      message: "Por favor, corrige los errores del formulario.",
+      values: {
+        customerId: formData.get("customerId") as string,
+        invoice_serie: formData.get("invoice_serie") as string,
+        status: formData.get("status") as string,
+        fecha: formData.get("fecha") as string,
+        base_imponible: formData.get("base_imponible") as string,
+        lines: formData.get("lines") as string,
+      }
     };
   }
 
   // Prepare data for insertion into the database
-  const { customerId, base_imponible, status, lines, fecha } = validatedFields.data;
+  const { customerId, base_imponible, status, lines, fecha, invoice_serie } = validatedFields.data;
   const idEmpresa = await requireEmpresaId();
 
   // Obtener datos del cliente y de la empresa para calcular impuestos
@@ -147,6 +167,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
         total_recargo, 
         total_factura, 
         invoice_number,
+        invoice_serie,
         cif
       )
       VALUES (
@@ -162,6 +183,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
          FROM invoices 
          WHERE id_empresa = ${idEmpresa} 
          AND date_part('year', date) = date_part('year', ${fecha}::date)),
+        ${invoice_serie},
         ${customer.cif}
       )
       RETURNING id, invoice_number;
@@ -205,16 +227,26 @@ export async function updateInvoice(
     lines: formData.get("lines"),
     fecha: formData.get("fecha"),
     invoiceNumber: formData.get("invoiceNumber"),
+    invoice_serie: formData.get("invoice_serie"),
   });
 
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: "Faltan campos por rellenar. No se ha podido actualizar la factura.",
+      values: {
+        customerId: formData.get("customerId") as string,
+        invoice_serie: formData.get("invoice_serie") as string,
+        status: formData.get("status") as string,
+        fecha: formData.get("fecha") as string,
+        base_imponible: formData.get("base_imponible") as string,
+        invoiceNumber: formData.get("invoiceNumber") as string,
+        lines: formData.get("lines") as string,
+      }
     };
   }
 
-  const { customerId, base_imponible, status, lines, fecha, invoiceNumber } = validatedFields.data;
+  const { customerId, base_imponible, status, lines, fecha, invoiceNumber, invoice_serie } = validatedFields.data;
   const idEmpresa = await requireEmpresaId();
 
   // Obtener datos del cliente y de la empresa para calcular impuestos
@@ -254,6 +286,7 @@ export async function updateInvoice(
             total_recargo = ${tax_rec_equivalenciaInCents}, 
             total_factura = ${totalInCents},
             invoice_number = ${invoiceNumber},
+            invoice_serie = ${invoice_serie},
             cif = ${customer.cif}
         WHERE id = ${id} AND id_empresa = ${idEmpresa}
       `;

@@ -4,8 +4,9 @@
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import InvoicesListPDF from './invoices-list-pdf';
 import { InvoicesTable } from '@/app/lib/definitions';
-import { DocumentArrowDownIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { useEffect, useState, useMemo } from 'react';
+import { formatDateToLocal } from '@/app/lib/utils';
+import { DocumentArrowDownIcon, FunnelIcon, XMarkIcon, ChevronDownIcon, TableCellsIcon, PrinterIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState, useMemo, useRef } from 'react';
 
 export default function ExportListButton({ invoices, companyName }: { invoices: InvoicesTable[], companyName: string }) {
   const [isClient, setIsClient] = useState(false);
@@ -18,11 +19,51 @@ export default function ExportListButton({ invoices, companyName }: { invoices: 
   const [statusFilter, setStatusFilter] = useState('');
   const [numberFilter, setNumberFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false); // showExportMenu es el valor actual del desplegable de exportación el valor es true si el desplegable esta abierto y false si esta cerrado
+  const menuRef = useRef<HTMLDivElement>(null); // menuRef es la referencia al elemento que contiene el desplegable de exportación
 
 
   useEffect(() => {
     setIsClient(true);
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleExportCSV = () => {
+    const headers = ['Serie', 'Nº Factura', 'Fecha', 'Cliente', 'CIF', 'Base Imponible', 'IVA', 'Recargo', 'Total', 'Estado'];
+    
+    const csvContent = [
+      headers.join(';'),
+      ...filteredInvoices.map(invoice => [
+        `"${invoice.invoice_serie}"`,
+        `"${new Date(invoice.date).getFullYear()}/${invoice.invoice_number}"`,
+        `"${formatDateToLocal(invoice.date)}"`,
+        `"${invoice.name}"`,
+        `"${invoice.cif}"`,
+        (invoice.base_imponible / 100).toString().replace('.', ','),
+        (invoice.total_iva / 100).toString().replace('.', ','),
+        (invoice.total_recargo / 100).toString().replace('.', ','),
+        (invoice.total_factura / 100).toString().replace('.', ','),
+        `"${invoice.status}"`
+      ].join(';'))
+    ].join('\n');
+
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `Listado_Facturas_${new Date().toISOString().split('T')[0]}.csv`);
+    link.click();
+    setShowExportMenu(false);
+  };
 
   // Función para filtrar las facturas
   const filteredInvoices = useMemo(() => {
@@ -54,21 +95,44 @@ export default function ExportListButton({ invoices, companyName }: { invoices: 
     <div className="flex flex-col items-end gap-2">
       <div className="flex items-center gap-2">
 
-        {/* Botón de Descarga */}
+        {/* Botón de Exportación con Desplegable */}
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={() => setShowExportMenu(!showExportMenu)} // al hacer clic en el botón se abre o se cierra el desplegable
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm font-medium"
+            aria-label="Opciones de exportación"
+          >
+            <DocumentArrowDownIcon className="w-5 h-5" />
+            <span>Exportar ({filteredInvoices.length})</span>
+            <ChevronDownIcon className={`w-4 h-4 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
+          </button>
 
-        <PDFDownloadLink
-          document={<InvoicesListPDF invoices={filteredInvoices} companyName={companyName} />}
-          fileName={`Listado_Facturas_${new Date().toISOString().split('T')[0]}.pdf`}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm font-medium"
-          aria-label="Exportar listado de facturas"
-        >
-          {({ loading }) => (
-            <>
-              <DocumentArrowDownIcon className="w-5 h-5" />
-              {loading ? 'Preparando...' : `Exportar (${filteredInvoices.length}) PDF`}
-            </>
+          {showExportMenu && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+              <PDFDownloadLink
+                key={`pdf-${filteredInvoices.length}-${desdeFecha}-${hastaFecha}-${filtroCliente}-${statusFilter}-${numberFilter}`}
+                document={<InvoicesListPDF invoices={filteredInvoices} companyName={companyName} />}
+                fileName={`Listado_Facturas_${new Date().toISOString().split('T')[0]}.pdf`}
+                className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors w-full"
+              >
+                {({ loading }) => (
+                  <>
+                    <PrinterIcon className="w-5 h-5 text-gray-400 group-hover:text-blue-500" />
+                    <span>{loading ? 'Generando PDF...' : 'Imprimir PDF'}</span>
+                  </>
+                )}
+              </PDFDownloadLink>
+
+              <button
+                onClick={handleExportCSV}
+                className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors w-full text-left"
+              >
+                <TableCellsIcon className="w-5 h-5 text-gray-400 group-hover:text-blue-500" />
+                <span>Exportar a CSV</span>
+              </button>
+            </div>
           )}
-        </PDFDownloadLink>
+        </div>
 
         {/* Botón para mostrar/ocultar filtros */}
         <button
