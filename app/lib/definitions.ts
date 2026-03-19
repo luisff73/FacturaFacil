@@ -55,7 +55,9 @@ export type Invoice = {
   total_recargo: number;
   total_factura: number;
   invoice_number: number;
-  invoice_serie:string;
+  invoice_serie: string;
+  hash?: string;
+  prev_hash?: string;
 };
 
 export type LatestInvoice = {
@@ -84,6 +86,8 @@ export type InvoicesTable = {
   total_factura: number;
   invoice_number:number;
   invoice_serie:string;  
+  hash?: string;
+  prev_hash?: string;
 };
 
 export type invoices_lines = {

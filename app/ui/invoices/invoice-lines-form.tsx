@@ -13,9 +13,10 @@ interface InvoiceLinesFormProps {
   customer?: Customer;
   invoice?: any; // Usamos any para evitar problemas de tipos circulares o simplemente Invoice
   empresaIva?: number;
+  onTotalChange?: (total: number) => void;
 }
 
-export default function InvoiceLinesForm({ initialLines = [], customer, invoice, empresaIva = 21 }: InvoiceLinesFormProps) {
+export default function InvoiceLinesForm({ initialLines = [], customer, invoice, empresaIva = 21, onTotalChange }: InvoiceLinesFormProps) {
   const [lines, setLines] = useState<Partial<invoices_lines>[]>(
     initialLines.length > 0
       ? initialLines
@@ -94,8 +95,13 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
     if (ivaDisplay) ivaDisplay.textContent = tax_iva.toFixed(2); // el ivaDisplay es el input visible que muestra el total de la factura
     if (reDisplay) reDisplay.textContent = rec_equivalencia.toFixed(2); // el reDisplay es el input visible que muestra el total de la factura
     if (totalDisplay) totalDisplay.textContent = total.toFixed(2); // el totalDisplay es el input visible que muestra el total de la factura
+    
+    // Notificar al padre si el total ha cambiado
+    if (onTotalChange) {
+      onTotalChange(total);
+    }
 
-  }, [lines, customer, empresaIva, invoice]); // el useeffect se ejecuta cada vez que cambia lines, customer, empresaIva o invoice
+  }, [lines, customer, empresaIva, invoice, onTotalChange]); // el useeffect se ejecuta cada vez que cambia lines, customer, empresaIva o invoice
 
   const addLine = () => { // la funcion addLine se ejecuta cuando se hace clic en el boton de añadir linea
     setLines([

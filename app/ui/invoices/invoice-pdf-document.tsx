@@ -4,9 +4,11 @@
 
 'use client';
 
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { Invoice, invoices_lines, Customer, Empresas } from '@/app/lib/definitions';
 import { formatCurrency, formatDateToLocal } from '@/app/lib/utils';
+import { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
 
 // Registramos la fuente roboto
 Font.register({
@@ -176,6 +178,24 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
     fontSize: 8,
   },
+  qrContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#f3f4f6',
+    paddingTop: 10,
+    gap: 15,
+  },
+  qrImage: {
+    width: 60,
+    height: 60,
+  },
+  qrText: {
+    fontSize: 7,
+    color: '#6b7280',
+    maxWidth: 200,
+  },
 });
 
 // Props del documento PDF
@@ -187,9 +207,34 @@ interface InvoicePDFProps {
 }
 
 export default function InvoicePDFDocument({ invoice, lines, customer, empresa }: InvoicePDFProps) {
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const isProforma = invoice.status === 'Proforma';
   const title = isProforma ? 'Factura Proforma' : 'Factura';
   const accentColor = isProforma ? '#64748b' : '#30374cff'; // Gris azulado para proforma, tu color para el resto
+
+  useEffect(() => {
+    const generateQR = async () => {
+      try {
+        // Enlace oficial tentativo Verifactu / AEAT para verificación de facturas
+        const dateStr = new Date(invoice.date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+        const invoiceNum = invoice.invoice_serie ? `${invoice.invoice_serie}-${invoice.invoice_number}` : invoice.invoice_number.toString();
+        // URL Oficial de Verifactu (AEAT) para verificación de facturas
+        const verifactuUrl = `https://www2.agenciatributaria.gob.es/wlpl/TIKE-CONT/v1/f?nif=${empresa.cif}&num=${invoiceNum}&fec=${dateStr}&imp=${Number(invoice.total_factura).toFixed(2)}`;
+        
+        const url = await QRCode.toDataURL(verifactuUrl, { 
+          margin: 1,
+          color: {
+            dark: '#1f2937',
+            light: '#ffffff'
+          }
+        });
+        setQrCodeUrl(url);
+      } catch (err) {
+        console.error('Error generating QR code:', err);
+      }
+    };
+    generateQR();
+  }, [invoice, empresa]);
 
   return (
     <Document title={`${title} ${invoice.id}`}>
@@ -198,7 +243,7 @@ export default function InvoicePDFDocument({ invoice, lines, customer, empresa }
         <View style={styles.header}>
           <View style={styles.titleContainer}>
             <Text style={[styles.invoiceTitle, { color: accentColor }]}>{title}</Text>
-            <Text style={styles.invoiceMeta}>Nº: {new Date(invoice.date).getFullYear()}/{invoice.invoice_number}</Text>
+            <Text style={styles.invoiceMeta}>Nº: {new Date(invoice.date).getFullYear()}/{invoice.invoice_serie ? invoice.invoice_serie + '/' : ''}{invoice.invoice_number}</Text>
             <Text style={styles.invoiceMeta}>Fecha: {formatDateToLocal(invoice.date)}</Text>
           </View>
           <View style={styles.companyInfo}>
@@ -277,6 +322,22 @@ export default function InvoicePDFDocument({ invoice, lines, customer, empresa }
             <Text>Gracias por su confianza.</Text>
             <Text style={{ marginTop: 4 }}>{empresa.nombre} - Generado por FacturaFácil</Text>
           </View>
+
+          {/* QR Verifactu AEAT */}
+          {!isProforma && qrCodeUrl && (
+            <View style={styles.qrContainer}>
+              <Image src={qrCodeUrl} style={styles.qrImage} />
+              <View style={styles.qrText}>
+                <Text style={{ fontWeight: 700, color: '#2563eb', marginBottom: 2 }}>VERI*FACTU</Text>
+                <Text>Esta factura cumple con los requisitos de la normativa de la Agencia Tributaria.</Text>
+                {invoice.hash && (
+                  <Text style={{ marginTop: 3, fontSize: 5, color: '#d1d5db', fontFamily: 'Courier' }}>
+                    HUÉRGARA: {invoice.hash.substring(0, 16)}...
+                  </Text>
+                )}
+              </View>
+            </View>
+          )}
         </View>
       </Page>
     </Document>

@@ -26,7 +26,11 @@ export default async function Page() {
           },
         ]}
       />
-      <Form customers={customers} empresaIva={empresa?.iva || 21} />
+      <Form 
+        customers={customers} 
+        empresaIva={empresa?.iva || 21} 
+        empresaCif={empresa?.cif || ''} 
+      />
     </main>
   );
 }

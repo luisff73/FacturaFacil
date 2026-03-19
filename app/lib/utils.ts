@@ -1,4 +1,5 @@
 import { Revenue } from './definitions';
+import crypto from 'crypto';
 
 // Función para obtener el color del usuario
 export const getUserColor = (session: any) => {
@@ -71,4 +72,11 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     '...',
     totalPages,
   ];
+};
+
+/**
+ * Genera un Hash SHA-256 para el encadenamiento de facturas (Verifactu)
+ */
+export const generateInvoiceHash = (data: string) => {
+  return crypto.createHash('sha256').update(data).digest('hex').toUpperCase();
 };

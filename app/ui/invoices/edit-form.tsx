@@ -4,15 +4,17 @@ import { CheckIcon, ClockIcon, CloudIcon, CurrencyEuroIcon, UserCircleIcon, Cale
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { updateInvoice, State } from '@/app/lib/actions';
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import InvoiceLinesForm from '@/app/ui/invoices/invoice-lines-form';
+import QRCodePreview from '@/app/ui/invoices/qrcode-preview';
 import React from 'react';
 
-export default function EditInvoiceForm({ invoice, customers, lines, empresaIva, }: {
+export default function EditInvoiceForm({ invoice, customers, lines, empresaIva, empresaCif }: {
   invoice: Invoice;
   customers: Customer[];
   lines: invoices_lines[];
   empresaIva: number;
+  empresaCif: string;
 }) {
   const initialState: State = { message: '', errors: {} };
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id); //bind para pasar el id de la factura
@@ -257,8 +259,26 @@ export default function EditInvoiceForm({ invoice, customers, lines, empresaIva,
             </div>
           </fieldset>
 
-          {/* Totales de la factura*/}
-          <div className="w-full md:w-auto mt-6 md:mt-0">
+          {/* Totales de la factura y Vista Previa QR */}
+          <div className="w-full md:w-auto mt-6 md:mt-0 flex flex-col md:flex-row gap-6 items-start">
+            
+            {/* QR de Verifactu (Vista previa) */}
+            {invoice.status !== 'Proforma' && (
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center gap-2">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Vista previa QR Hacienda</p>
+                <div className="relative w-32 h-32 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100">
+                  <QRCodePreview 
+                    cif={empresaCif}
+                    serie={invoice.invoice_serie}
+                    numero={invoice.invoice_number}
+                    fecha={invoice.date}
+                    importe={invoice.total_factura}
+                  />
+                </div>
+                <p className="text-[8px] text-gray-500 text-center max-w-[120px]">Este código QR se incluirá automáticamente en el PDF oficial.</p>
+              </div>
+            )}
+
             <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-6 shadow-sm min-w-[280px]">
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-sm">

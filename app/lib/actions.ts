@@ -14,6 +14,7 @@ import {
   Empresas,
 } from "@/app/lib/definitions";
 import { requireEmpresaId } from "./data";
+import { generateInvoiceHash } from "./utils";
 import bcrypt from "bcrypt";
 
 // Define el esquema para FormSchema
@@ -132,11 +133,30 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
   // Obtener datos del cliente y de la empresa para calcular impuestos
   const [customerResult, empresaResult] = await Promise.all([
     sql`SELECT tiene_iva, tiene_re, cif FROM customers WHERE id = ${customerId} AND id_empresa = ${idEmpresa}`,
-    sql`SELECT iva FROM empresas WHERE id = ${idEmpresa}`,
+    sql`SELECT iva, cif FROM empresas WHERE id = ${idEmpresa}`,
   ]);
 
-  const customer = customerResult.rows[0];
-  const ivaEmpresa = Number(empresaResult.rows[0].iva) || 21;
+  const [customer, empresa] = [customerResult.rows[0], empresaResult.rows[0]];
+  const ivaEmpresa = Number(empresa.iva) || 21;
+
+  // Obtener el siguiente número de factura y el hash anterior para Verifactu
+  const [nextNumberResult, lastHashResult] = await Promise.all([
+    sql`
+      SELECT COALESCE(MAX(invoice_number), 0) + 1 as next_number 
+      FROM invoices 
+      WHERE id_empresa = ${idEmpresa} 
+      AND date_part('year', date) = date_part('year', ${fecha}::date)
+    `,
+    sql`
+      SELECT hash FROM invoices 
+      WHERE id_empresa = ${idEmpresa} 
+      ORDER BY date DESC, invoice_number DESC, id DESC 
+      LIMIT 1
+    `
+  ]);
+
+  const invoice_number = nextNumberResult.rows[0].next_number;
+  const prev_hash = lastHashResult.rows[0]?.hash || '';
   let reRate = 0.5;
   if (ivaEmpresa === 21) reRate = 5.2;
   else if (ivaEmpresa === 10) reRate = 1.4;
@@ -155,6 +175,11 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
 
   const totalInCents = base_imponibleInCents + tax_ivaInCents + tax_rec_equivalenciaInCents;
 
+  // Cálculo de la huella digital (Verifactu)
+  // Concatenamos datos según normativa: NIF_Emisor|Num_Serie-Num_Factura|Fecha|Total|PrevHash
+  const hashData = `${empresa.cif || ''}|${invoice_serie ? invoice_serie + '-' : ''}${invoice_number}|${fecha}|${totalInCents}|${prev_hash}`;
+  const hash = generateInvoiceHash(hashData);
+
   try {
     const result = await sql`
       INSERT INTO invoices (
@@ -168,7 +193,9 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
         total_factura, 
         invoice_number,
         invoice_serie,
-        cif
+        cif,
+        hash,
+        prev_hash
       )
       VALUES (
         ${customerId}, 
@@ -179,12 +206,11 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
         ${tax_ivaInCents}, 
         ${tax_rec_equivalenciaInCents}, 
         ${totalInCents}, 
-        (SELECT COALESCE(MAX(invoice_number), 0) + 1 
-         FROM invoices 
-         WHERE id_empresa = ${idEmpresa} 
-         AND date_part('year', date) = date_part('year', ${fecha}::date)),
+        ${invoice_number},
         ${invoice_serie},
-        ${customer.cif}
+        ${customer.cif},
+        ${hash},
+        ${prev_hash}
       )
       RETURNING id, invoice_number;
     `;

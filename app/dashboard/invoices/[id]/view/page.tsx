@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { formatCurrency, formatDateToLocal } from '@/app/lib/utils';
 import { roboto } from '@/app/ui/fonts';
 import { invoices_lines } from '@/app/lib/definitions';
+import QRCodePreview from '@/app/ui/invoices/qrcode-preview';
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -39,11 +40,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <div className="flex gap-4">
           <PrintButton />
           {invoice && customer && empresa && (
-            <ExportPDFButton 
-              invoice={invoice} 
-              lines={lines} 
-              customer={customer} 
-              empresa={empresa} 
+            <ExportPDFButton
+              invoice={invoice}
+              lines={lines}
+              customer={customer}
+              empresa={empresa}
             />
           )}
         </div>
@@ -55,7 +56,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <div className="flex justify-between items-start border-b-2 border-gray-100 pb-8 mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-800 uppercase tracking-tight mb-2">Factura</h1>
-            <p className="text-gray-500 font-medium">Nº: {invoice.id.substring(0, 8).toUpperCase()}</p>
+            <p className="text-gray-500 font-medium tracking-wide">
+              Nº: {new Date(invoice.date).getFullYear()}/{invoice.invoice_serie ? invoice.invoice_serie + '/' : ''}{invoice.invoice_number}
+            </p>
             <p className="text-gray-500 font-medium">Fecha: {formatDateToLocal(invoice.date)}</p>
           </div>
           <div className="text-right">
@@ -135,9 +138,39 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           </div>
         </div>
 
-        <div className="pt-6 border-t border-gray-100 text-center text-gray-400 text-xs">
-          <p>Gracias por su confianza.</p>
-          <p className="mt-1">{empresa?.nombre} - Generado por FacturaFácil</p>
+        <div className="pt-6 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="text-center md:text-left text-gray-400 text-xs">
+            <p>Gracias por su confianza.</p>
+            <p className="mt-1">{empresa?.nombre} - Generado por FacturaFácil</p>
+          </div>
+
+          {/* QR de verificación Verifactu (AEAT) */}
+          {invoice.status !== 'Proforma' && empresa?.cif && (
+            <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100 print:bg-transparent print:border-none">
+              <div className="w-16 h-16 bg-white p-1 rounded-lg shadow-sm border border-gray-100">
+                <QRCodePreview 
+                  cif={empresa.cif}
+                  serie={invoice.invoice_serie}
+                  numero={invoice.invoice_number}
+                  fecha={invoice.date}
+                  importe={invoice.total_factura}
+                  size={64}
+                />
+              </div>
+              <div className="text-left max-w-[200px]">
+                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-tight flex items-center gap-1.5">
+                  VERI*FACTU
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(34,197,94,1)]" />
+                </p>
+                <p className="text-[8px] text-gray-500 mt-1 font-medium leading-tight">Esta factura cumple con los requisitos de la normativa de la Agencia Tributaria.</p>
+                {invoice.hash && (
+                  <div className="mt-2 text-[7px] text-gray-300 font-mono break-all leading-none bg-gray-50/50 p-1 rounded border border-gray-100/50">
+                    ID_HUÉRGARA: {invoice.hash.substring(0, 16)}...
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </footer>
     </main>
