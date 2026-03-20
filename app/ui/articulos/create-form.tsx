@@ -2,13 +2,13 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { createArticulo, uploadImage } from '@/app/lib/actions';
+import { createArticulo, uploadImage } from '@/app/lib/actions'; // esta es la accion que crea el articulo y sube la imagen
 import { ArticulosTableType } from '@/app/lib/definitions';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
 
-interface FormProps {
-  articulos: ArticulosTableType[];
+interface FormProps { 
+  articulos: ArticulosTableType[]; // recibe todos los artículos de la funcion fetchArticulos() de dashboard/articulos/page.tsx
 }
 
 const CreateArticulosForm: React.FC<FormProps> = () => {
@@ -16,23 +16,24 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
   const [state, setState] = useState<{ errors: { codigo?: string[]; descripcion?: string[]; precio?: string[]; iva?: string[]; stock?: string[]; imagen?: string[] }, message: string }>({ errors: {}, message: '' });
   const router = useRouter();
 
-  const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.target as HTMLFormElement);
-    const fileInput = inputFileRef.current?.files?.[0];
-    let imageUrl = '';
+  const formAction = async (event: React.FormEvent<HTMLFormElement>) => { // funcion que se ejecuta al enviar el formulario
+    event.preventDefault();  // evita que la pagina se recargue al enviar el formulario
+    const formData = new FormData(event.target as HTMLFormElement); // crea un objeto FormData con los datos del formulario
+    const fileInput = inputFileRef.current?.files?.[0]; // obtiene el archivo seleccionado del input file
+    let imageUrl = ''; 
 
-    if (fileInput && fileInput.size > 0) {
+    if (fileInput && fileInput.size > 0) { // si se ha seleccionado un archivo y tiene tamaño
       // Crear un FormData con solo el archivo para enviarlo a la Server Action
       const uploadData = new FormData();
       uploadData.append('file', fileInput);
       
-      const uploadedPath = await uploadImage(uploadData);
-      if (uploadedPath) {
-        imageUrl = uploadedPath;
+      const uploadedPath = await uploadImage(uploadData); // sube la imagen a la carpeta de imagenes en blob storage
+      if (uploadedPath) { // si la imagen se ha subido correctamente
+        imageUrl = uploadedPath; // almacena la ruta de la imagen
       }
     }
 
+    // crea un objeto con los datos del formulario
     const data = {
       codigo: formData.get('codigo') as string,
       descripcion: formData.get('descripcion') as string,
@@ -44,17 +45,17 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
 
     try {
       await createArticulo(data);
-      router.push('/dashboard/articulos');
+      router.push('/dashboard/articulos'); 
     } catch (error) {
       if (error instanceof Error) {
-        setState({ errors: (error as any).errors || {}, message: error.message });
+        setState({ errors: (error as any).errors || {}, message: error.message }); // actualiza el estado del formulario y muestra los errores
       }
     }
   };
 
   return (
     // Formulario para crear un artículo
-    <form onSubmit={formAction}>
+    <form onSubmit={formAction}> 
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Articulo Código */}
         <div className="mb-4">
@@ -196,9 +197,9 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
             <input
               id="imagen"
               name="file"
-              ref={inputFileRef}
-              type="file"
-              accept="image/jpeg, image/png, image/webp"
+              ref={inputFileRef} // referencia al input file para poder acceder a el
+              type="file" // tipo de input file para poder subir archivos
+              accept="image/jpeg, image/png, image/webp" 
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="imagen-error"
             />

@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { signIn, auth, signOut } from "@/auth";
 import { AuthError } from "next-auth";
+import { validateDocument } from "@/app/lib/valitacionnifcif";
 import {
   Customer,
   ArticulosTableType,
@@ -54,8 +55,8 @@ const CustomerSchema = z.object({
   poblacion: z.string().min(1, { message: "La población es obligatoria." }),
   provincia: z.string().min(1, { message: "La provincia es obligatoria." }),
   telefono: z.string().optional(),
-  cif: z.string().regex(/^[ABCDEFGHJNPQRSUVW]\d{7}[0-9A-J]$/i, {
-    message: "El formato del CIF no es válido (ej: A1234567B).",
+  cif: z.string().refine((value) => validateDocument(value), { // refine es una funcion que valida el campo de zod
+    message: "El formato del NIF/CIF no es válido.",
   }),
   pais: z.string().min(1, { message: "El país es obligatorio." }),
   id_empresa: z.number().optional(),
@@ -98,8 +99,6 @@ export type State = {
 };
 
 export async function createInvoice(prevState: State, formData: FormData): Promise<State> {
-
-
   // Valida los campos del formulario. usando zod
   const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get("customerId"),
@@ -500,6 +499,8 @@ export async function createArticulo(
   // Devolver el artículo creado
   return result.rows[0];
 }
+
+// Función para eliminar una imagen de un artículo
 export async function deleteArticuloImage(articuloId: number, imageId: number) {
   try {
     const result = await sql`
@@ -680,8 +681,10 @@ export async function createEmpresa(
 
 export async function updateUserCss(css: string) {
   const session = await auth();
+  
+  // Si no hay sesión (ej: el usuario está cerrando sesión), no lanzamos error, cerramos silenciosamente.
   if (!session?.user?.email) {
-    throw new Error("No session found");
+    return { success: false, message: "No active session" };
   }
 
   try {
@@ -690,9 +693,11 @@ export async function updateUserCss(css: string) {
       SET css = ${css}
       WHERE email = ${session.user.email}
     `;
+    return { success: true };
   } catch (error) {
+    // Si la base de datos falla, aquí sí queremos que Sentry nos avise.
     console.error("Database Error: Failed to Update User CSS.", error);
-    throw new Error("Failed to update user CSS.");
+    throw new Error(`Failed to update user CSS for ${session.user.email}`);
   }
 }
 

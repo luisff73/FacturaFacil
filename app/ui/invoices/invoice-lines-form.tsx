@@ -22,8 +22,9 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       ? initialLines
       : [{ linea: 1, descripcion: '', observaciones: '', cantidad: 1, precio: 0, total: 0, id_articulo: 0 }]
   );
+  const [prevLinesLength, setPrevLinesLength] = useState(lines.length);
 
-  const [ settax_ivaDetails] = useState({
+  const [settax_ivaDetails] = useState({
     bi: 0,
     iva: 0,
     re: 0,
@@ -34,11 +35,11 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
   const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(null);
   const [observacionesIndex, setObservaciones] = useState<number | null>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Sincronizar líneas con las iniciales si estas cambian (por ejemplo, tras un error de validación)
+
   useEffect(() => {
     if (initialLines.length > 0) {
       setLines(initialLines);
+      setPrevLinesLength(initialLines.length);
     }
   }, [initialLines]);
 
@@ -81,7 +82,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
 
     const total = bi + tax_iva + rec_equivalencia;
 
-    // settax_ivaDetails({ bi, iva: tax_iva, re: rec_equivalencia, total });
+   
 
     // Actualizar campos del formulario principal mediante el DOM para reflejar el desglose
     const biInput = document.querySelector('input[name="base_imponible"]') as HTMLInputElement;
@@ -95,7 +96,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
     if (ivaDisplay) ivaDisplay.textContent = tax_iva.toFixed(2); // el ivaDisplay es el input visible que muestra el total de la factura
     if (reDisplay) reDisplay.textContent = rec_equivalencia.toFixed(2); // el reDisplay es el input visible que muestra el total de la factura
     if (totalDisplay) totalDisplay.textContent = total.toFixed(2); // el totalDisplay es el input visible que muestra el total de la factura
-    
+
     // Notificar al padre si el total ha cambiado
     if (onTotalChange) {
       onTotalChange(total);
@@ -247,10 +248,11 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                 {/* <label className="block text-xs font-medium text-gray-500 mb-1 leading-none md:hidden">Observaciones</label> */}
                 <button
                   type="button"
+                  tabIndex={-1}
                   onClick={() => setObservaciones(index)}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all border ${line.observaciones
-                      ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
-                      : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700'
+                    ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
+                    : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700'
                     }`}
                   title="Editar observaciones"
                 >
@@ -267,12 +269,17 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                 <div className="flex flex-col">
                   <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">Cant.</label>
                   <input
-                    type="number"
-                    step="any" // permite decimales
-                    lang="en" // fuerza el uso del punto como separador decimal
+                    type="text"
+                    inputMode="decimal"
                     value={line.cantidad || 1}
-                    onChange={(e) => updateLine(index, 'cantidad', e.target.value)}
-                    className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 text-center"
+                    onChange={(e) => {
+                      // Permitir solo números y un solo punto
+                      const val = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
+                      const parts = val.split('.');
+                      const finalVal = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : val;
+                      updateLine(index, 'cantidad', finalVal);
+                    }}
+                    className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 text-center font-mono"
                   />
                 </div>
 
@@ -280,12 +287,17 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                 <div className="flex flex-col">
                   <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">Precio</label>
                   <input
-                    type="number"
-                    step="any" // permite decimales
-                    lang="en" // fuerza el uso del punto como separador decimal
+                    type="text"
+                    inputMode="decimal"
                     value={line.precio || 0}
-                    onChange={(e) => updateLine(index, 'precio', e.target.value)}
-                    className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 text-center"
+                    onChange={(e) => {
+                      // Normalización total de comas y basura
+                      const val = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
+                      const parts = val.split('.');
+                      const finalVal = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : val;
+                      updateLine(index, 'precio', finalVal);
+                    }}
+                    className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 text-center font-mono"
                   />
                 </div>
 
@@ -302,6 +314,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                   <label className="block text-[10px] font-medium text-gray-400 mb-1 md:hidden uppercase">Borrar</label>
                   <button
                     type="button"
+                    tabIndex={-1}
                     onClick={() => removeLine(index)}
                     className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full transition-colors mt-0.5 md:mt-0"
                     title="Eliminar línea"
@@ -341,7 +354,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                 <XMarkIcon className="h-5 w-5 text-gray-500" />
               </button>
             </div>
-            <div className="p-4"> 
+            <div className="p-4">
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                 Añade detalles adicionales o notas específicas para esta línea de la factura.
               </p>

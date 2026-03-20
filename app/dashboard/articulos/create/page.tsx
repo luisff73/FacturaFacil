@@ -3,12 +3,12 @@ import Form from '@/app/ui/articulos/create-form';
 import Breadcrumbs from '@/app/ui/articulos/breadcrumbs';
 import { Metadata } from 'next';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = { 
   title: 'Alta de artículos',
 };
 
 export default async function Page() {
-  const articulos = await fetchArticulos();
+  const articulos = await fetchArticulos(); // obtiene todos los artículos
 
   return (
     <main>
