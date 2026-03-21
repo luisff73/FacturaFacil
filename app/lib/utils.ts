@@ -3,7 +3,7 @@ import crypto from 'crypto';
 
 // Función para obtener el color del usuario
 export const getUserColor = (session: any) => {
-  return (session?.user as any)?.css || '#4CAF50';
+  return (session?.user as any)?.css || '#1a1c1eff';
 };
 
 // Función para formatear la moneda

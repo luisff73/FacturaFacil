@@ -1,4 +1,4 @@
-import { fetchCustomers, fetchEmpresaById, requireEmpresaId } from '@/app/lib/data';
+import { fetchCustomers, fetchEmpresaById, requireEmpresaId, fetchSeries } from '@/app/lib/data';
 import Form from '@/app/ui/invoices/create-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { Metadata } from 'next';
@@ -8,9 +8,10 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const [customers, empresaId] = await Promise.all([
+  const [customers, empresaId, series] = await Promise.all([
     fetchCustomers(),
     requireEmpresaId(),
+    fetchSeries(),
   ]);
   const empresa = await fetchEmpresaById(empresaId.toString());
 
@@ -28,6 +29,7 @@ export default async function Page() {
       />
       <Form 
         customers={customers} 
+        series={series}
         empresaIva={empresa?.iva || 21} 
         empresaCif={empresa?.cif || ''} 
       />

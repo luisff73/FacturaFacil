@@ -1,5 +1,6 @@
 'use client';
 import { Customer } from '@/app/lib/definitions';
+import { Series } from '@/app/lib/definitions';
 import Link from 'next/link';
 import {
   CheckIcon,
@@ -10,26 +11,26 @@ import {
   CalendarIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
-import { createInvoice, State } from '@/app/lib/actions'; 
+import { createInvoice, State } from '@/app/lib/actions';
 import { useActionState, useState, useEffect } from 'react';
 import InvoiceLinesForm from '@/app/ui/invoices/invoice-lines-form';
 import QRCodePreview from '@/app/ui/invoices/qrcode-preview';
 import React from 'react';
 
-export default function Form({ customers, empresaIva, empresaCif }: { customers: Customer[], empresaIva: number, empresaCif: string }) {
+export default function Form({ customers, series, empresaIva, empresaCif }: { customers: Customer[], series: Series[], empresaIva: number, empresaCif: string }) {
   const initialState: State = { message: '', errors: {} };
   const [state, formAction] = useActionState(createInvoice, initialState);
   const [selectedCustomerId, setSelectedCustomerId] = React.useState(state.values?.customerId || '');
   const [realTimeTotal, setRealTimeTotal] = React.useState(0);
   const [currentDate, setCurrentDate] = React.useState(state.values?.fecha || new Date().toISOString().split('T')[0]);
-  const [currentSerie, setCurrentSerie] = React.useState(state.values?.invoice_serie || '');
-  
+  const [currentSerie, setCurrentSerie] = React.useState(state.values?.invoice_serie || series[0]?.id || '');
+
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
 
   // Sincronizar el cliente seleccionado si hay un error de validación
   React.useEffect(() => {
     if (state.values?.customerId) {
-        setSelectedCustomerId(state.values.customerId);
+      setSelectedCustomerId(state.values.customerId);
     }
   }, [state.values?.customerId]);
 
@@ -94,21 +95,41 @@ export default function Form({ customers, empresaIva, empresaCif }: { customers:
             </div>
           </div>
 
-          <div className="flex flex-col md:col-span-2 text-center">
-            <label htmlFor="invoice_serie" className="mb-2 block text-sm font-medium">Serie</label>
+          {/* Selector de Serie */}
+          <div className="mb-4 md:col-span-2">
+            <label htmlFor="invoice_serie" className="mb-2 block text-sm font-medium">
+              Serie
+            </label>
             <div className="relative">
-              <input
+              <select
                 id="invoice_serie"
                 name="invoice_serie"
-                type="text"
-                placeholder="Serie"
-                className="peer block w-full rounded-md border border-gray-200 py-2 text-sm outline-2 placeholder:text-gray-500 text-center"
-                defaultValue={currentSerie}
+                className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 text-sm outline-2 placeholder:text-gray-500"
+                // Usamos el valor recuperado de state.values o la primera serie por defecto
+                defaultValue={state.values?.invoice_serie || series[0]?.id || ""}
                 onChange={(e) => setCurrentSerie(e.target.value)}
                 aria-describedby="serie-error"
-              />
+              >
+                <option value="" disabled>--- Selecciona una serie ---</option>
+                {series.map((serie: Series) => (
+                  <option key={serie.id} value={serie.id}>
+                    {serie.id} - {serie.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 👇 Manejo de errores de validación (idéntico a customers) */}
+            <div id="serie-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.invoice_serie &&
+                state.errors.invoice_serie.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
             </div>
           </div>
+
 
           <div className="flex flex-col md:col-span-3">
             <label htmlFor="fecha" className="mb-2 block text-sm font-medium">Fecha</label>
@@ -127,9 +148,9 @@ export default function Form({ customers, empresaIva, empresaCif }: { customers:
           </div>
         </div>
 
-        <InvoiceLinesForm 
-          customer={selectedCustomer} 
-          empresaIva={empresaIva} 
+        <InvoiceLinesForm
+          customer={selectedCustomer}
+          empresaIva={empresaIva}
           initialLines={state.values?.lines ? JSON.parse(state.values.lines) : []}
           onTotalChange={(total) => setRealTimeTotal(total)}
         />
@@ -165,7 +186,7 @@ export default function Form({ customers, empresaIva, empresaCif }: { customers:
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center gap-2">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Vista previa QR Hacienda</p>
               <div className="relative w-32 h-32 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100">
-                <QRCodePreview 
+                <QRCodePreview
                   cif={empresaCif}
                   serie={currentSerie}
                   numero={0}

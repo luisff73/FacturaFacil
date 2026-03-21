@@ -1,14 +1,14 @@
 'use client';
 // Luis
-// filepath: /c:/DAW/desenvolupament web client/next/nextjs-dashboard/app/ui/users/create-form.tsx
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createUser, uploadImage } from '@/app/lib/actions';
 import { User } from '@/app/lib/definitions';
-// Importa la interfaz User desde definitions.ts
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import Cookies from 'js-cookie';
+import { getUserColor } from '@/app/lib/utils';
+import { auth } from '@/auth';
 
 
 // definimos la interfaz CreateUserFormProps
@@ -42,12 +42,14 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
     if (fileInput && fileInput.size > 0) {
       const uploadData = new FormData();
       uploadData.append('file', fileInput);
-      
+
       const uploadedPath = await uploadImage(uploadData);
       if (uploadedPath) {
         imageUrl = uploadedPath;
       }
     }
+
+    const session = await auth();
 
     const data: Omit<User, "id"> = {
       name: formData.get('name') as string,
@@ -56,7 +58,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
       token: Cookies.get('token') as string || '',
       type: formData.get('type') as 'admin' | 'user',
       id_empresa: Number(formData.get('id_empresa')),
-      css: '#4CAF50',
+      css: getUserColor(session) as string,
       image_url: imageUrl,
     };
 

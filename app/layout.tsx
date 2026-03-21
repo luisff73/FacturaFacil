@@ -35,7 +35,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const session = await auth();
-  const Color_usuario = (session?.user as any)?.css || '#4CAF50';
+  const Color_usuario = (session?.user as any)?.css || '#2b3643ff';
 
   return (
     <html lang="es" className="light" suppressHydrationWarning>

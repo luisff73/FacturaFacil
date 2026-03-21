@@ -316,7 +316,7 @@ export async function updateInvoice(
         WHERE id = ${id} AND id_empresa = ${idEmpresa}
       `;
 
-    // Actualizar líneas: borrar las viejas e insertar las nuevas (estrategia simple)
+    // Actualizar líneas: borrar las viejas e insertar las nuevas
     await sql`DELETE FROM invoices_lines WHERE id_invoice = ${id} AND id_empresa = ${idEmpresa}`;
 
     if (lines) {
@@ -337,11 +337,12 @@ export async function updateInvoice(
 }
 
 export async function deleteInvoice(id: string, formData?: FormData) {
+  const idEmpresa = await requireEmpresaId();
   try {
     // Primero borramos las líneas asociadas para evitar el error de clave foránea
-    await sql`DELETE FROM invoices_lines WHERE id_invoice = ${id}`;
+    await sql`DELETE FROM invoices_lines WHERE id_invoice = ${id} and id_empresa = ${idEmpresa}`;
     // Ahora podemos borrar la factura
-    await sql`DELETE FROM invoices WHERE id = ${id}`;
+    await sql`DELETE FROM invoices WHERE id = ${id} and id_empresa = ${idEmpresa}`;
     
     revalidatePath("/dashboard/invoices");
     return { message: "Factura eliminada correctamente." };
@@ -391,26 +392,14 @@ export async function createCustomer(data: Omit<Customer, "id">): Promise<State>
 
 // Función para actualizar un cliente
 export async function updateCustomer(id: string, data: Omit<Customer, "id">) {
-  const {
-    name,
-    email,
-    image_url,
-    direccion,
-    c_postal,
-    poblacion,
-    provincia,
-    telefono,
-    cif,
-    pais,
-    tiene_iva,
-    tiene_re,
-  } = data;
+  const {name, email, image_url, direccion, c_postal, poblacion, provincia, telefono, cif, pais, tiene_iva, tiene_re,} = data;
+  const idEmpresa = await requireEmpresaId();
   try {
     // Consulta SQL para actualizar un cliente
     await sql`
       UPDATE customers
       SET name = ${name}, email = ${email}, image_url = ${image_url}, direccion = ${direccion}, c_postal = ${c_postal}, poblacion = ${poblacion}, provincia = ${provincia}, telefono = ${telefono}, cif = ${cif}, pais = ${pais}, tiene_iva = ${tiene_iva}, tiene_re = ${tiene_re}
-      WHERE id = ${id}
+      WHERE id = ${id} and id_empresa = ${idEmpresa}
     `;
 
     return {
@@ -427,7 +416,8 @@ export async function updateCustomer(id: string, data: Omit<Customer, "id">) {
 }
 
 export async function deleteCustomers(id: string) {
-  await sql`DELETE FROM customers WHERE id = ${id}`;
+  const idEmpresa = await requireEmpresaId();
+  await sql`DELETE FROM customers WHERE id = ${id} and id_empresa = ${idEmpresa}`;
   revalidatePath("/dashboard/customers");
 }
 
@@ -451,7 +441,8 @@ export async function authenticate(
 }
 
 export async function deleteArticulo(id: string) {
-  await sql`DELETE FROM articulos WHERE id = ${id}`;
+  const idEmpresa = await requireEmpresaId();
+  await sql`DELETE FROM articulos WHERE id = ${id} and id_empresa = ${idEmpresa}`;
   revalidatePath("/dashboard/articulos");
 }
 
@@ -461,6 +452,7 @@ export async function updateArticulo(
   data: Omit<ArticulosTableType, "id" | "id_empresa">,
 ) {
   const { codigo, descripcion, precio, iva, stock, imagen } = data;
+  const idEmpresa = await requireEmpresaId();
 
   // Consulta SQL para actualizar un artículo
   const result = await sql`
@@ -472,7 +464,7 @@ export async function updateArticulo(
       iva = ${iva}, 
       stock = ${stock}, 
       imagen = ${JSON.stringify(imagen)}
-    WHERE id = ${id}
+    WHERE id = ${id} and id_empresa = ${idEmpresa}
     RETURNING id, codigo, descripcion, precio, iva, stock, imagen;
   `;
 

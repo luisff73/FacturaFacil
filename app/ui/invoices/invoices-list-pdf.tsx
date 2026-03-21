@@ -49,6 +49,7 @@ const styles = StyleSheet.create({
   colNum: { width: '10%' },
   colCif: { width: '9%' },
   colName: { width: '30%' },
+  colEstado: { width: '9%', textAlign: 'center' },
   colDate: { width: '12%', textAlign: 'left' },
   colBaseImponible: { width: '12%', textAlign: 'right' },
   colIva: { width: '9%', textAlign: 'right' },
@@ -79,11 +80,11 @@ export default function InvoicesListPDF({ invoices, companyName }: { invoices: I
 
         <View style={styles.table}>
           <View style={styles.tableHeader}>
-            <Text style={[styles.headerText, styles.colNum]}>Serie</Text>
             <Text style={[styles.headerText, styles.colNum]}>Nº Factura</Text>
             <Text style={[styles.headerText, styles.colDate]}>Fecha</Text>
             <Text style={[styles.headerText, styles.colCif]}>CIF</Text>
             <Text style={[styles.headerText, styles.colName]}>Cliente</Text>
+            <Text style={[styles.headerText, styles.colEstado]}>Estado</Text>
             <Text style={[styles.headerText, styles.colBaseImponible]}>Base imp.</Text>
             <Text style={[styles.headerText, styles.colIva]}>IVA</Text>
             <Text style={[styles.headerText, styles.colRecargo]}>RE</Text>
@@ -93,11 +94,11 @@ export default function InvoicesListPDF({ invoices, companyName }: { invoices: I
 
           {invoices.map((invoice) => (
             <View key={invoice.id} style={styles.tableRow}>
-              <Text style={[styles.rowText, styles.colNum]}>{invoice.invoice_serie}</Text>
-              <Text style={[styles.rowText, styles.colNum]}>{new Date(invoice.date).getFullYear()}/{invoice.invoice_number}</Text>
+              <Text style={[styles.rowText, styles.colNum]}>{new Date(invoice.date).getFullYear()}/{invoice.invoice_serie}/{invoice.invoice_number}</Text>
               <Text style={[styles.rowText, styles.colDate]}>{formatDateToLocal(invoice.date)}</Text>
               <Text style={[styles.rowText, styles.colCif]}>{invoice.cif}</Text>
               <Text style={[styles.rowText, styles.colName]}>{invoice.name}</Text>
+              <Text style={[styles.rowText, styles.colEstado]}>{invoice.status}</Text>
               <Text style={[styles.rowText, styles.colBaseImponible]}>{formatCurrency(invoice.base_imponible)}</Text>
               <Text style={[styles.rowText, styles.colIva]}>{formatCurrency(invoice.total_iva)}</Text>
               <Text style={[styles.rowText, styles.colRecargo]}>{formatCurrency(invoice.total_recargo)}</Text>

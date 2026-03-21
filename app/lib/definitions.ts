@@ -154,3 +154,9 @@ export type Empresas = {
   fecha_creacion: Date;
   activa: boolean;
 };
+
+export type Series = {
+  id: string;
+  id_empresa: number;
+  name: string;
+}

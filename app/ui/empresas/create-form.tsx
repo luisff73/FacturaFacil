@@ -8,8 +8,34 @@ import { Empresas, User } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 
+import { z } from 'zod';
+
 // type for errors map
 type FieldErrors = Record<string, string[]>;
+
+// Esquema de validación para la empresa
+const EmpresaSchema = z.object({
+  nombre: z.string().min(1, { message: "El nombre es obligatorio." }),
+  direccion: z.string().min(1, { message: "La dirección es obligatoria." }),
+  c_postal: z.string().min(1, { message: "El código postal es obligatorio." }),
+  poblacion: z.string().min(1, { message: "La población es obligatoria." }),
+  provincia: z.string().min(1, { message: "La provincia es obligatoria." }),
+  telefono: z.string().default(''),
+  cif: z.string().min(1, { message: "El CIF es obligatorio y debe ser válido." }),
+  email: z.string().email({ message: "Introduce un email válido." }),
+  iva: z.number({
+    invalid_type_error: "El IVA debe ser un número."
+  }).min(1, { message: "El IVA es obligatorio y debe ser mayor que 0." }),
+  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
+  activa: z.boolean().default(true),
+});
+
+// Esquema de validación para el usuario inicial
+const UserSchema = z.object({
+  name: z.string().min(1, { message: "El nombre del administrador es obligatorio." }),
+  email: z.string().email({ message: "Introduce un email válido para el administrador." }),
+  password: z.string().min(6, { message: "La contraseña del administrador debe tener al menos 6 caracteres." }),
+});
 
 function ErrorMessages({ field, errors }: { field: string; errors?: string[] }) {
   if (!errors || errors.length === 0) return null;
@@ -50,31 +76,61 @@ const CreateEmpresaForm: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setErrors({});
+    setMessage('');
+
     const form = event.currentTarget;
 
-    const empresaData: Omit<Empresas, 'id'> = {
-      nombre: (form.nombre as HTMLInputElement).value.trim(),
-      direccion: (form.direccion as HTMLInputElement).value.trim(),
-      c_postal: (form.c_postal as HTMLInputElement).value.trim(),
-      poblacion: (form.poblacion as HTMLInputElement).value.trim(),
-      provincia: (form.provincia as HTMLInputElement).value.trim(),
-      telefono: (form.telefono as HTMLInputElement).value.trim(),
-      cif: (form.cif as HTMLInputElement).value.trim(),
-      email: (form.email as HTMLInputElement).value.trim(),
-      iva: parseFloat((form.iva as HTMLInputElement).value) || 0,
+    // Validación con Zod
+    const validatedEmpresa = EmpresaSchema.safeParse({
+      nombre: (form.nombre as HTMLInputElement).value,
+      direccion: (form.direccion as HTMLInputElement).value,
+      c_postal: (form.c_postal as HTMLInputElement).value,
+      poblacion: (form.poblacion as HTMLInputElement).value,
+      provincia: (form.provincia as HTMLInputElement).value,
+      telefono: (form.telefono as HTMLInputElement).value,
+      cif: (form.cif as HTMLInputElement).value,
+      email: (form.email as HTMLInputElement).value,
+      iva: parseFloat((form.iva as HTMLInputElement).value),
       password: (form.password as HTMLInputElement).value,
       activa: (form.activa as HTMLInputElement).checked,
+    });
+
+    const validatedUser = UserSchema.safeParse({
+      name: (form.user_name as HTMLInputElement).value,
+      email: (form.user_email as HTMLInputElement).value,
+      password: (form.user_password as HTMLInputElement).value,
+    });
+
+    if (!validatedEmpresa.success || !validatedUser.success) {
+      const allErrors: any = {};
+
+      if (!validatedEmpresa.success) {
+        Object.assign(allErrors, validatedEmpresa.error.flatten().fieldErrors);
+      }
+      if (!validatedUser.success) {
+        // Mapeamos los errores del usuario a prefijos para no chocar
+        const userErrors = validatedUser.error.flatten().fieldErrors;
+        if (userErrors.name) allErrors.user_name = userErrors.name;
+        if (userErrors.email) allErrors.user_email = userErrors.email;
+        if (userErrors.password) allErrors.user_password = userErrors.password;
+      }
+
+      setErrors(allErrors);
+      setMessage("Por favor, corrige los errores del formulario.");
+      return;
+    }
+
+    const empresaData: Omit<Empresas, 'id'> = {
+      ...validatedEmpresa.data,
       fecha_creacion: new Date(),
     };
 
-
     const initialUser: Omit<User, 'id' | 'id_empresa'> = {
-      name: (form.user_name as HTMLInputElement).value.trim(),
-      email: (form.user_email as HTMLInputElement).value.trim(),
-      password: (form.user_password as HTMLInputElement).value,
+      ...validatedUser.data,
       type: 'admin' as const,
       token: Cookies.get('token') || '',
-      css: '#4CAF50',
+      css: '#1a1c1eff',
       image_url: '',
     };
 
@@ -94,9 +150,7 @@ const CreateEmpresaForm: React.FC = () => {
       router.push('/dashboard/empresas');
     } catch (err) {
       if (err instanceof Error) {
-        const e: any = err;
-        setErrors(e.errors || {});
-        setMessage(e.message);
+        setMessage(err.message);
       }
     }
   };

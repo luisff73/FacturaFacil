@@ -17,6 +17,7 @@ import {
   User,
   Empresas,
   invoices_lines,
+  Series,
 } from "./definitions";
 
 import { formatCurrency } from "./utils";
@@ -632,3 +633,46 @@ export async function fetchFilteredEmpresas(
     throw new Error("Error en el fetch filtrado de la tabla empresas.");
   }
 }
+
+export async function fetchSeriesById(id: string) {
+  const idEmpresa = await requireEmpresaId();
+  try {
+    const data = await sql<Series>`
+      SELECT
+        series.id,
+        series.name
+      FROM series where series.id_empresa = ${idEmpresa}
+      and series.id = ${id};
+    `;
+
+    const series = data.rows.map((series) => ({
+      ...series,
+    }));
+
+    return series[0] || null;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Error en el fetch de la tabla series.");
+  }
+}
+
+export async function fetchSeries() {
+  const idEmpresa = await requireEmpresaId();
+  try {
+    const data = await sql<Series>`
+      SELECT
+        series.id,
+        series.name
+      FROM series where series.id_empresa = ${idEmpresa}
+      ORDER BY series.name ASC
+    `;
+
+    const series = data.rows;
+    return series;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Error en el fetch all de la tabla series.");
+  }
+} 
+
+ 
