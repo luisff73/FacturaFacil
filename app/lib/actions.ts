@@ -16,7 +16,7 @@ import {
 } from "@/app/lib/definitions";
 import { requireEmpresaId } from "./data";
 import { generateInvoiceHash } from "./utils";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 // Define el esquema para FormSchema
 const FormSchema = z.object({

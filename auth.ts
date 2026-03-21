@@ -1,6 +1,6 @@
 import NextAuth from "next-auth"; // biblioteca de autenticación
 import Credentials from "next-auth/providers/credentials"; // proveedor de autenticación de credenciales
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { sql } from "@vercel/postgres";
 import { z } from "zod";
 import type { User } from "@/app/lib/definitions";
