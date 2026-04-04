@@ -5,7 +5,7 @@ import { SunIcon, MoonIcon, PencilIcon } from '@heroicons/react/24/outline';
 import SelectorColores from '@/components/selector_colores'; // componente para seleccionar colores
 import tinycolor from 'tinycolor2'; // librería para generar colores dinámicos
 
-export default function BarraTemas({ initialColor }: { initialColor: string }) {
+export default function BarraTemas({ initialColor, showUI = true }: { initialColor: string, showUI?: boolean }) {
     // 1. ESTADOS DEL COMPONENTE
     const [darkMode, setDarkMode] = useState(false); // estado para alternar entre modo oscuro y claro
     const [, setBgColor] = useState(initialColor); // Usamos ',' porque no necesitamos leer el valor, solo actualizarlo
@@ -61,35 +61,39 @@ export default function BarraTemas({ initialColor }: { initialColor: string }) {
     }, []);
 
     return (
-        <div className="flex space-x-2 bg-green-000">
-            {/* Botón para abrir/cerrar el selector de colores */}
-            <button
-                className="p-2 rounded-lg bg-green-400 dark:bg-gray-700"
-                onClick={() => setShowColorPicker(!showColorPicker)}
-                title="Cambiar color"
-                aria-label="Cambiar color"
-            >
-                <PencilIcon className="h-5 w-5" />
-            </button>
+        <>
+            {showUI && (
+                <div className="flex space-x-2 bg-green-000">
+                    {/* Botón para abrir/cerrar el selector de colores */}
+                    <button
+                        className="p-2 rounded-lg bg-green-400 dark:bg-gray-700"
+                        onClick={() => setShowColorPicker(!showColorPicker)}
+                        title="Cambiar color"
+                        aria-label="Cambiar color"
+                    >
+                        <PencilIcon className="h-5 w-5" />
+                    </button>
 
-            {/* Muestra el selector solo si showColorPicker es true */}
-            {showColorPicker && (
-                <SelectorColores onColorChange={handleColorChange} initialColor={initialColor} />
+                    {/* Muestra el selector solo si showColorPicker es true */}
+                    {showColorPicker && (
+                        <SelectorColores onColorChange={handleColorChange} initialColor={initialColor} />
+                    )}
+
+                    {/* Botón para alternar Modo Oscuro / Claro */}
+                    <button
+                        onClick={() => setDarkMode(!darkMode)}
+                        className="p-2 rounded-lg bg-green-400 dark:bg-gray-700"
+                        title={darkMode ? "Activar modo claro" : "Activar modo oscuro"}
+                        aria-label={darkMode ? "Activar modo claro" : "Activar modo oscuro"}
+                    >
+                        {darkMode ? (
+                            <SunIcon className="h-5 w-5" />
+                        ) : (
+                            <MoonIcon className="h-5 w-5" />
+                        )}
+                    </button>
+                </div>
             )}
-
-            {/* Botón para alternar Modo Oscuro / Claro */}
-            <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2 rounded-lg bg-green-400 dark:bg-gray-700"
-                title={darkMode ? "Activar modo claro" : "Activar modo oscuro"}
-                aria-label={darkMode ? "Activar modo claro" : "Activar modo oscuro"}
-            >
-                {darkMode ? (
-                    <SunIcon className="h-5 w-5" />
-                ) : (
-                    <MoonIcon className="h-5 w-5" />
-                )}
-            </button>
-        </div>
+        </>
     );
 }

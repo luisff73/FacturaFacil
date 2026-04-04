@@ -36,15 +36,15 @@ export default async function FacturaFacilLogo({ size = 'large' }: { size?: 'sma
       />
       <div className="flex flex-col ml-4 items-start">
         <div className="flex flex-col md:flex-row items-start">
-          <p className={`${isSmall ? 'text-[10px]' : 'text-[15px]'} md:text-[30px] self-start mr-4`}>
+          <p className={`${isSmall ? 'text-[10px]' : 'w-full text-[15px]'} md:text-[30px] self-start mr-4`}>
             Tu programa de gestión
           </p>
-          <p className={`${isSmall ? 'text-[10px]' : 'text-[20px]'} md:text-[30px] self-start md:font-bold`}>
+          <p className={`${isSmall ? 'text-[10px]' : 'w-full text-[15px] font-bold'} md:text-[30px] self-start mr-4`}>
             AUTONOMO
           </p>
         </div>
         {nombreEmpresa && (
-          <p className={`${isSmall ? 'text-[8px]' : 'text-[14px]'} md:text-[24px] mt-1 md:mt-2 text-green-100 font-medium uppercase tracking-wide`}>
+          <p className={`${isSmall ? 'text-[8px]' : 'w-full text-[14px]'} md:text-[24px] mt-1 md:mt-2 text-green-100 font-medium uppercase tracking-wide`}>
             {nombreEmpresa}
           </p>
         )}
@@ -55,7 +55,7 @@ export default async function FacturaFacilLogo({ size = 'large' }: { size?: 'sma
 
 export async function FacturaFacilUser() {
   let nombreUsuario = null;
-  let imagenUsuario = "/user.png"; // Imagen por defecto mejorada
+  let imagenUsuario = "/user.png"; // Imagen por defecto 
 
   try {
     const session = await auth();

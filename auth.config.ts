@@ -4,7 +4,11 @@ export const authConfig = {
   pages: {
     signIn: '/login',
   },
-  session: { strategy: 'jwt' },
+  session: { 
+    strategy: 'jwt',
+    maxAge: 5 * 60, // 5 minutos (300 segundos)
+    updateAge: 0,    // Se actualiza en cada petición para resetear el contador de inactividad
+  },
   secret: process.env.AUTH_SECRET,
   trustHost: true,
   providers: [

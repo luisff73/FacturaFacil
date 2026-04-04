@@ -650,6 +650,12 @@ export async function createEmpresa(
     VALUES (${nombre}, ${direccion}, ${c_postal}, ${poblacion}, ${provincia}, ${telefono}, ${cif}, ${email}, ${iva}, ${hashedPassword}, ${activa})
     RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, password;
   `;
+  // Crea la serie 001 por defecto
+  const result2 = await sql`
+    INSERT INTO series (codigo, descripcion, id_empresa)
+    VALUES ('001', 'Nacional', ${result.rows[0].id})
+    RETURNING id, codigo, descripcion, id_empresa;
+  `;
 
   const empresa = result.rows[0];
 

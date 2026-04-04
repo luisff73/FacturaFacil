@@ -44,7 +44,7 @@ export default async function RootLayout({
         className={`${inter.className} antialiased dark:bg-gray-900 dark:text-white min-h-screen transition-colors duration-300`}
       >
         <div className="fixed top-4 right-4 z-50 print:hidden">
-          <BarraTemas initialColor={Color_usuario} />
+          <BarraTemas initialColor={Color_usuario} showUI={false} />
         </div>
         {children}
         {/* <RegisterSW /> */}

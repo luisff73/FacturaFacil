@@ -16,13 +16,12 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
 
-    <main className="flex min-h-screen flex-col p-6">
-      <div className="flex h-auto w-full shrink-0 items-end rounded-lg bg-green-500 p-4 md:h-50 md:w-full">
-        <FacturaFacilLogo />
+    <main className="flex h-screen flex-col p-6 overflow-hidden">
+      <div className="flex h-36 shrink-0 items-end rounded-lg bg-green-500 p-6 md:h-48">
+        <div className='w-full h-full object-contain'><FacturaFacilLogo /></div>
       </div>
 
-
-      <div className="mt-4 flex grow flex-col gap-4 md:flex-row">
+      <div className="mt-4 flex flex-1 flex-col gap-4 overflow-hidden md:flex-row">
         <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10 md:w-2/5 md:px-20">
 
           <p className={`${roboto.className} text-xl text-gray-600 md:text-3xl md:leading-normal`}>
