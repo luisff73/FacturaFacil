@@ -34,10 +34,15 @@ export const authConfig = {
       return session;
     },
     authorized({ auth, request: { nextUrl } }) {
+      // Comprueba si el usuario está logueado
       const isLoggedIn = !!auth?.user && !!(auth.user as any).id_empresa;
+      // Comprueba si el usuario es admin
       const isAdmin = (auth?.user as any)?.type === 'admin';
+      // Comprueba si la ruta es el dashboard
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
+      // Comprueba si la ruta es /dashboard/users
       const isOnUsersAdmin = nextUrl.pathname.startsWith('/dashboard/users');
+      // Comprueba si la ruta es /login
       const isOnLogin = nextUrl.pathname.startsWith('/login');
       // Las rutas de creación de empresa deben ser públicas porque se está registrando la primera vez
       const isEmpresaRegistration = nextUrl.pathname === '/dashboard/empresas/create' || nextUrl.pathname === '/dashboard/empresas';

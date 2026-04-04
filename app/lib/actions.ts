@@ -652,9 +652,9 @@ export async function createEmpresa(
   `;
   // Crea la serie 001 por defecto
   const result2 = await sql`
-    INSERT INTO series (codigo, descripcion, id_empresa)
+    INSERT INTO series (id, name, id_empresa)
     VALUES ('001', 'Nacional', ${result.rows[0].id})
-    RETURNING id, codigo, descripcion, id_empresa;
+    RETURNING id, name, id_empresa;
   `;
 
   const empresa = result.rows[0];
@@ -688,7 +688,7 @@ export async function updateUserCss(css: string) {
   try {
     await sql`
       UPDATE users
-      SET css = ${css}
+      SET css = ${css} 
       WHERE email = ${session.user.email}
     `;
     return { success: true };
