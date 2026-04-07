@@ -23,10 +23,7 @@ const EmpresaSchema = z.object({
   telefono: z.string().default(''),
   cif: z.string().min(1, { message: "El CIF es obligatorio y debe ser válido." }),
   email: z.string().email({ message: "Introduce un email válido." }),
-  iva: z.number({
-    invalid_type_error: "El IVA debe ser un número."
-  }).min(1, { message: "El IVA es obligatorio y debe ser mayor que 0." }),
-  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
+  logotipo: z.string().default(''),
   activa: z.boolean().default(true),
 });
 
@@ -65,11 +62,12 @@ const FIELDS: Array<{
     { name: 'telefono', label: 'Teléfono', type: 'text', placeholder: 'Introduce el teléfono de la empresa', autoComplete: 'tel' },
     { name: 'cif', label: 'CIF', type: 'text', placeholder: 'Introduce el CIF de la empresa' },
     { name: 'email', label: 'Email', type: 'email', placeholder: 'Introduce el email de la empresa', autoComplete: 'email' },
-    { name: 'iva', label: 'IVA', type: 'number', placeholder: 'Introduce el IVA de la empresa' },
+    { name: 'logotipo', label: 'Logotipo', type: 'file', placeholder: 'Introduce el logotipo de la empresa' },
   ];
 
 const CreateEmpresaForm: React.FC = () => {
   const inputFileRef = useRef<HTMLInputElement>(null);
+  const logotipoRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [message, setMessage] = useState('');
   const router = useRouter();
@@ -91,8 +89,7 @@ const CreateEmpresaForm: React.FC = () => {
       telefono: (form.telefono as HTMLInputElement).value,
       cif: (form.cif as HTMLInputElement).value,
       email: (form.email as HTMLInputElement).value,
-      iva: parseFloat((form.iva as HTMLInputElement).value),
-      password: (form.password as HTMLInputElement).value,
+      logotipo: "", // Se actualizará tras la subida
       activa: (form.activa as HTMLInputElement).checked,
     });
 
@@ -121,8 +118,21 @@ const CreateEmpresaForm: React.FC = () => {
       return;
     }
 
+    // Manejo de la subida del logotipo de la empresa
+    let logotipoUrl = "";
+    const logotipoFile = logotipoRef.current?.files?.[0];
+    if (logotipoFile && logotipoFile.size > 0) {
+      const uploadData = new FormData();
+      uploadData.append('logotipo', logotipoFile);
+      const uploadedPath = await uploadImage(uploadData, 'logotipo');
+      if (uploadedPath) {
+        logotipoUrl = uploadedPath;
+      }
+    }
+
     const empresaData: Omit<Empresas, 'id'> = {
       ...validatedEmpresa.data,
+      logotipo: logotipoUrl,
       fecha_creacion: new Date(),
     };
 
@@ -147,15 +157,30 @@ const CreateEmpresaForm: React.FC = () => {
 
     try {
       await createEmpresa(empresaData, initialUser);
-      router.push('/dashboard/empresas');
+      //router.push('/dashboard/empresas');
+      router.push('/dashboard');
     } catch (err) {
       if (err instanceof Error) {
         setMessage(err.message);
       }
     }
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT') {
+      const input = e.target as HTMLInputElement;
+      if (input.type !== 'submit' && input.type !== 'button' && input.type !== 'checkbox' && input.type !== 'file') {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const index = Array.from(form.elements).indexOf(input);
+        const next = form.elements[index + 1] as HTMLElement;
+        if (next) next.focus();
+      }
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-6">
       <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
         {FIELDS.map(({ name, label, type, placeholder }) => (
           <div key={name} className="mb-4">
@@ -166,6 +191,7 @@ const CreateEmpresaForm: React.FC = () => {
               <input
                 id={name}
                 name={name}
+                ref={name === 'logotipo' ? logotipoRef : null}
                 type={type}
                 placeholder={placeholder}
                 className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
@@ -174,8 +200,28 @@ const CreateEmpresaForm: React.FC = () => {
             </div>
             <ErrorMessages field={name} errors={errors[name]} />
           </div>
-        ))}
 
+        ))}
+        {/* activa */}
+        <div className="mb-4 flex items-center">
+          <input
+            id="activa"
+            name="activa"
+            type="checkbox"
+            defaultChecked={true}
+            className="mr-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+          />
+          <label htmlFor="activa" className="text-sm dark:text-gray-200">
+            Activa
+          </label>
+          <ErrorMessages field="activa" errors={errors.activa} />
+        </div>
+
+        {message && (
+          <p className="mt-2 text-sm text-red-500 dark:text-red-400" aria-live="polite">
+            {message}
+          </p>
+        )}
         {/* Sección de usuario inicial */}
         <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
           <h3 className="mb-4 text-lg font-medium dark:text-gray-200">Usuario administrador inicial</h3>
@@ -251,49 +297,13 @@ const CreateEmpresaForm: React.FC = () => {
             <ErrorMessages field="user_image" errors={errors.user_image} />
           </div>
         </div>
-
-        {/* contraseña */}
-        <div className="mb-4">
-          <label htmlFor="password" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            Contraseña
-          </label>
-          <div className="relative">
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Introduce la contraseña de la empresa"
-              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-              aria-describedby="password-error"
-            />
-          </div>
-          <ErrorMessages field="password" errors={errors.password} />
-        </div>
-
-        {/* activa */}
-        <div className="mb-4 flex items-center">
-          <input
-            id="activa"
-            name="activa"
-            type="checkbox"
-            className="mr-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-          />
-          <label htmlFor="activa" className="text-sm dark:text-gray-200">
-            Activa
-          </label>
-          <ErrorMessages field="activa" errors={errors.activa} />
-        </div>
-
-        {message && (
-          <p className="mt-2 text-sm text-red-500 dark:text-red-400" aria-live="polite">
-            {message}
-          </p>
-        )}
       </div>
 
       <div className="mt-6 flex justify-end gap-4">
         <Link
-          href="/dashboard/empresas"
+          //href="/dashboard/empresas"
+          href="/dashboard"
+
           className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-800 px-4 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
         >
           Cancelar

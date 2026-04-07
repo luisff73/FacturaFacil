@@ -9,12 +9,10 @@ import InvoiceLinesForm from '@/app/ui/invoices/invoice-lines-form';
 import QRCodePreview from '@/app/ui/invoices/qrcode-preview';
 import React from 'react';
 
-export default function EditInvoiceForm({ invoice, customers, lines, empresaIva, empresaCif }: {
+export default function EditInvoiceForm({ invoice, customers, lines }: {
   invoice: Invoice;
   customers: Customer[];
   lines: invoices_lines[];
-  empresaIva: number;
-  empresaCif: string;
 }) {
   const initialState: State = { message: '', errors: {} };
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id); //bind para pasar el id de la factura
@@ -30,10 +28,12 @@ export default function EditInvoiceForm({ invoice, customers, lines, empresaIva,
   }, [state.values?.customerId]);
 
   // Calcular la tasa de RE basada en el IVA (Estándares en España)
+  // Como empresaIva ya no existe, usamos 21 como valor por defecto para el cálculo de RE si fuera necesario
+  const defaultIva = 21;
   let empresaRe = 0.5;
-  if (empresaIva === 21) empresaRe = 5.2;
-  else if (empresaIva === 10) empresaRe = 1.4;
-  else if (empresaIva === 5 || empresaIva === 4) empresaRe = 0.5;
+  if (defaultIva === 21) empresaRe = 5.2;
+  else if (defaultIva === 10) empresaRe = 1.4;
+  else if (defaultIva === 5 || defaultIva === 4) empresaRe = 0.5;
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
     if (e.key === 'Enter') {
@@ -189,7 +189,7 @@ export default function EditInvoiceForm({ invoice, customers, lines, empresaIva,
 
 
         {/* Subformulario lineas de factura */}
-        <InvoiceLinesForm initialLines={lines} customer={selectedCustomer} invoice={invoice} empresaIva={empresaIva} />
+        <InvoiceLinesForm initialLines={lines} customer={selectedCustomer} invoice={invoice} />
 
         <div className="mt-6 flex flex-col md:flex-row gap-6 justify-between items-start md:items-end">
           {/* Estado de la factura */}
@@ -268,7 +268,7 @@ export default function EditInvoiceForm({ invoice, customers, lines, empresaIva,
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Vista previa QR Hacienda</p>
                 <div className="relative w-32 h-32 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100">
                   <QRCodePreview 
-                    cif={empresaCif}
+                    cif={(invoice as any).cif || ''}
                     serie={invoice.invoice_serie}
                     numero={invoice.invoice_number}
                     fecha={invoice.date}
@@ -290,7 +290,7 @@ export default function EditInvoiceForm({ invoice, customers, lines, empresaIva,
                 </div>
 
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">IVA ({empresaIva}%)</span>
+                  <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">IVA (21%)</span>
                   <div className="flex items-center gap-1 font-bold text-gray-700">
                     <span id="total_iva-display">{invoice.total_iva}</span>
                     <CurrencyEuroIcon className="h-4 w-4" />

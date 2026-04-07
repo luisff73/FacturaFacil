@@ -36,10 +36,10 @@ export default function Page() {
 
 
           <Link
-            href="/dashboard/empresas"
+            href="/dashboard/empresas/create"
             className="flex items-center gap-5 self-start rounded-lg bg-green-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-green-400 md:text-base"
           >
-            Empresas <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
+            Crear Empresa <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
           </Link>
 
         </div>

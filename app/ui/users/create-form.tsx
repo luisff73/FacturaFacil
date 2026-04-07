@@ -7,8 +7,7 @@ import { User } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import Cookies from 'js-cookie';
-import { getUserColor } from '@/app/lib/utils';
-import { auth } from '@/auth';
+//import { getUserColor } from '@/app/lib/utils';
 
 
 // definimos la interfaz CreateUserFormProps
@@ -49,16 +48,14 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
       }
     }
 
-    const session = await auth();
-
     const data: Omit<User, "id"> = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       password: formData.get('password') as string,
       token: Cookies.get('token') as string || '',
       type: formData.get('type') as 'admin' | 'user',
-      id_empresa: Number(formData.get('id_empresa')),
-      css: getUserColor(session) as string,
+      id_empresa: Number(formData.get('id_empresa')) || 0,
+      css: '', // El servidor se encargará de rellenarlo si llega vacío
       image_url: imageUrl,
     };
 
@@ -71,8 +68,22 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
       }
     }
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT') {
+      const input = e.target as HTMLInputElement;
+      if (input.type !== 'submit' && input.type !== 'button' && input.type !== 'checkbox' && input.type !== 'file') {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const index = Array.from(form.elements).indexOf(input);
+        const next = form.elements[index + 1] as HTMLElement;
+        if (next) next.focus();
+      }
+    }
+  };
+
   return (
-    <form onSubmit={formAction}>
+    <form onSubmit={formAction} onKeyDown={handleKeyDown}>
       <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
         {/* Nombre */}
         <div className="mb-4">
@@ -88,6 +99,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
               autoComplete="name"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="name-error"
+              required
             />
           </div>
           <div id="name-error" aria-live="polite" aria-atomic="true">
@@ -114,6 +126,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
               autoComplete="email"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="email-error"
+              required
             />
           </div>
           <div id="email-error" aria-live="polite" aria-atomic="true">
@@ -140,6 +153,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
               autoComplete="new-password"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="password-error"
+              required
             />
           </div>
           <div id="password-error" aria-live="polite" aria-atomic="true">

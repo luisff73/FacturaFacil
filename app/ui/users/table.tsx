@@ -1,15 +1,7 @@
-
 import { User } from '@/app/lib/definitions';
 import { UpdateUser, DeleteUser } from '@/app/ui/users/buttons';
 import Image from 'next/image';
-
-const BLOB_URL = (process.env.NEXT_PUBLIC_BLOB_URL || '').replace(/"/g, '');
-
-const getImageUrl = (image_url: string | null | undefined) => {
-  if (!image_url) return '/user.png';
-  if (image_url.startsWith('http') || image_url.startsWith('/')) return image_url;
-  return `${BLOB_URL}/${image_url}`;
-};
+import { getImageUrl } from '@/app/lib/utils';
 
 interface UsersTableProps {
   users: User[];
@@ -30,7 +22,7 @@ export default function UsersTable({ users }: UsersTableProps) {
                   <div>
                     <div className="mb-2 flex items-center gap-3">
                       <Image
-                        src={getImageUrl(user.image_url)}
+                        src={getImageUrl(user.image_url, '/user.png')}
                         alt={user.name}
                         width={40}
                         height={40}

@@ -98,9 +98,11 @@ export type invoices_lines = {
   cantidad: number;
   precio: number;
   total: number;
-  id_articulo: number;
+  id_articulo: string;
   id_invoice: number;
   id_empresa: number;
+  iva: number;
+  re: number;
 };
 
 export type Revenue = {
@@ -149,8 +151,7 @@ export type Empresas = {
   cif: string;
   telefono: string;
   email: string;
-  iva: number;
-  password: string;
+  logotipo: string;
   fecha_creacion: Date;
   activa: boolean;
 };

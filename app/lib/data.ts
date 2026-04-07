@@ -553,9 +553,8 @@ export async function fetchEmpresaById(id: string): Promise<Empresas | null> {
         cif,
         telefono,
         email,
-        iva,
+        logotipo,
         activa,
-        password,
         fecha_creacion
       FROM empresas
       WHERE id = ${id};

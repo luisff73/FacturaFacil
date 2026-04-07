@@ -16,11 +16,30 @@ interface InvoiceLinesFormProps {
   onTotalChange?: (total: number) => void;
 }
 
+// Función auxiliar para calcular el Recargo de Equivalencia (RE) según el IVA (Estándares España)
+function getReRate(iva: number, hasRe: boolean): number {
+  if (!hasRe) return 0;
+  if (iva === 21) return 5.2;
+  if (iva === 10) return 1.4;
+  if (iva === 5 || iva === 4) return 0.5;
+  return 0;
+}
+
 export default function InvoiceLinesForm({ initialLines = [], customer, invoice, empresaIva = 21, onTotalChange }: InvoiceLinesFormProps) {
   const [lines, setLines] = useState<Partial<invoices_lines>[]>(
     initialLines.length > 0
       ? initialLines
-      : [{ linea: 1, descripcion: '', observaciones: '', cantidad: 1, precio: 0, total: 0, id_articulo: 0 }]
+      : [{
+        linea: 1,
+        descripcion: '',
+        observaciones: '',
+        cantidad: 1,
+        precio: 0,
+        total: 0,
+        id_articulo: '',
+        iva: 21,
+        re: getReRate(21, !!customer?.tiene_re)
+      }]
   );
   const [prevLinesLength, setPrevLinesLength] = useState(lines.length);
 
@@ -54,6 +73,12 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       newLines[index].total = Number((qty * price).toFixed(2));
     }
 
+    // Si cambia el IVA, calcular automáticamente el RE basado en el cliente
+    if (field === 'iva') {
+      const newIva = Number(value) || 0;
+      newLines[index].re = getReRate(newIva, !!customer?.tiene_re);
+    }
+
     setLines(newLines);
   };
 
@@ -67,22 +92,22 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
     const hasRe = invoice ? (Number(invoice.total_recargo) > 0) : customer?.tiene_re;
 
     if (hasIva) {
-      const ivaRate = Number(empresaIva);
-      tax_iva = bi * (ivaRate / 100);
-      if (hasRe) {
-        // Tasa de RE según IVA (Estándares en España)
-        let reRate = 0.5; // Por defecto para IVA 4% o inferior
-        if (ivaRate === 21) reRate = 5.2;
-        else if (ivaRate === 10) reRate = 1.4;
-        else if (ivaRate === 5 || ivaRate === 4) reRate = 0.5; // Ajustar si es necesario
+      lines.forEach(line => {
+        const lineTotal = Number(line.total) || 0;
+        const lineIva = Number(line.iva) || 21;
+        const lineRe = Number(line.re) || 0;
 
-        rec_equivalencia = bi * (reRate / 100);
-      }
+        tax_iva += lineTotal * (lineIva / 100);
+
+        if (lineRe > 0) {
+          rec_equivalencia += lineTotal * (lineRe / 100);
+        }
+      });
     }
 
     const total = bi + tax_iva + rec_equivalencia;
 
-   
+
 
     // Actualizar campos del formulario principal mediante el DOM para reflejar el desglose
     const biInput = document.querySelector('input[name="base_imponible"]') as HTMLInputElement;
@@ -114,7 +139,9 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
         cantidad: 1,
         precio: 0,
         total: 0,
-        id_articulo: 0
+        id_articulo: '',
+        iva: 21,
+        re: getReRate(21, !!customer?.tiene_re)
       }
     ]);
   };
@@ -147,15 +174,24 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
     const newLines = [...lines];
     newLines[index] = {
       ...newLines[index],
-      id_articulo: Number(article.id),
+      id_articulo: article.id,
       descripcion: article.descripcion,
       precio: Number(article.precio),
+      iva: Number(article.iva),
       cantidad: 1,
       total: Number(article.precio)
     };
     setLines(newLines);
     setSearchResults([]);
     setActiveSearchIndex(null);
+
+    // Si el artículo tiene IVA predefinido, calcular también el RE
+    if (article.iva) {
+      const reRate = getReRate(article.iva, !!customer?.tiene_re);
+      const newLines = [...lines];
+      newLines[index].re = reRate;
+      setLines(newLines);
+    }
   };
 
   return (
@@ -163,20 +199,21 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       <h3 className="text-lg font-medium mb-4 dark:text-gray-200">Líneas de Factura</h3>
       <div className="space-y-1">
         {/* Cabecera para detalle de lineas de factura */}
-        <div className="hidden md:grid md:grid-cols-12 gap-2 px-4 pb-1 border-b dark:border-gray-700 text-[10px] font-semibold uppercase text-gray-500 tracking-wider">
-          <div className="md:col-span-6">Artículo / Descripción</div>
+        <div className="hidden md:grid md:grid-cols-12 gap-1.5 px-1.5 border-b dark:border-gray-700 text-[12px] font-semibold uppercase text-gray-500 tracking-wider">
+          <div className="md:col-span-5">Artículo / Descripción</div>
           <div className="md:col-span-2 text-center">Observaciones</div>
           <div className="md:col-span-1 text-center">Cantidad</div>
           <div className="md:col-span-1 text-center">Precio</div>
           <div className="md:col-span-1 text-center">Total</div>
-          <div className="md:col-span-1 text-center">Eliminar</div>
+          <div className="md:col-span-1 text-center">IVA</div>
+          <div className="md:col-span-1 text-center">borrar</div>
         </div>
 
         {lines.map((line, index) => (
-          <div key={index} className="flex flex-col gap-1 p-2 md:p-1 border md:border-none rounded-md bg-white dark:bg-gray-900 dark:border-gray-700 md:bg-transparent transition-all hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-1 md:gap-2 items-center">
+          <div key={index} className="flex flex-col gap-1 px-1.5 py-1 border md:border-none rounded-md bg-white dark:bg-gray-900 dark:border-gray-700 md:bg-transparent transition-all hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-1.5 items-center">
               {/* Búsqueda/Descripción */}
-              <div className="md:col-span-6 relative">
+              <div className="md:col-span-5 relative">
                 <label className="block text-xs font-medium text-gray-500 mb-1 leading-none md:hidden">Artículo / Descripción</label>
                 <div className="relative">
                   <input
@@ -244,84 +281,95 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
               </div>
 
               {/* Observaciones */}
-              <div className="md:col-span-2 flex items-center justify-right">
+              <div className="md:col-span-2 flex items-center">
                 {/* <label className="block text-xs font-medium text-gray-500 mb-1 leading-none md:hidden">Observaciones</label> */}
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setObservaciones(index)}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all border ${line.observaciones
+                  className={`flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-all border ${line.observaciones
                     ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
                     : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700'
                     }`}
                   title="Editar observaciones"
                 >
                   <ChatBubbleLeftEllipsisIcon className="h-4 w-4" />
-                  <span className="truncate max-w-[80px] md:max-w-[120px]">
-                    {line.observaciones || 'Observaciones...'}
+                  <span className="truncate max-w-[80px] md:max-w-[180px]">
+                    {line.observaciones || 'Observaciones....'}
                   </span>
                 </button>
               </div>
 
-              {/* Grupo para móviles: Cantidad, Precio, Total y Eliminar */}
-              <div className="md:col-span-4 grid grid-cols-4 gap-2 items-center border-t md:border-t-0 pt-2 md:pt-0 mt-1 md:mt-0">
-                {/* Cantidad */}
-                <div className="flex flex-col">
-                  <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">Cant.</label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={line.cantidad || 1}
-                    onChange={(e) => {
-                      // Permitir solo números y un solo punto
-                      const val = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
-                      const parts = val.split('.');
-                      const finalVal = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : val;
-                      updateLine(index, 'cantidad', finalVal);
-                    }}
-                    className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 text-center font-mono"
-                  />
-                </div>
+              {/* Grupo de campos numéricos alineados con la cabecera */}
+              <div className="md:col-span-1 flex flex-col">
+                <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">Cant.</label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={line.cantidad || 1}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
+                    const parts = val.split('.');
+                    const finalVal = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : val;
+                    updateLine(index, 'cantidad', finalVal);
+                  }}
+                  className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 text-center font-mono"
+                />
+              </div>
+              {/* Precio */}
+              <div className="md:col-span-1 flex flex-col">
+                <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">Precio</label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={line.precio || 0}
+                  onChange={(e) => {
+                    // Normalización total de comas y basura
+                    const val = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
+                    const parts = val.split('.');
+                    const finalVal = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : val;
+                    updateLine(index, 'precio', finalVal);
+                  }}
+                  className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 text-center font-mono"
+                />
+              </div>
 
-                {/* Precio */}
-                <div className="flex flex-col">
-                  <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">Precio</label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={line.precio || 0}
-                    onChange={(e) => {
-                      // Normalización total de comas y basura
-                      const val = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
-                      const parts = val.split('.');
-                      const finalVal = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : val;
-                      updateLine(index, 'precio', finalVal);
-                    }}
-                    className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 text-center font-mono"
-                  />
+              {/* Total */}
+              <div className="md:col-span-1 flex flex-col text-center">
+                <label className="block text-[10px] font-medium text-gray-400 md:hidden uppercase">Total</label>
+                <div className="text-sm font-semibold dark:text-white md:pt-1.5 pt-1">
+                  {line.total}€
                 </div>
+              </div>
 
-                {/* Total */}
-                <div className="flex flex-col text-center">
-                  <label className="block text-[10px] font-medium text-gray-400 mb-1 md:hidden uppercase">Total</label>
-                  <div className="text-sm font-semibold dark:text-white md:pt-0 pt-1">
-                    {line.total}€
-                  </div>
-                </div>
+              {/* IVA */}
+              <div className="md:col-span-1 flex flex-col">
+                <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">IVA</label>
+                <select
+                  value={line.iva || 21}
+                  onChange={(e) => updateLine(index, 'iva', Number(e.target.value))}
+                  className="w-full text-xs border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 px-1 text-center"
+                  title="IVA Aplicable"
+                >
+                  <option value="21">21%</option>
+                  <option value="10">10%</option>
+                  <option value="5">5%</option>
+                  <option value="4">4%</option>
+                  <option value="0">0%</option>
+                </select>
+              </div>
 
-                {/* Eliminar */}
-                <div className="flex flex-col items-center">
-                  <label className="block text-[10px] font-medium text-gray-400 mb-1 md:hidden uppercase">Borrar</label>
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    onClick={() => removeLine(index)}
-                    className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full transition-colors mt-0.5 md:mt-0"
-                    title="Eliminar línea"
-                  >
-                    <TrashIcon className="h-4 w-4" />
-                  </button>
-                </div>
+              <div className="md:col-span-1 flex flex-col items-center">
+                <label className="block text-[10px] font-medium text-gray-400 mb-1 md:hidden uppercase">Borrar</label>
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => removeLine(index)}
+                  className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full transition-colors mt-0.5 md:mt-0"
+                  title="Eliminar línea"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </button>
               </div>
             </div>
           </div>

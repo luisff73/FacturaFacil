@@ -6,7 +6,7 @@ export const authConfig = {
   },
   session: { 
     strategy: 'jwt',
-    maxAge: 5 * 60, // 5 minutos (300 segundos)
+    maxAge: 30 * 60, // 30 minutos (1800 segundos)
     updateAge: 0,    // Se actualiza en cada petición para resetear el contador de inactividad
   },
   secret: process.env.AUTH_SECRET,
@@ -34,31 +34,38 @@ export const authConfig = {
       return session;
     },
     authorized({ auth, request: { nextUrl } }) {
-      // Comprueba si el usuario está logueado
-      const isLoggedIn = !!auth?.user && !!(auth.user as any).id_empresa;
-      // Comprueba si el usuario es admin
-      const isAdmin = (auth?.user as any)?.type === 'admin';
-      // Comprueba si la ruta es el dashboard
-      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-      // Comprueba si la ruta es /dashboard/users
-      const isOnUsersAdmin = nextUrl.pathname.startsWith('/dashboard/users');
-      // Comprueba si la ruta es /login
-      const isOnLogin = nextUrl.pathname.startsWith('/login');
-      // Las rutas de creación de empresa deben ser públicas porque se está registrando la primera vez
-      const isEmpresaRegistration = nextUrl.pathname === '/dashboard/empresas/create' || nextUrl.pathname === '/dashboard/empresas';
+      const isLoggedIn = !!auth?.user; // si esta logueado
+      const hasEmpresa = !!(auth?.user as any)?.id_empresa; // si tiene empresa
+      const isAdmin = (auth?.user as any)?.type === 'admin'; // si es admin
       
-      if (isOnDashboard && !isEmpresaRegistration) {
-        if (isLoggedIn) {
-          // Si intenta acceder a cualquier ruta relativa a usuarios y NO es admin, se le devuelve a dashboard
-          if (isOnUsersAdmin && !isAdmin) {
-             return Response.redirect(new URL('/dashboard', nextUrl));
-          }
-          return true;
+      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard'); // si esta en el dashboard
+      const isOnLogin = nextUrl.pathname === '/login'; // si esta en el login
+      const isPublicEmpresaPath = nextUrl.pathname === '/dashboard/empresas/create' || nextUrl.pathname === '/dashboard/empresas'; // si esta en la creacion de empresas
+      const isUsersAdminPath = nextUrl.pathname.startsWith('/dashboard/users'); // si esta en la ruta de usuarios
+
+      // Si estamos en el dashboard
+      if (isOnDashboard) {
+        // PERMITIR registro de empresa sin id_empresa (pero logueado)
+        if (isPublicEmpresaPath) {
+          return true; // Permitimos a los usuarios logueados o no el registro de empresa inicial
         }
-        return false; // Redirect unauthenticated users to login page
-      } else if (isLoggedIn && isOnLogin) {
+
+        // Para el resto del dashboard REQUIRE login + id_empresa
+        if (!isLoggedIn || !hasEmpresa) return false;
+
+        // Si es ruta de usuarios administrador y NO es admin, redirigir al dashboard
+        if (isUsersAdminPath && !isAdmin) {
+          return Response.redirect(new URL('/dashboard', nextUrl));
+        }
+
+        return true;
+      }
+
+      // Si está logueado e intenta ir a login, redirigir al dashboard
+      if (isOnLogin && isLoggedIn && hasEmpresa) {
         return Response.redirect(new URL('/dashboard', nextUrl));
       }
+
       return true;
     },
   },

@@ -80,3 +80,23 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
 export const generateInvoiceHash = (data: string) => {
   return crypto.createHash('sha256').update(data).digest('hex').toUpperCase();
 };
+
+/**
+ * Devuelve la URL completa de una imagen, gestionando si es absoluta o relativa (Blob Storage)
+ */
+export const getImageUrl = (path: string | null | undefined, fallback: string = "/user.png") => {
+  if (!path) return fallback;
+  if (path.startsWith("http")) return path;
+  
+  // Limpiamos posibles comillas de la variable de entorno
+  const baseUrl = (process.env.NEXT_PUBLIC_BLOB_URL || "").replace(/"/g, "");
+  
+  // Si no hay base URL y no es absoluta, devolvemos el path tal cual
+  if (!baseUrl) return path;
+
+  // Nos aseguramos de no duplicar slashes
+  const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
+  
+  return `${cleanBase}/${cleanPath}`;
+};

@@ -39,8 +39,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         invoice={invoice} 
         customers={customers} 
         lines={lines} 
-        empresaIva={empresa?.iva || 21} 
-        empresaCif={empresa?.cif || ''}
       />
     </main>
   );

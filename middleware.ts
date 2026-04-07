@@ -57,7 +57,7 @@ import { authConfig } from "./auth.config";
 
 export default NextAuth(authConfig).auth; 
 
+// proteger todas las rutas excepto las que comienzan con api, _next/static, _next/image, monitoring, favicon.ico, .png dashboard
 export const config = {
-
-  matcher: ["/((?!api|_next/static|_next/image|monitoring|favicon.ico|.*\\.png$).*)"], 
+  matcher: ['/((?!api|_next/static|_next/image|monitoring|favicon.ico|.*\\.png$).*)','/dashboard/:path*'],
 };

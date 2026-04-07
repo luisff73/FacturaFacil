@@ -1,9 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateEmpresa } from '@/app/lib/actions';
+import { updateEmpresa, uploadImage } from '@/app/lib/actions';
 import { Empresas } from '@/app/lib/definitions';
 import { Button } from '@/app/ui/button';
+import { getImageUrl } from '@/app/lib/utils';
 import Link from 'next/link';
 
 interface EditFormProps {
@@ -13,10 +14,25 @@ interface EditFormProps {
 const EditEmpresasForm: React.FC<EditFormProps> = ({ empresa }) => {
   const [state, setState] = useState<{ errors: Partial<Record<keyof Empresas, string[]>>; message: string }>({ errors: {}, message: '' });
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
+
+    // 1. Manejar la subida del logotipo si hay un archivo nuevo
+    let logotipoUrl = empresa.logotipo || '';
+    const file = fileInputRef.current?.files?.[0];
+
+    if (file && file.size > 0) {
+      const uploadData = new FormData();
+      uploadData.append('logotipo', file);
+      const uploadedPath = await uploadImage(uploadData, 'logotipo');
+      if (uploadedPath) {
+        logotipoUrl = uploadedPath;
+      }
+    }
+
     const data = {
       nombre: formData.get('nombre') as string || '',
       direccion: formData.get('direccion') as string || '',
@@ -26,9 +42,8 @@ const EditEmpresasForm: React.FC<EditFormProps> = ({ empresa }) => {
       telefono: formData.get('telefono') as string || '',
       cif: formData.get('cif') as string || '',
       email: formData.get('email') as string || '',
-      iva: parseFloat(formData.get('iva') as string) || 0.0,
-      activa: formData.get('activa') === 'true',
-      password: formData.get('password') as string || '',
+      logotipo: logotipoUrl, // Usamos la URL (nueva o antigua)
+      activa: formData.get('activa') === 'on', // Las checkboxes en FormData son 'on' si están marcadas
       fecha_creacion: empresa.fecha_creacion,
     };
 
@@ -42,8 +57,21 @@ const EditEmpresasForm: React.FC<EditFormProps> = ({ empresa }) => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT') {
+      const input = e.target as HTMLInputElement;
+      if (input.type !== 'submit' && input.type !== 'button' && input.type !== 'checkbox' && input.type !== 'file') {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const index = Array.from(form.elements).indexOf(input);
+        const next = form.elements[index + 1] as HTMLElement;
+        if (next) next.focus();
+      }
+    }
+  };
+
   return (
-    <form onSubmit={formAction}>
+    <form onSubmit={formAction} onKeyDown={handleKeyDown}>
       <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
         {/* Empresa Nombre */}
         <div className="mb-4">
@@ -248,49 +276,35 @@ const EditEmpresasForm: React.FC<EditFormProps> = ({ empresa }) => {
           </div>
         </div>
 
-        {/* Empresa IVA */}
+        {/* Empresa Logotipo */}
         <div className="mb-4">
-          <label htmlFor="iva" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            IVA
+          <label htmlFor="logotipo" className="mb-2 block text-sm font-medium dark:text-gray-200">
+            Logotipo
           </label>
           <div className="relative">
             <input
-              id="iva"
-              name="iva"
-              type="text"
-              defaultValue={empresa.iva}
-              placeholder="Introduzca el IVA de la empresa"
+              id="logotipo"
+              name="logotipo"
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              placeholder="Introduzca el logotipo de la empresa"
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-              aria-describedby="iva-error"
+              aria-describedby="logotipo-error"
             />
+            {empresa.logotipo && (
+              <div className="mt-2">
+                <p className="text-xs text-gray-500">Logotipo actual:</p>
+                <img
+                  src={getImageUrl(empresa.logotipo)}
+                  alt="Logotipo actual"
+                  className="h-20 w-auto rounded border p-1"
+                />
+              </div>
+            )}
           </div>
-          <div id="iva-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.iva?.map((error: string) => (
-              <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
-                {error}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        {/* Empresa Contraseña */}
-        <div className="mb-4">
-          <label htmlFor="password" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            Contraseña
-          </label>
-          <div className="relative">
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Introduzca la nueva contraseña de la empresa (opcional)"
-              autoComplete="new-password"
-              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-              aria-describedby="password-error"
-            />
-          </div>
-          <div id="password-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.password?.map((error: string) => (
+          <div id="logotipo-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.logotipo?.map((error: string) => (
               <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
                 {error}
               </p>

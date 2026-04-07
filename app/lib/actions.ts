@@ -8,17 +8,12 @@ import { redirect } from "next/navigation";
 import { signIn, auth, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 import { validateDocument } from "@/app/lib/valitacionnifcif";
-import {
-  Customer,
-  ArticulosTableType,
-  User,
-  Empresas,
-} from "@/app/lib/definitions";
+import { Customer, ArticulosTableType, User, Empresas} from "@/app/lib/definitions";
 import { requireEmpresaId } from "./data";
 import { generateInvoiceHash } from "./utils";
 import bcrypt from "bcryptjs";
 
-// Define el esquema para FormSchema
+// Define el esquema para FormSchema de facturas
 const FormSchema = z.object({
   id: z.string(),
   customerId: z.string({
@@ -44,6 +39,15 @@ const UpdateInvoice = FormSchema.omit({ id: true }).extend({
   }).min(1, { message: "El número de factura es obligatorio." }),
 });
 
+// Función auxiliar para calcular el Recargo de Equivalencia (RE) según el IVA (Estándares España)
+function getReRate(iva: number, hasRe: boolean): number {
+  if (!hasRe) return 0;
+  if (iva === 21) return 5.2;
+  if (iva === 10) return 1.4;
+  if (iva === 5 || iva === 4) return 0.5;
+  return 0;
+}
+
 // Esquema para Clientes y validacion de campos zod
 const CustomerSchema = z.object({
   id: z.string().optional(),
@@ -68,7 +72,7 @@ const CreateCustomer = CustomerSchema.omit({ id: true });
 //const UpdateCustomer = CustomerSchema.omit({ id: true });
 
 
-export type State = {
+export type State = { 
   errors?: {
     customerId?: string[];
     base_imponible?: string[];
@@ -109,7 +113,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
     invoice_serie: formData.get("invoice_serie"),
   });
 
-  // If form validation fails, return errors early. Otherwise, continue.
+  // Si falla la validación del formulario, devuelve los errores.
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
@@ -125,18 +129,17 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
     };
   }
 
-  // Prepare data for insertion into the database
+  // Prepara los datos para la inserción en la base de datos
   const { customerId, base_imponible, status, lines, fecha, invoice_serie } = validatedFields.data;
   const idEmpresa = await requireEmpresaId();
 
-  // Obtener datos del cliente y de la empresa para calcular impuestos
   const [customerResult, empresaResult] = await Promise.all([
     sql`SELECT tiene_iva, tiene_re, cif FROM customers WHERE id = ${customerId} AND id_empresa = ${idEmpresa}`,
-    sql`SELECT iva, cif FROM empresas WHERE id = ${idEmpresa}`,
+    sql`SELECT cif FROM empresas WHERE id = ${idEmpresa}`,
   ]);
 
-  const [customer, empresa] = [customerResult.rows[0], empresaResult.rows[0]];
-  const ivaEmpresa = Number(empresa.iva) || 21;
+  const customer = customerResult.rows[0];
+  const empresa = empresaResult.rows[0];
 
   // Obtener el siguiente número de factura y el hash anterior para Verifactu
   const [nextNumberResult, lastHashResult] = await Promise.all([
@@ -156,20 +159,25 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
 
   const invoice_number = nextNumberResult.rows[0].next_number;
   const prev_hash = lastHashResult.rows[0]?.hash || '';
-  let reRate = 0.5;
-  if (ivaEmpresa === 21) reRate = 5.2;
-  else if (ivaEmpresa === 10) reRate = 1.4;
-  else if (ivaEmpresa === 4) reRate = 0.5;
-
-  const base_imponibleInCents = Math.round(base_imponible * 100); // BI
+  
+  const base_imponibleInCents = Math.round(base_imponible * 100); // BI total
   let tax_ivaInCents = 0;
   let tax_rec_equivalenciaInCents = 0;
 
+  const parsedLines = lines ? JSON.parse(lines) : [];
+
   if (customer.tiene_iva) {
-    tax_ivaInCents = Math.round(base_imponibleInCents * (ivaEmpresa / 100));
-    if (customer.tiene_re) {
-      tax_rec_equivalenciaInCents = Math.round(base_imponibleInCents * (reRate / 100));
-    }
+    parsedLines.forEach((line: any) => {
+      const lineBaseInCents = Math.round((Number(line.cantidad) * Number(line.precio)) * 100);
+      const lineIvaRate = Number(line.iva) || 21;
+      
+      tax_ivaInCents += Math.round(lineBaseInCents * (lineIvaRate / 100));
+
+      if (line.re) {
+        const reRate = getReRate(lineIvaRate, !!customer.tiene_re);
+        tax_rec_equivalenciaInCents += Math.round(lineBaseInCents * (reRate / 100));
+      }
+    });
   }
 
   const totalInCents = base_imponibleInCents + tax_ivaInCents + tax_rec_equivalenciaInCents;
@@ -222,8 +230,8 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
       const parsedLines = JSON.parse(lines);
       for (const line of parsedLines) {
         await sql`
-          INSERT INTO invoices_lines (id_invoice, linea, descripcion, observaciones, cantidad, precio, total, id_articulo, id_empresa)
-          VALUES (${invoiceId}, ${line.linea}, ${line.descripcion}, ${line.observaciones}, ${line.cantidad}, ${line.precio}, ${line.total}, ${line.id_articulo}, ${idEmpresa})
+          INSERT INTO invoices_lines (id_invoice, linea, descripcion, observaciones, cantidad, precio, total, id_articulo, id_empresa, iva, re)
+          VALUES (${invoiceId}, ${line.linea}, ${line.descripcion}, ${line.observaciones}, ${line.cantidad}, ${line.precio}, ${line.total}, ${line.id_articulo}, ${idEmpresa}, ${line.iva || 21}, ${line.re || 0})
         `;
       }
     }
@@ -274,28 +282,30 @@ export async function updateInvoice(
   const { customerId, base_imponible, status, lines, fecha, invoiceNumber, invoice_serie } = validatedFields.data;
   const idEmpresa = await requireEmpresaId();
 
-  // Obtener datos del cliente y de la empresa para calcular impuestos
-  const [customerResult, empresaResult] = await Promise.all([
+  // Obtener datos del cliente para calcular impuestos
+  const [customerResult] = await Promise.all([
     sql`SELECT tiene_iva, tiene_re, cif FROM customers WHERE id = ${customerId} AND id_empresa = ${idEmpresa}`,
-    sql`SELECT iva FROM empresas WHERE id = ${idEmpresa}`,
   ]);
 
   const customer = customerResult.rows[0];
-  const ivaEmpresa = Number(empresaResult.rows[0].iva) || 21;
-  let reRate = 0.5;
-  if (ivaEmpresa === 21) reRate = 5.2;
-  else if (ivaEmpresa === 10) reRate = 1.4;
-  else if (ivaEmpresa === 4) reRate = 0.5;
-
   const base_imponibleInCents = Math.round(base_imponible * 100); // BI
   let tax_ivaInCents = 0;
   let tax_rec_equivalenciaInCents = 0;
 
+  const parsedLines = lines ? JSON.parse(lines) : [];
+
   if (customer.tiene_iva) {
-    tax_ivaInCents = Math.round(base_imponibleInCents * (ivaEmpresa / 100));
-    if (customer.tiene_re) {
-      tax_rec_equivalenciaInCents = Math.round(base_imponibleInCents * (reRate / 100));
-    }
+    parsedLines.forEach((line: any) => {
+      const lineBaseInCents = Math.round((Number(line.cantidad) * Number(line.precio)) * 100);
+      const lineIvaRate = Number(line.iva) || 21;
+      
+      tax_ivaInCents += Math.round(lineBaseInCents * (lineIvaRate / 100));
+
+      if (line.re) {
+        const reRate = getReRate(lineIvaRate, !!customer.tiene_re);
+        tax_rec_equivalenciaInCents += Math.round(lineBaseInCents * (reRate / 100));
+      }
+    });
   }
 
   const totalInCents = base_imponibleInCents + tax_ivaInCents + tax_rec_equivalenciaInCents;
@@ -323,8 +333,8 @@ export async function updateInvoice(
       const parsedLines = JSON.parse(lines);
       for (const line of parsedLines) {
         await sql`
-          INSERT INTO invoices_lines (id_invoice, linea, descripcion, observaciones, cantidad, precio, total, id_articulo, id_empresa)
-          VALUES (${id}, ${line.linea}, ${line.descripcion}, ${line.observaciones}, ${line.cantidad}, ${line.precio}, ${line.total}, ${line.id_articulo}, ${idEmpresa})
+          INSERT INTO invoices_lines (id_invoice, linea, descripcion, observaciones, cantidad, precio, total, id_articulo, id_empresa, iva, re)
+          VALUES (${id}, ${line.linea}, ${line.descripcion}, ${line.observaciones}, ${line.cantidad}, ${line.precio}, ${line.total}, ${line.id_articulo}, ${idEmpresa}, ${line.iva || 21}, ${line.re || 0})
         `;
       }
     }
@@ -431,7 +441,7 @@ export async function authenticate(
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
-          return "Invalid credentials.";
+          return "Correo electronico o contraseña incorrectas.";
         default:
           return "Algo ha ido mal.";
       }
@@ -544,10 +554,10 @@ export async function updateUser(id: string, data: Omit<User, "id">) {
     const saltRounds = 5; // nivel de seguridad de bcrypt mas alto es 10 mas lento pero mas seguro
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    // Consulta SQL para actualizar un usuario
+    // Consulta SQL para actualizar un usuario (excluyendo nombre y email que son inmutables)
     const result = await sql`
       UPDATE users
-      SET name = ${name}, email = ${email}, password = ${hashedPassword}, type = ${type}, token = ${token}, css = ${css}, image_url = ${image_url}
+      SET password = ${hashedPassword}, type = ${type}, token = ${token}, css = ${css}, image_url = ${image_url}
       WHERE id = ${id}
       RETURNING id, name, email, password, type, token, css, image_url;
     `;
@@ -555,7 +565,7 @@ export async function updateUser(id: string, data: Omit<User, "id">) {
   } else {
     const result = await sql`
       UPDATE users
-      SET name = ${name}, email = ${email}, type = ${type}, token = ${token}, css = ${css}, image_url = ${image_url}
+      SET type = ${type}, token = ${token}, css = ${css}, image_url = ${image_url}
       WHERE id = ${id}
       RETURNING id, name, email, password, type, token, css, image_url;
     `;
@@ -570,6 +580,17 @@ export async function createUser(data: Omit<User, "id">) {
 
   if (!id_empresa) {
     id_empresa = await requireEmpresaId();
+  }
+
+  // Si no se proporciona un CSS, usamos el del usuario actual o el por defecto
+  if (!css) {
+    const session = await auth();
+    css = (session?.user as any)?.css || '#1a1c1eff';
+  }
+
+  // Validar que la contraseña no esté vacía
+  if (!password || password.trim() === "") {
+    throw new Error("La contraseña es obligatoria.");
   }
 
   // Encriptar la contraseña
@@ -597,27 +618,17 @@ export async function deleteEmpresa(id: string) {
 
 // Función para actualizar una empresa
 export async function updateEmpresa(id: string, data: Omit<Empresas, "id">) {
-  const { nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, activa, password } = data;
+  const { nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, logotipo, activa } = data;
 
-  if (password) {
-    const saltRounds = 5;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const result = await sql`
-      UPDATE empresas
-      SET nombre = ${nombre}, direccion = ${direccion}, c_postal = ${c_postal}, poblacion = ${poblacion}, provincia = ${provincia}, telefono = ${telefono}, cif = ${cif}, email = ${email}, iva = ${iva}, activa = ${activa}, password = ${hashedPassword}
-      WHERE id = ${id}
-      RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, password;
-    `;
-    return result.rows[0];
-  } else {
-    const result = await sql`
-      UPDATE empresas
-      SET nombre = ${nombre}, direccion = ${direccion}, c_postal = ${c_postal}, poblacion = ${poblacion}, provincia = ${provincia}, telefono = ${telefono}, cif = ${cif}, email = ${email}, iva = ${iva}, activa = ${activa}
-      WHERE id = ${id}
-      RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, password;
-    `;
-    return result.rows[0];
-  }
+  const result = await sql`
+    UPDATE empresas
+    SET nombre = ${nombre}, direccion = ${direccion}, c_postal = ${c_postal}, poblacion = ${poblacion}, provincia = ${provincia}, telefono = ${telefono}, cif = ${cif}, email = ${email}, logotipo = ${logotipo}, activa = ${activa}
+    WHERE id = ${id}
+    RETURNING id, nombre, logotipo;
+  `;
+  
+  revalidatePath("/dashboard/empresas");
+  return result.rows[0];
 }
 
 // cuando llamamos desde el cliente aún no conocemos el id de la empresa, por lo que el usuario inicial puede omitirlo.  La función helper se encargará de fusionarlo automáticamente después de crear la empresa.  Por eso `initialUser` puede omitir tanto `id` como `id_empresa`.
@@ -635,20 +646,15 @@ export async function createEmpresa(
     telefono,
     cif,
     email,
-    iva,
-    password,
+    logotipo,
     activa,
   } = data;
 
-  // Encriptar la contraseña de la empresa
-  const saltRounds = 5;
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-
   // Insertar la empresa
   const result = await sql`
-    INSERT INTO empresas (nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, password, activa)
-    VALUES (${nombre}, ${direccion}, ${c_postal}, ${poblacion}, ${provincia}, ${telefono}, ${cif}, ${email}, ${iva}, ${hashedPassword}, ${activa})
-    RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, iva, password;
+    INSERT INTO empresas (nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, logotipo, activa)
+    VALUES (${nombre}, ${direccion}, ${c_postal}, ${poblacion}, ${provincia}, ${telefono}, ${cif}, ${email}, ${logotipo}, ${activa})
+    RETURNING id, nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, logotipo, activa;
   `;
   // Crea la serie 001 por defecto
   const result2 = await sql`
@@ -658,6 +664,9 @@ export async function createEmpresa(
   `;
 
   const empresa = result.rows[0];
+
+  const serie = result2.rows[0];
+  console.log(serie);
 
   // Si se ha pasado un usuario inicial, crearlo y asociarlo a la nueva empresa
   if (initialUser) {
@@ -699,8 +708,8 @@ export async function updateUserCss(css: string) {
   }
 }
 
-export async function uploadImage(formData: FormData) {
-  const file = formData.get('file') as File | null;
+export async function uploadImage(formData: FormData, fieldName: string = 'file') {
+  const file = formData.get(fieldName) as File | null;
   if (!file || !file.name || file.name === "undefined") {
     return null;
   }

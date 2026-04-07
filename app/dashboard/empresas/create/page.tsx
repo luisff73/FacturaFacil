@@ -14,7 +14,7 @@ export default async function Page() {
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: 'Empresas', href: '/dashboard/empresas' },
+          { label: 'Panel de entrada', href: '/dashboard' },
           {
             label: 'Crear Empresa',
             href: '/dashboard/empresas/create',

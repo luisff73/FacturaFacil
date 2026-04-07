@@ -52,8 +52,21 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT') {
+      const input = e.target as HTMLInputElement;
+      if (input.type !== 'submit' && input.type !== 'button' && input.type !== 'checkbox' && input.type !== 'file') {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const index = Array.from(form.elements).indexOf(input);
+        const next = form.elements[index + 1] as HTMLElement;
+        if (next) next.focus();
+      }
+    }
+  };
+
   return (
-    <form onSubmit={formAction}>
+    <form onSubmit={formAction} onKeyDown={handleKeyDown}>
       <div className="rounded-md bg-gray-50 dark:bg-gray-800 p-4 md:p-6">
         {/* User Name */}
         <div className="mb-4">
@@ -66,9 +79,8 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               name="name"
               type="text"
               defaultValue={user.name}
-              placeholder="Introduce el nombre del usuario"
-              autoComplete="name"
-              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+              readOnly
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 bg-gray-100 dark:bg-gray-800 dark:text-gray-400 cursor-not-allowed"
               aria-describedby="name-error"
             />
           </div>
@@ -92,9 +104,8 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
               name="email"
               type="email"
               defaultValue={user.email}
-              placeholder="Introduce el email del usuario"
-              autoComplete="email"
-              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+              readOnly
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 bg-gray-100 dark:bg-gray-800 dark:text-gray-400 cursor-not-allowed"
               aria-describedby="email-error"
             />
           </div>
