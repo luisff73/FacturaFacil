@@ -231,7 +231,19 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
       for (const line of parsedLines) {
         await sql`
           INSERT INTO invoices_lines (id_invoice, linea, descripcion, observaciones, cantidad, precio, total, id_articulo, id_empresa, iva, re)
-          VALUES (${invoiceId}, ${line.linea}, ${line.descripcion}, ${line.observaciones}, ${line.cantidad}, ${line.precio}, ${line.total}, ${line.id_articulo}, ${idEmpresa}, ${line.iva || 21}, ${line.re || 0})
+          VALUES (
+            ${invoiceId}, 
+            ${line.linea}, 
+            ${line.descripcion}, 
+            ${line.observaciones}, 
+            ${Math.round(line.cantidad * 100)}, 
+            ${Math.round(line.precio * 100)}, 
+            ${Math.round(line.total * 100)}, 
+            ${line.id_articulo}, 
+            ${idEmpresa}, 
+            ${line.iva || 21}, 
+            ${line.re || 0}
+          )
         `;
       }
     }
@@ -334,7 +346,19 @@ export async function updateInvoice(
       for (const line of parsedLines) {
         await sql`
           INSERT INTO invoices_lines (id_invoice, linea, descripcion, observaciones, cantidad, precio, total, id_articulo, id_empresa, iva, re)
-          VALUES (${id}, ${line.linea}, ${line.descripcion}, ${line.observaciones}, ${line.cantidad}, ${line.precio}, ${line.total}, ${line.id_articulo}, ${idEmpresa}, ${line.iva || 21}, ${line.re || 0})
+          VALUES (
+            ${id}, 
+            ${line.linea}, 
+            ${line.descripcion}, 
+            ${line.observaciones}, 
+            ${Math.round(line.cantidad * 100)}, 
+            ${Math.round(line.precio * 100)}, 
+            ${Math.round(line.total * 100)}, 
+            ${line.id_articulo}, 
+            ${idEmpresa}, 
+            ${line.iva || 21}, 
+            ${line.re || 0}
+          )
         `;
       }
     }

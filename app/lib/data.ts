@@ -267,9 +267,9 @@ export async function fetchinvoices_lines(invoiceId: string) {
 
     return data.rows.map((line) => ({
       ...line,
-      precio: Number(line.precio),
-      cantidad: Number(line.cantidad),
-      total: Number(line.total),
+      precio: line.precio / 100,
+      cantidad: line.cantidad / 100,
+      total: line.total / 100,
     }));
   } catch (error) {
     console.error("Database Error:", error);

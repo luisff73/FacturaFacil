@@ -30,7 +30,6 @@ export default async function Page() {
       <Form 
         customers={customers} 
         series={series}
-        empresaIva={empresa?.iva || 21} 
         empresaCif={empresa?.cif || ''} 
       />
     </main>

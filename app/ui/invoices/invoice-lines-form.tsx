@@ -12,7 +12,6 @@ interface InvoiceLinesFormProps {
   initialLines?: invoices_lines[];
   customer?: Customer;
   invoice?: any; // Usamos any para evitar problemas de tipos circulares o simplemente Invoice
-  empresaIva?: number;
   onTotalChange?: (total: number) => void;
 }
 
@@ -25,7 +24,7 @@ function getReRate(iva: number, hasRe: boolean): number {
   return 0;
 }
 
-export default function InvoiceLinesForm({ initialLines = [], customer, invoice, empresaIva = 21, onTotalChange }: InvoiceLinesFormProps) {
+export default function InvoiceLinesForm({ initialLines = [], customer, invoice, onTotalChange }: InvoiceLinesFormProps) {
   const [lines, setLines] = useState<Partial<invoices_lines>[]>(
     initialLines.length > 0
       ? initialLines
@@ -41,14 +40,6 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
         re: getReRate(21, !!customer?.tiene_re)
       }]
   );
-  const [prevLinesLength, setPrevLinesLength] = useState(lines.length);
-
-  const [settax_ivaDetails] = useState({
-    bi: 0,
-    iva: 0,
-    re: 0,
-    total: 0
-  });
 
   const [searchResults, setSearchResults] = useState<ArticulosTableType[]>([]);
   const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(null);
@@ -58,13 +49,12 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
   useEffect(() => {
     if (initialLines.length > 0) {
       setLines(initialLines);
-      setPrevLinesLength(initialLines.length);
     }
   }, [initialLines]);
 
   const updateLine = (index: number, field: keyof invoices_lines, value: any) => {
-    const newLines = [...lines];
-    newLines[index] = { ...newLines[index], [field]: value };
+    const newLines = [...lines]; // copio el array de lineas  
+    newLines[index] = { ...newLines[index], [field]: value };// actualizo el campo que ha cambiado
 
     // Recalcular total si cambia cantidad o precio
     if (field === 'cantidad' || field === 'precio') {
@@ -127,7 +117,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       onTotalChange(total);
     }
 
-  }, [lines, customer, empresaIva, invoice, onTotalChange]); // el useeffect se ejecuta cada vez que cambia lines, customer, empresaIva o invoice
+  }, [lines, customer, invoice, onTotalChange]); // el useeffect se ejecuta cada vez que cambia lines, customer o invoice
 
   const addLine = () => { // la funcion addLine se ejecuta cuando se hace clic en el boton de añadir linea
     setLines([
@@ -172,26 +162,23 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
 
   const selectArticle = (article: ArticulosTableType, index: number) => {
     const newLines = [...lines];
+    const iva = Number(article.iva) || 21;
+    const re = getReRate(iva, !!customer?.tiene_re);
+
     newLines[index] = {
       ...newLines[index],
       id_articulo: article.id,
       descripcion: article.descripcion,
       precio: Number(article.precio),
-      iva: Number(article.iva),
+      iva: iva,
+      re: re,
       cantidad: 1,
       total: Number(article.precio)
     };
+
     setLines(newLines);
     setSearchResults([]);
     setActiveSearchIndex(null);
-
-    // Si el artículo tiene IVA predefinido, calcular también el RE
-    if (article.iva) {
-      const reRate = getReRate(article.iva, !!customer?.tiene_re);
-      const newLines = [...lines];
-      newLines[index].re = reRate;
-      setLines(newLines);
-    }
   };
 
   return (
@@ -335,9 +322,9 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
               </div>
 
               {/* Total */}
-              <div className="md:col-span-1 flex flex-col text-center">
+              <div className="md:col-span-1 flex flex-col text-center mb-1">
                 <label className="block text-[10px] font-medium text-gray-400 md:hidden uppercase">Total</label>
-                <div className="text-sm font-semibold dark:text-white md:pt-1.5 pt-1">
+                <div className="text-sm dark:text-white md:pt-1 pt-1">
                   {line.total}€
                 </div>
               </div>

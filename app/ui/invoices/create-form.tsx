@@ -17,7 +17,7 @@ import InvoiceLinesForm from '@/app/ui/invoices/invoice-lines-form';
 import QRCodePreview from '@/app/ui/invoices/qrcode-preview';
 import React from 'react';
 
-export default function Form({ customers, series, empresaIva, empresaCif }: { customers: Customer[], series: Series[], empresaIva: number, empresaCif: string }) {
+export default function Form({ customers, series, empresaCif }: { customers: Customer[], series: Series[], empresaCif: string }) {
   const initialState: State = { message: '', errors: {} };
   const [state, formAction] = useActionState(createInvoice, initialState);
   const [selectedCustomerId, setSelectedCustomerId] = React.useState(state.values?.customerId || '');
@@ -34,11 +34,7 @@ export default function Form({ customers, series, empresaIva, empresaCif }: { cu
     }
   }, [state.values?.customerId]);
 
-  // Calcular la tasa de RE basada en el IVA (Estándares en España)
-  let empresaRe = 0.5;
-  if (empresaIva === 21) empresaRe = 5.2;
-  else if (empresaIva === 10) empresaRe = 1.4;
-  else if (empresaIva === 4) empresaRe = 0.5;
+
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
     if (e.key === 'Enter') {
@@ -119,7 +115,7 @@ export default function Form({ customers, series, empresaIva, empresaCif }: { cu
               </select>
             </div>
 
-            {/* 👇 Manejo de errores de validación (idéntico a customers) */}
+            {/* Manejo de errores de validación (idéntico a customers) */}
             <div id="serie-error" aria-live="polite" aria-atomic="true">
               {state.errors?.invoice_serie &&
                 state.errors.invoice_serie.map((error: string) => (
@@ -150,7 +146,6 @@ export default function Form({ customers, series, empresaIva, empresaCif }: { cu
 
         <InvoiceLinesForm
           customer={selectedCustomer}
-          empresaIva={empresaIva}
           initialLines={state.values?.lines ? JSON.parse(state.values.lines) : []}
           onTotalChange={(total) => setRealTimeTotal(total)}
         />
@@ -208,7 +203,7 @@ export default function Form({ customers, series, empresaIva, empresaCif }: { cu
                 </div>
 
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">IVA ({empresaIva}%)</span>
+                  <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">IVA</span>
                   <div className="flex items-center gap-1">
                     <span id="total_iva-display">0.00</span>
                     <CurrencyEuroIcon className="h-4 w-4" />
@@ -217,7 +212,7 @@ export default function Form({ customers, series, empresaIva, empresaCif }: { cu
 
                 {selectedCustomer?.tiene_re && (
                   <div className="flex justify-between items-center text-sm text-blue-600">
-                    <span className="font-medium uppercase tracking-wider text-[10px]">RE ({empresaRe}%)</span>
+                    <span className="font-medium uppercase tracking-wider text-[10px]">RE</span>
                     <div className="flex items-center gap-1">
                       <span id="total_recargo-display">0.00</span>
                       <CurrencyEuroIcon className="h-4 w-4" />
