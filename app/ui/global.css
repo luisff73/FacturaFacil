@@ -1,21 +1,37 @@
+
+
+/* este fichero es el que carga tailwindcss y las variables de entorno (da el estilo a la app)*/
+
+
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+
+/* esto oculta las flechas de los inputs de tipo number en firefox */
 input[type='number'] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
 
+/* esto oculta las flechas de los inputs de tipo number en chrome y edge */
 input[type='number']::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
+/* esto oculta las flechas de los inputs de tipo number en chrome y edge */
 input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+/* Resumen
+Si pones este código en tu archivo global.css, 
+todos tus campos de tipo número se verán como campos de texto planos, 
+pero seguirán funcionando como números (abrirán el teclado numérico en 
+móviles y solo aceptarán caracteres numéricos). */
+
 
 /* :root {
   --bg-green-100: #C8E6C9;

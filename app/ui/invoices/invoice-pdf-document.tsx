@@ -218,8 +218,8 @@ export default function InvoicePDFDocument({ invoice, lines, customer, empresa }
         // Enlace oficial tentativo Verifactu / AEAT para verificación de facturas
         const dateStr = new Date(invoice.date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
         const invoiceNum = invoice.invoice_serie ? `${invoice.invoice_serie}-${invoice.invoice_number}` : invoice.invoice_number.toString();
-        // URL Oficial de Verifactu (AEAT) para verificación de facturas
-        const verifactuUrl = `https://www2.agenciatributaria.gob.es/wlpl/TIKE-CONT/v1/f?nif=${empresa.cif}&num=${invoiceNum}&fec=${dateStr}&imp=${Number(invoice.total_factura).toFixed(2)}`;
+        // URL Oficial de Verifactu (AEAT) para verificación de facturas (Entorno de pruebas)
+        const verifactuUrl = `https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQR?nif=${empresa.cif}&numserie=${invoice.invoice_serie ? invoice.invoice_serie + '/' : ''}${invoice.invoice_number}&fecha=${dateStr}&importe=${Number(invoice.total_factura).toFixed(2)}`;
         
         const url = await QRCode.toDataURL(verifactuUrl, { 
           margin: 1,

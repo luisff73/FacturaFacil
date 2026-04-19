@@ -47,7 +47,6 @@ export default async function RootLayout({
           <BarraTemas initialColor={Color_usuario} showUI={false} />
         </div>
         {children}
-        {/* <RegisterSW /> */}
       </body>
     </html>
   )
