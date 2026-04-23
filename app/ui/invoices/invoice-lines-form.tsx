@@ -27,7 +27,12 @@ function getReRate(iva: number, hasRe: boolean): number {
 export default function InvoiceLinesForm({ initialLines = [], customer, invoice, onTotalChange }: InvoiceLinesFormProps) {
   const [lines, setLines] = useState<Partial<invoices_lines>[]>(
     initialLines.length > 0
-      ? initialLines
+      ? initialLines.map(line => ({
+          ...line,
+          cantidad: line.cantidad / 100,
+          precio: line.precio / 100,
+          total: line.total / 100,
+        }))
       : [{
         linea: 1,
         descripcion: '',
@@ -48,7 +53,12 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
 
   useEffect(() => {
     if (initialLines.length > 0) {
-      setLines(initialLines);
+      setLines(initialLines.map(line => ({
+        ...line,
+        cantidad: line.cantidad / 100,
+        precio: line.precio / 100,
+        total: line.total / 100,
+      })));
     }
   }, [initialLines]);
 
@@ -169,11 +179,11 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       ...newLines[index],
       id_articulo: article.id,
       descripcion: article.descripcion,
-      precio: Number(article.precio),
+      precio: Number(article.precio) / 100,
       iva: iva,
       re: re,
       cantidad: 1,
-      total: Number(article.precio)
+      total: Number(article.precio) / 100
     };
 
     setLines(newLines);
@@ -246,7 +256,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                                 {art.codigo}
                               </span>
                               <span className="text-[10px] text-green-600 font-medium">
-                                {art.precio}€
+                                {(art.precio / 100).toFixed(2)}€
                               </span>
                             </div>
                           </div>
@@ -325,7 +335,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
               <div className="md:col-span-1 flex flex-col text-center mb-1">
                 <label className="block text-[10px] font-medium text-gray-400 md:hidden uppercase">Total</label>
                 <div className="text-sm dark:text-white md:pt-1 pt-1">
-                  {line.total}€
+                  {Number(line.total).toFixed(2)}€
                 </div>
               </div>
 

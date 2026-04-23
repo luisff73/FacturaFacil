@@ -98,7 +98,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                   <p className="font-medium text-gray-800">{line.descripcion}</p>
                   {line.observaciones && <p className="text-sm text-gray-500 italic">{line.observaciones}</p>}
                 </td>
-                <td className="py-4 text-right text-gray-600">{line.cantidad}</td>
+                <td className="py-4 text-right text-gray-600">{(line.cantidad / 100).toFixed(2)}</td>
                 <td className="py-4 text-right text-gray-600">{formatCurrency(line.precio)}</td>
                 <td className="py-4 text-right font-bold text-gray-800">{formatCurrency(line.total)}</td>
               </tr>

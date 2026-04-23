@@ -29,7 +29,7 @@ export default function QRCodePreview({
       try {
         const dateStr = new Date(fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
         // URL Oficial de Verifactu (AEAT) para entorno de pruebas
-        const url = `https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQR?nif=${cif}&numserie=${serie ? serie + '/' : ''}${numero}&fecha=${dateStr}&importe=${Number(importe).toFixed(2)}`;
+        const url = `https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQR?nif=${cif}&numserie=${serie ? serie + '/' : ''}${numero}&fecha=${dateStr}&importe=${(Number(importe) / 100).toFixed(2)}`;
         const dataUrl = await QRCode.toDataURL(url, { margin: 1, width: size });
         setSrc(dataUrl);
       } catch (e) {

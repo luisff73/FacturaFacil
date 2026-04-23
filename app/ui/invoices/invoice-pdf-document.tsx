@@ -219,7 +219,7 @@ export default function InvoicePDFDocument({ invoice, lines, customer, empresa }
         const dateStr = new Date(invoice.date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
         const invoiceNum = invoice.invoice_serie ? `${invoice.invoice_serie}-${invoice.invoice_number}` : invoice.invoice_number.toString();
         // URL Oficial de Verifactu (AEAT) para verificación de facturas (Entorno de pruebas)
-        const verifactuUrl = `https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQR?nif=${empresa.cif}&numserie=${invoice.invoice_serie ? invoice.invoice_serie + '/' : ''}${invoice.invoice_number}&fecha=${dateStr}&importe=${Number(invoice.total_factura).toFixed(2)}`;
+        const verifactuUrl = `https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQR?nif=${empresa.cif}&numserie=${invoice.invoice_serie ? invoice.invoice_serie + '/' : ''}${invoice.invoice_number}&fecha=${dateStr}&importe=${(invoice.total_factura / 100).toFixed(2)}`;
         
         const url = await QRCode.toDataURL(verifactuUrl, { 
           margin: 1,
@@ -281,7 +281,7 @@ export default function InvoicePDFDocument({ invoice, lines, customer, empresa }
                 <Text style={styles.lineDesc}>{line.descripcion}</Text>
                 {line.observaciones && <Text style={styles.lineObs}>{line.observaciones}</Text>}
               </View>
-              <Text style={[styles.lineText, styles.colQty]}>{line.cantidad}</Text>
+              <Text style={[styles.lineText, styles.colQty]}>{(line.cantidad / 100).toFixed(2)}</Text>
               <Text style={[styles.lineText, styles.colPrice]}>{formatCurrency(line.precio)}</Text>
               <Text style={[styles.lineTotal, styles.colTotal]}>{formatCurrency(line.total)}</Text>
             </View>

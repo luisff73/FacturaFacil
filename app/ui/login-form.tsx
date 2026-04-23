@@ -100,7 +100,7 @@ export default function LoginForm() {
         </div>
 
         {/* Botones de Social Login */}
-        <div className="mt-6 space-y-3">
+        {/* <div className="mt-6 space-y-3">
           <button
             type="button"
             onClick={handleGoogleLogin}
@@ -117,7 +117,7 @@ export default function LoginForm() {
             <FaGithub className="mr-2 h-5 w-5" />
             Sign in with GitHub
           </button>
-        </div>
+        </div> */}
       </div>
     </form>
   );

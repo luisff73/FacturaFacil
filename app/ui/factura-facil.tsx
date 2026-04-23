@@ -1,11 +1,10 @@
-import React from 'react';
 import { roboto } from '@/app/ui/fonts';
-import Image from 'next/image';
-import { auth } from '@/auth';
-import { fetchEmpresaById } from '@/app/lib/data';
-import { fetchUsersById } from '@/app/lib/data';
+import Image from 'next/image'; // Importamos Image de next/image para optimizar la carga de imágenes
+import { auth } from '@/auth'; // Importamos auth de next-auth para obtener la sesión
+import { fetchEmpresaById } from '@/app/lib/data'; // Importamos fetchEmpresaById de app/lib/data para obtener la empresa
+import { fetchUsersById } from '@/app/lib/data'; // Importamos fetchUsersById de app/lib/data para obtener el usuario
 
-const BLOB_URL = (process.env.NEXT_PUBLIC_BLOB_URL || '').replace(/"/g, '');
+const BLOB_URL = (process.env.NEXT_PUBLIC_BLOB_URL || '').replace(/"/g, ''); // Obtenemos la URL del Blob
 
 export default async function FacturaFacilLogo({ size = 'large' }: { size?: 'small' | 'large' }) {
   let nombreEmpresa = null;
@@ -35,11 +34,11 @@ export default async function FacturaFacilLogo({ size = 'large' }: { size?: 'sma
         priority={true}
       />
       <div className="flex flex-col ml-4 items-start">
-        <div className="flex flex-col md:flex-row items-start">
-          <p className={`${isSmall ? 'text-[10px]' : 'w-full text-[15px]'} md:text-[30px] self-start mr-4`}>
+        <div className="flex flex-col items-start">
+          <p className={`${isSmall ? 'text-[11px]' : 'w-full text-[15px]'} md:text-[30px] self-start mr-4`}>
             Tu programa de gestión
           </p>
-          <p className={`${isSmall ? 'text-[10px]' : 'w-full text-[15px] font-bold'} md:text-[30px] self-start mr-4`}>
+          <p className={`${isSmall ? 'text-[15px]' : 'w-full text-[15px] font-bold'} md:text-[30px] self-start mr-4 mt-2`}>
             AUTONOMO
           </p>
         </div>

@@ -284,7 +284,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">Base Imponible</span>
                   <div className="flex items-center gap-1 font-bold text-gray-700">
-                    <span id="base_imponible-display">{invoice.base_imponible}</span>
+                    <span id="base_imponible-display">{(invoice.base_imponible / 100).toFixed(2)}</span>
                     <CurrencyEuroIcon className="h-4 w-4" />
                   </div>
                 </div>
@@ -292,7 +292,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">IVA (21%)</span>
                   <div className="flex items-center gap-1 font-bold text-gray-700">
-                    <span id="total_iva-display">{invoice.total_iva}</span>
+                    <span id="total_iva-display">{(invoice.total_iva / 100).toFixed(2)}</span>
                     <CurrencyEuroIcon className="h-4 w-4" />
                   </div>
                 </div>
@@ -302,7 +302,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-500 font-medium uppercase tracking-wider text-[10px]">RE ({empresaRe}%)</span>
                     <div className="flex items-center gap-1 font-bold text-gray-700">
-                      <span id="total_recargo-display">{invoice.total_recargo}</span>
+                      <span id="total_recargo-display">{(invoice.total_recargo / 100).toFixed(2)}</span>
                       <CurrencyEuroIcon className="h-4 w-4" />
                     </div>
                   </div>
@@ -311,7 +311,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
                 <div className="pt-3 border-t border-gray-200 flex justify-between items-end">
                   <span className="text-gray-900 font-extrabold uppercase tracking-widest text-[12px] mb-1">Total Factura</span>
                   <div className="flex items-center gap-1 font-black text-green-600">
-                    <span id="total_factura-display">{invoice.total_factura}</span>
+                    <span id="total_factura-display">{(invoice.total_factura / 100).toFixed(2)}</span>
                     <CurrencyEuroIcon className="h-6 w-6" />
                   </div>
                 </div>
@@ -321,7 +321,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
                 id="base_imponible"
                 name="base_imponible"
                 type="hidden"
-                defaultValue={invoice.base_imponible}
+                defaultValue={(invoice.base_imponible / 100).toFixed(2)}
               />
 
               <div id="base_imponible-error" aria-live="polite" aria-atomic="true">

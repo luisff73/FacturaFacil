@@ -241,11 +241,6 @@ export async function fetchInvoiceById(id: string) {
 
     const invoice = data.rows.map((invoice) => ({
       ...invoice,
-      // Convert base_imponibles from cents to units
-      base_imponible: invoice.base_imponible / 100,
-      total_iva: invoice.total_iva / 100,
-      total_recargo: invoice.total_recargo / 100,
-      total_factura: invoice.total_factura / 100,
     }));
     console.log(invoice); // Devolvera Invoice que es un array vacio []
     return invoice[0];
@@ -267,9 +262,6 @@ export async function fetchinvoices_lines(invoiceId: string) {
 
     return data.rows.map((line) => ({
       ...line,
-      precio: line.precio / 100,
-      cantidad: line.cantidad / 100,
-      total: line.total / 100,
     }));
   } catch (error) {
     console.error("Database Error:", error);
