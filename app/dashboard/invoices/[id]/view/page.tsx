@@ -8,6 +8,8 @@ import { roboto } from '@/app/ui/fonts';
 import { invoices_lines } from '@/app/lib/definitions';
 import QRCodePreview from '@/app/ui/invoices/qrcode-preview';
 
+import SendInvoiceEmailButton from '@/app/ui/invoices/send-email-button';
+
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const id = params.id;
@@ -40,12 +42,20 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <div className="flex gap-4">
           <PrintButton />
           {invoice && customer && empresa && (
-            <ExportPDFButton
-              invoice={invoice}
-              lines={lines}
-              customer={customer}
-              empresa={empresa}
-            />
+            <>
+              <SendInvoiceEmailButton
+                invoice={invoice}
+                lines={lines}
+                customer={customer}
+                empresa={empresa}
+              />
+              <ExportPDFButton
+                invoice={invoice}
+                lines={lines}
+                customer={customer}
+                empresa={empresa}
+              />
+            </>
           )}
         </div>
       </div>
@@ -65,6 +75,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
             <h2 className="text-2xl font-bold text-green-600">{empresa?.nombre}</h2>
             <p className="text-gray-600">{empresa?.direccion}</p>
             <p className="text-gray-600">{empresa?.c_postal} - {empresa?.poblacion}</p>
+            <p className="text-gray-600">{empresa?.provincia}</p>
             <p className="text-gray-600">CIF: {empresa?.cif}</p>
           </div>
         </div>
@@ -74,10 +85,13 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Cliente</h3>
           <div className="bg-gray-50 p-6 rounded-xl">
             <p className="text-xl font-bold text-gray-800 mb-1">{customer?.name}</p>
-            <p className="text-gray-600">{customer?.email}</p>
             <p className="text-gray-600">{customer?.direccion}</p>
             <p className="text-gray-600">{customer?.c_postal} {customer?.poblacion}</p>
+            <p className="text-gray-600">{customer?.provincia}</p>
+            <p className="text-gray-600">{customer?.pais}</p>
             <p className="text-gray-600">{customer?.cif}</p>
+            <p className="text-gray-600">{customer?.email}</p>
+
           </div>
         </div>
 
@@ -148,7 +162,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           {invoice.status !== 'Proforma' && empresa?.cif && (
             <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100 print:bg-transparent print:border-none">
               <div className="w-16 h-16 bg-white p-1 rounded-lg shadow-sm border border-gray-100">
-                <QRCodePreview 
+                <QRCodePreview
                   cif={empresa.cif}
                   serie={invoice.invoice_serie}
                   numero={invoice.invoice_number}

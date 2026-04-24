@@ -3,13 +3,17 @@ import {
   AtSymbolIcon,
   KeyIcon,
   ExclamationCircleIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from '@heroicons/react/24/outline';
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from '@/app/ui/button';
 import { useActionState } from 'react';
 import { authenticate } from '@/app/lib/actions';
 import { useSearchParams } from 'next/navigation';
-import { FaGoogle, FaGithub } from 'react-icons/fa'; // Importar iconos de Google y GitHub
+import { FaGoogle, FaGithub } from 'react-icons/fa';
+import { useState } from 'react';
+import Link from 'next/link';
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -18,6 +22,7 @@ export default function LoginForm() {
     authenticate,
     undefined,
   );
+  const [showPassword, setShowPassword] = useState(false);
 
   // Handlers para los botones de Social Login
   const handleGoogleLogin = () => {
@@ -66,9 +71,9 @@ export default function LoginForm() {
             </label>
             <div className="relative">
               <input
-                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
+                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 pr-10 text-sm outline-2 placeholder:text-gray-500"
                 id="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 placeholder="Enter password"
                 required
@@ -76,6 +81,25 @@ export default function LoginForm() {
                 autoComplete="current-password"
               />
               <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeSlashIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+            <div className="flex justify-end mt-2">
+              <Link
+                href="/forgot-password"
+                className="text-xs text-green-600 hover:text-green-500 transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
             </div>
           </div>
         </div>

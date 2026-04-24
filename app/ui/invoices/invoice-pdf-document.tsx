@@ -220,8 +220,8 @@ export default function InvoicePDFDocument({ invoice, lines, customer, empresa }
         const invoiceNum = invoice.invoice_serie ? `${invoice.invoice_serie}-${invoice.invoice_number}` : invoice.invoice_number.toString();
         // URL Oficial de Verifactu (AEAT) para verificación de facturas (Entorno de pruebas)
         const verifactuUrl = `https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQR?nif=${empresa.cif}&numserie=${invoice.invoice_serie ? invoice.invoice_serie + '/' : ''}${invoice.invoice_number}&fecha=${dateStr}&importe=${(invoice.total_factura / 100).toFixed(2)}`;
-        
-        const url = await QRCode.toDataURL(verifactuUrl, { 
+
+        const url = await QRCode.toDataURL(verifactuUrl, {
           margin: 1,
           color: {
             dark: '#1f2937',
@@ -250,6 +250,7 @@ export default function InvoicePDFDocument({ invoice, lines, customer, empresa }
             <Text style={[styles.companyName, { color: accentColor }]}>{empresa.nombre}</Text>
             <Text style={styles.companyText}>{empresa.direccion}</Text>
             <Text style={styles.companyText}>{empresa.c_postal} - {empresa.poblacion}</Text>
+            <Text style={styles.companyText}>{empresa.provincia}</Text>
             <Text style={styles.companyText}>CIF: {empresa.cif}</Text>
           </View>
         </View>
@@ -262,6 +263,8 @@ export default function InvoicePDFDocument({ invoice, lines, customer, empresa }
             <Text style={styles.customerText}>{customer.email}</Text>
             <Text style={styles.customerText}>{customer.direccion}</Text>
             <Text style={styles.customerText}>{customer.c_postal} {customer.poblacion}</Text>
+            <Text style={styles.customerText}>{customer.provincia}</Text>
+            <Text style={styles.customerText}>{customer.pais}</Text>
             <Text style={styles.customerText}>{customer.cif}</Text>
           </View>
         </View>

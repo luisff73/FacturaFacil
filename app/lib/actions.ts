@@ -8,10 +8,137 @@ import { redirect } from "next/navigation";
 import { signIn, auth, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 import { validateDocument } from "@/app/lib/valitacionnifcif";
-import { Customer, ArticulosTableType, User, Empresas} from "@/app/lib/definitions";
+import { generatePasswordResetToken, getPasswordResetTokenByToken, deletePasswordResetToken } from "@/app/lib/tokens";
+import { sendPasswordResetEmail, sendInvoiceEmail } from "@/app/lib/mail";
+import { Invoice, invoices_lines, Customer, Empresas, ArticulosTableType, User } from "@/app/lib/definitions";
 import { requireEmpresaId } from "./data";
 import { generateInvoiceHash } from "./utils";
-import bcrypt from "bcryptjs";
+import bcrypt from 'bcryptjs';
+
+const ResetSchema = z.object({
+  email: z.string().email({
+    message: "Email inválido",
+  }),
+});
+
+const NewPasswordSchema = z.object({
+  password: z.string().min(6, {
+    message: "La contraseña debe tener al menos 6 caracteres",
+  }),
+});
+
+export async function resetPassword(prevState: any, formData: FormData, token: string | null) {
+  if (!token) {
+    return "Token no encontrado.";
+  }
+
+  const validatedFields = NewPasswordSchema.safeParse({
+    password: formData.get("password"),
+  });
+
+  if (!validatedFields.success) {
+    return "Contraseña inválida. Mínimo 6 caracteres.";
+  }
+
+  const { password } = validatedFields.data;
+
+  try {
+    const existingToken = await getPasswordResetTokenByToken(token);
+
+    if (!existingToken) {
+      return "Token inválido o expirado.";
+    }
+
+    const hasExpired = new Date(existingToken.expires) < new Date();
+
+    if (hasExpired) {
+      return "El token ha expirado. Por favor, solicita uno nuevo.";
+    }
+
+    const user = await sql`SELECT * FROM users WHERE email = ${existingToken.email}`;
+
+    if (user.rows.length === 0) {
+      return "El usuario ya no existe.";
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Actualizar contraseña
+    await sql`
+      UPDATE users 
+      SET password = ${hashedPassword}
+      WHERE email = ${existingToken.email}
+    `;
+
+    // Eliminar el token usado
+    await deletePasswordResetToken(existingToken.id);
+
+    return undefined; // Éxito
+  } catch (error) {
+    console.error("Error en resetPassword:", error);
+    return "Error al cambiar la contraseña. Inténtalo de nuevo.";
+  }
+}
+
+export async function sendInvoiceEmailAction(
+  invoice: Invoice,
+  lines: invoices_lines[],
+  customer: Customer,
+  empresa: Empresas
+) {
+  try {
+    const result = await sendInvoiceEmail(invoice, lines, customer, empresa);
+    if (result.success) {
+      return { success: true, message: "Factura enviada correctamente" };
+    } else {
+      return { success: false, message: "Error al enviar la factura" };
+    }
+  } catch (error) {
+    console.error("Error en sendInvoiceEmailAction:", error);
+    return { success: false, message: "Error inesperado al enviar la factura" };
+  }
+}
+
+export async function requestPasswordReset(prevState: any, formData: FormData) {
+  const validatedFields = ResetSchema.safeParse({
+    email: formData.get("email"),
+  });
+
+  if (!validatedFields.success) {
+    return "Email inválido. Por favor, revisa el formato.";
+  }
+
+  const { email } = validatedFields.data;
+
+  try {
+    // Verificar si el usuario existe
+    const user = await sql`SELECT * FROM users WHERE email = ${email}`;
+    
+    if (user.rows.length === 0) {
+      // Por seguridad, no decimos si el email existe o no
+      return undefined; 
+    }
+
+    const userData = user.rows[0];
+    
+    // Generar Token
+    const token = await generatePasswordResetToken(email);
+    if (!token) {
+      return "Error al generar el token. Inténtalo de nuevo.";
+    }
+
+    // Enviar Email
+    await sendPasswordResetEmail(userData.email, token, userData.name);
+
+    return undefined; // Éxito
+  } catch (error) {
+    console.error("Error en requestPasswordReset:", error);
+    return "Algo salió mal. Inténtalo de nuevo más tarde.";
+  }
+}
+
+
+
 
 // Define el esquema para FormSchema de facturas
 const FormSchema = z.object({

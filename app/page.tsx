@@ -22,7 +22,7 @@ export default function Page() {
       </div>
 
       <div className="mt-4 flex flex-1 flex-col gap-4 overflow-hidden md:flex-row">
-        <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10 md:w-2/5 md:px-20">
+        <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10 md:w-2/5 md:px-6">
 
           <p className={`${roboto.className} text-xl text-gray-600 md:text-3xl md:leading-normal`}>
             <strong>Bienvenido a Factura Facil.</strong> <br></br> Tu programa de gestión autónomo.
