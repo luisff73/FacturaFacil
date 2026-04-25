@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { UpdateInvoice, DeleteInvoice, PrintInvoice } from '@/app/ui/invoices/buttons';
+import SendInvoiceEmailButton from '@/app/ui/invoices/send-email-button';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredInvoices } from '@/app/lib/data';
@@ -58,6 +59,7 @@ export default async function InvoicesTable({
                     <p className="dark:text-gray-300">{formatDateToLocal(invoice.date)}</p>
                   </div>
                   <div className="flex justify-end gap-2 whitespace-nowrap px-6 py-4 text-sm">
+                    <SendInvoiceEmailButton invoiceId={invoice.id} showText={false} />
                     <PrintInvoice id={invoice.id} />
                     <UpdateInvoice id={invoice.id} />
                     <DeleteInvoice id={invoice.id} />
@@ -130,6 +132,7 @@ export default async function InvoicesTable({
                     <InvoiceStatus status={invoice.status} />
                   </td>
                   <td className="flex justify-end gap-2 whitespace-nowrap px-6 py-4 text-sm">
+                    <SendInvoiceEmailButton invoiceId={invoice.id} showText={false} />
                     <PrintInvoice id={invoice.id} />
                     <UpdateInvoice id={invoice.id} />
                     <DeleteInvoice id={invoice.id} />

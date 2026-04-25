@@ -11,6 +11,7 @@ import { validateDocument } from "@/app/lib/valitacionnifcif";
 import { generatePasswordResetToken, getPasswordResetTokenByToken, deletePasswordResetToken } from "@/app/lib/tokens";
 import { sendPasswordResetEmail, sendInvoiceEmail } from "@/app/lib/mail";
 import { Invoice, invoices_lines, Customer, Empresas, ArticulosTableType, User } from "@/app/lib/definitions";
+import { fetchInvoiceById, fetchinvoices_lines, fetchCustomersById, fetchEmpresaById } from "@/app/lib/data";
 import { requireEmpresaId } from "./data";
 import { generateInvoiceHash } from "./utils";
 import bcrypt from 'bcryptjs';
@@ -96,6 +97,33 @@ export async function sendInvoiceEmailAction(
   } catch (error) {
     console.error("Error en sendInvoiceEmailAction:", error);
     return { success: false, message: "Error inesperado al enviar la factura" };
+  }
+}
+
+export async function sendInvoiceEmailByIdAction(invoiceId: string) {
+  try {
+    const invoice = await fetchInvoiceById(invoiceId);
+    if (!invoice) return { success: false, message: "Factura no encontrada" };
+
+    const [lines, customer] = await Promise.all([
+      fetchinvoices_lines(invoiceId),
+      fetchCustomersById(invoice.customer_id),
+    ]);
+
+    const empresa = await fetchEmpresaById(invoice.id_empresa.toString());
+
+    if (!customer || !empresa) {
+        return { success: false, message: "Datos de cliente o empresa incompletos" };
+    }
+
+    const result = await sendInvoiceEmail(invoice, lines, customer, empresa);
+    return result.success 
+      ? { success: true, message: "Factura enviada correctamente" }
+      : { success: false, message: "Error al enviar la factura" };
+
+  } catch (error) {
+    console.error("Error en sendInvoiceEmailByIdAction:", error);
+    return { success: false, message: "Error al procesar el envío" };
   }
 }
 

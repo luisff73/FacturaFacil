@@ -2,15 +2,17 @@
 
 import { EnvelopeIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
-import { sendInvoiceEmailAction } from '@/app/lib/actions';
+import { sendInvoiceEmailAction, sendInvoiceEmailByIdAction } from '@/app/lib/actions';
 import { Invoice, invoices_lines, Customer, Empresas } from '@/app/lib/definitions';
 import clsx from 'clsx';
 
 interface SendInvoiceEmailButtonProps {
-  invoice: Invoice;
-  lines: invoices_lines[];
-  customer: Customer;
-  empresa: Empresas;
+  invoice?: Invoice;
+  lines?: invoices_lines[];
+  customer?: Customer;
+  empresa?: Empresas;
+  invoiceId?: string;
+  showText?: boolean; // Para ocultar el texto en la tabla y dejar solo el icono
 }
 
 export default function SendInvoiceEmailButton({
@@ -18,6 +20,8 @@ export default function SendInvoiceEmailButton({
   lines,
   customer,
   empresa,
+  invoiceId,
+  showText = true,
 }: SendInvoiceEmailButtonProps) {
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -27,7 +31,15 @@ export default function SendInvoiceEmailButton({
 
     setStatus('sending');
     try {
-      const result = await sendInvoiceEmailAction(invoice, lines, customer, empresa);
+      let result;
+      if (invoiceId) {
+        result = await sendInvoiceEmailByIdAction(invoiceId);
+      } else if (invoice && lines && customer && empresa) {
+        result = await sendInvoiceEmailAction(invoice, lines, customer, empresa);
+      } else {
+        throw new Error('Faltan datos para el envío');
+      }
+
       if (result.success) {
         setStatus('success');
         setMessage(result.message);
@@ -63,25 +75,25 @@ export default function SendInvoiceEmailButton({
         {status === 'idle' && (
           <>
             <EnvelopeIcon className="h-5 w-5" />
-            <span>Enviar Email</span>
+            {showText && <span>Enviar Email</span>}
           </>
         )}
         {status === 'sending' && (
           <>
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-            <span>Enviando...</span>
+            {showText && <span>Enviando...</span>}
           </>
         )}
         {status === 'success' && (
           <>
             <CheckIcon className="h-5 w-5" />
-            <span>¡Enviado!</span>
+            {showText && <span>¡Enviado!</span>}
           </>
         )}
         {status === 'error' && (
           <>
             <XMarkIcon className="h-5 w-5" />
-            <span>Error</span>
+            {showText && <span>Error</span>}
           </>
         )}
       </button>
