@@ -6,7 +6,10 @@ import { generateInvoicePDFBuffer } from '@/app/lib/invoice-pdf-server';
 import { Invoice, invoices_lines, Customer, Empresas } from '@/app/lib/definitions';
 import { formatCurrency } from './utils';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Importante: No inicializar con process.env.RESEND_API_KEY directamente fuera de una función, 
+// ya que esto rompe el build de Vercel si la clave no está disponible en tiempo de compilación.
+const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder_for_build');
+
 
 export const sendEmail = async (
   to: string, 
