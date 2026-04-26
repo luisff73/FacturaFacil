@@ -18,7 +18,7 @@ const links = [
   { name: 'Inicio', href: '/dashboard', icon: HomeIcon },
   { name: 'Facturas', href: '/dashboard/invoices', icon: DocumentDuplicateIcon },
   { name: 'Clientes', href: '/dashboard/customers', icon: UserGroupIcon },
-  { name: 'Productos', href: '/dashboard/articulos', icon: TagIcon },
+  { name: 'Artículos', href: '/dashboard/articulos', icon: TagIcon },
   { name: 'Usuarios', href: '/dashboard/users', icon: UserCircleIcon, adminOnly: true },
 ];
 
@@ -44,7 +44,7 @@ export default function NavLinks({ user }: { user?: { type?: 'admin' | 'user' } 
             key={link.name}
             href={link.href}
             className={clsx( // clsx es una libreria que permite concatenar clases de forma dinamica
-              'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 dark:bg-gray-800 p-3 text-sm font-medium hover:bg-green-200 dark:hover:bg-grey-900 hover:text-green-600 dark:text-white',
+              'flex h-[48px] grow items-center justify-center gap-4 rounded-md bg-gray-50 dark:bg-gray-800 p-3 text-sm font-medium hover:bg-green-200 dark:hover:bg-grey-900 hover:text-green-600 dark:text-white',
               {
                 'bg-green-100 text-green-600': pathname === link.href,
               },

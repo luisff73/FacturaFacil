@@ -13,7 +13,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
     const Color_usuario = (session?.user as any)?.css || '#2b3643ff';
 
     return (
-        <div className="flex h-auto md:h-screen flex-col md:flex-row md:overflow-hidden print:h-auto print:block relative">
+        <div className="flex h-auto md:h-screen flex-col print:h-auto print:block relative overflow-hidden">
             {/* Barra de temas fija */}
             <div className="fixed top-4 right-4 z-[60] print:hidden">
                 <BarraTemas initialColor={Color_usuario} showUI={true} />
@@ -26,7 +26,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
             </div>
 
             {/* CONTENEDOR PRINCIPAL */}
-            <div className="flex flex-grow flex-col md:flex-row w-full h-full">
+            <div className="flex flex-grow flex-col md:flex-row w-full min-h-0">
                 {/* SIDEBAR */}
                 <div className="w-full flex-none md:w-64 print:hidden">
                     {/* En escritorio podemos poner aqui el logo si queremos, o dejarlo en el sidenav */}

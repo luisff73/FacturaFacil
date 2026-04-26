@@ -8,7 +8,7 @@ export default async function SideNav() {
   const session = await auth();
 
   return (
-    <div className="flex h-full flex-col px-3 py-4 md:px-2 bg-gray-100 dark:bg-gray-900">
+    <div className="flex h-auto md:h-full flex-col px-3 py-4 md:px-2 bg-gray-100 dark:bg-gray-900">
       <div className="grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2 flex">
         <NavLinks user={session?.user as any} />
         <div className="hidden h-auto w-full grow rounded-md bg-gray-50 md:block"></div>

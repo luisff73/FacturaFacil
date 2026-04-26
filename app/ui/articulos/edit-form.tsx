@@ -28,7 +28,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
     if (fileInput && fileInput.size > 0) {
       const uploadData = new FormData();
       uploadData.append('file', fileInput);
-      
+
       const uploadedPath = await uploadImage(uploadData);
       if (uploadedPath) {
         imageUrl = uploadedPath;
@@ -224,8 +224,8 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
                   <Image
                     src={img.ruta.startsWith('http') ? img.ruta : (img.ruta.startsWith('/') ? img.ruta : `${BLOB_URL}/${img.ruta}`)}
                     alt={`Imagen ${index + 1}`}
-                    layout="fill"
-                    objectFit="contain"
+                    width={100}
+                    height={100}
                     className="rounded-md object-center md:object-left"
                   />
                 </div>

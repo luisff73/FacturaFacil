@@ -2,7 +2,7 @@ import "@/app/ui/global.css" // Importa los estilos globales y tailwindcss
 import { inter } from "@/app/ui/fonts" // Importa la fuente Inter
 import type { Metadata } from "next" // Importa el tipo Metadata de Next.js q
 import BarraTemas from "@/components/BarraTemas"
-//import { RegisterSW } from "@/register-sw"
+
 import type React from "react" // Import React
 
 export const metadata: Metadata = {
@@ -41,7 +41,7 @@ export default async function RootLayout({
     <html lang="es" className="h-full" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${inter.className} antialiased h-full dark:bg-gray-900 dark:text-white transition-colors duration-300`}
+        className={`${inter.className} antialiased min-h-screen dark:bg-gray-900 dark:text-white transition-colors duration-300`}
       >
         <div className="fixed top-4 right-4 z-50 print:hidden">
           <BarraTemas initialColor={Color_usuario} showUI={false} />
@@ -50,5 +50,6 @@ export default async function RootLayout({
       </body>
     </html>
   )
+
 }
 

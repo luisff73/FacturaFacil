@@ -65,7 +65,7 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
                       </div>
                     </div>
                     <div className="pt-4 text-sm dark:text-gray-300">
-                      <p>{customer.total_invoices} invoices</p>
+                      <p>{customer.total_invoices} facturas</p>
                     </div>
                   </div>
                 ))}
