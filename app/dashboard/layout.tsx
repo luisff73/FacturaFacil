@@ -13,22 +13,28 @@ export default async function Layout({ children }: { children: React.ReactNode }
     const Color_usuario = (session?.user as any)?.css || '#2b3643ff';
 
     return (
-        <div className="flex h-screen flex-col print:h-auto print:block relative overflow-hidden">
-            {/* Solo se muestra en el dashboard */}
+        <div className="flex h-auto md:h-screen flex-col md:flex-row md:overflow-hidden print:h-auto print:block relative">
+            {/* Barra de temas fija */}
             <div className="fixed top-4 right-4 z-[60] print:hidden">
                 <BarraTemas initialColor={Color_usuario} showUI={true} />
             </div>
-            <div className="w-full flex-none flex justify-between items-end bg-green-500 print:hidden">
-                <FacturaFacilLogo size="small" /> {/* pasamos el parametro size para que el logo se muestre en tamaño pequeño */}
+
+            {/* BARRA SUPERIOR (Logo y Usuario) - Solo para movil o diseño global */}
+            <div className="md:hidden w-full flex-none flex justify-between items-end bg-green-500 p-2 print:hidden">
+                <FacturaFacilLogo size="small" />
                 <FacturaFacilUser />
             </div>
-            <div className="flex flex-grow flex-col md:flex-row md:overflow-hidden">
 
-
+            {/* CONTENEDOR PRINCIPAL */}
+            <div className="flex flex-grow flex-col md:flex-row w-full h-full">
+                {/* SIDEBAR */}
                 <div className="w-full flex-none md:w-64 print:hidden">
+                    {/* En escritorio podemos poner aqui el logo si queremos, o dejarlo en el sidenav */}
                     <SideNav />
                 </div>
-                <div className="flex-grow p-6 overflow-y-auto md:p-12 print:p-0 print:overflow-visible">
+
+                {/* CONTENIDO PRINCIPAL */}
+                <div className="flex-grow p-4 md:p-12 overflow-y-auto print:p-0 print:overflow-visible">
                     {children}
                 </div>
             </div>
