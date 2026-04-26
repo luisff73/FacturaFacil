@@ -13,7 +13,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
     const Color_usuario = (session?.user as any)?.css || '#2b3643ff';
 
     return (
-        <div className="flex h-full flex-col print:h-auto print:block relative">
+        <div className="flex h-screen flex-col print:h-auto print:block relative overflow-hidden">
             {/* Solo se muestra en el dashboard */}
             <div className="fixed top-4 right-4 z-[60] print:hidden">
                 <BarraTemas initialColor={Color_usuario} showUI={true} />
@@ -25,10 +25,10 @@ export default async function Layout({ children }: { children: React.ReactNode }
             <div className="flex flex-grow flex-col md:flex-row md:overflow-hidden">
 
 
-            <div className="w-full flex-none md:w-64 print:hidden">
-                <SideNav />
-            </div>
-            <div className="flex-grow p-6 overflow-y-auto md:p-12 print:p-0 print:overflow-visible">
+                <div className="w-full flex-none md:w-64 print:hidden">
+                    <SideNav />
+                </div>
+                <div className="flex-grow p-6 overflow-y-auto md:p-12 print:p-0 print:overflow-visible">
                     {children}
                 </div>
             </div>

@@ -41,7 +41,7 @@ export default async function RootLayout({
     <html lang="es" className="h-full" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${inter.className} antialiased min-h-full dark:bg-gray-900 dark:text-white transition-colors duration-300`}
+        className={`${inter.className} antialiased h-full dark:bg-gray-900 dark:text-white transition-colors duration-300`}
       >
         <div className="fixed top-4 right-4 z-50 print:hidden">
           <BarraTemas initialColor={Color_usuario} showUI={false} />
