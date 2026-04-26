@@ -26,28 +26,11 @@ export default async function InvoicesTable({
                 <div className="flex items-center justify-between border-b dark:border-gray-700 pb-4">
                   <div>
                     <div className="mb-2 flex items-center">
-                      <Image
-                        src={
-                          invoice.image_url && invoice.image_url.startsWith('http')
-                            ? invoice.image_url
-                            : invoice.image_url && invoice.image_url.startsWith('/')
-                              ? invoice.image_url
-                            : invoice.image_url
-                                ? `${BLOB_URL}/${invoice.image_url}`
-                              : `https://ui-avatars.com/api/?name=${invoice.name}&background=random`
-                        }
-                        className="mr-2 rounded-full"
-                        width={28}
-                        height={28}
-                        style={{ height: 'auto' }}
-                        alt={`${invoice.name}'s profile picture`}
-                      />
                       <p className="dark:text-white font-bold">
                         {new Date(invoice.date).getFullYear()}/{invoice.invoice_number}
                       </p>
                       <p className="dark:text-white ml-2">{invoice.name}</p>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{invoice.email}</p>
                   </div>
                   <InvoiceStatus status={invoice.status} />
                 </div>
