@@ -19,8 +19,8 @@ export default async function Layout({ children }: { children: React.ReactNode }
                 <BarraTemas initialColor={Color_usuario} showUI={true} />
             </div>
 
-            {/* BARRA SUPERIOR (Logo y Usuario) - Solo para movil o diseño global */}
-            <div className="md:hidden w-full flex-none flex justify-between items-end bg-green-500 p-2 print:hidden">
+            {/* BARRA SUPERIOR (Logo y Usuario) - Global */}
+            <div className="w-full flex-none flex justify-between items-end bg-green-500 p-2 print:hidden">
                 <FacturaFacilLogo size="small" />
                 <FacturaFacilUser />
             </div>
