@@ -40,6 +40,7 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
                               alt={`${customer.name}'s profile picture`}
                               width={28}
                               height={28}
+                              style={{ height: 'auto' }}
                             />
                             <p className="dark:text-white">{customer.name}</p>
                           </div>
@@ -107,6 +108,7 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
                             alt={`${customer.name}'s profile picture`}
                             width={28}
                             height={28}
+                            style={{ height: 'auto' }}
                           />
                           <p>{customer.name}</p>
                         </div>

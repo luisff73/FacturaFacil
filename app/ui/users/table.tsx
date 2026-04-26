@@ -27,6 +27,7 @@ export default function UsersTable({ users }: UsersTableProps) {
                         width={40}
                         height={40}
                         className="rounded-full"
+                        style={{ height: 'auto' }}
                       />
                       <p className="dark:text-gray-200">{user.name}</p>
                     </div>
@@ -76,6 +77,7 @@ export default function UsersTable({ users }: UsersTableProps) {
                       width={40}
                       height={40}
                       className="rounded-full"
+                      style={{ height: 'auto' }}
                     />
                   </td>
                   <td className="whitespace-nowrap bg-white dark:bg-gray-900 py-3 pl-6 pr-3">
