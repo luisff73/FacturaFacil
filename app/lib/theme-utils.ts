@@ -12,7 +12,7 @@ export const aplicarColoresTema = (selectedColor: string) => {
 
     if (typeof document !== 'undefined') {
         Object.entries(colors).forEach(([key, value]) => {
-            document.documentElement.style.setProperty(`--bg-green-${key}`, value);
+            document.documentElement.style.setProperty(`--color-user-${key}`, value);
         });
     }
     

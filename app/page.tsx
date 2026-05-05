@@ -17,7 +17,7 @@ export default function Page() {
   return (
 
     <main className="flex h-screen flex-col p-6 overflow-hidden">
-      <div className="flex h-36 shrink-0 items-end rounded-lg bg-green-500 p-6 md:h-48">
+      <div className="flex h-36 shrink-0 items-end rounded-lg bg-color-user-500 p-6 md:h-48">
         <div className='w-full h-full object-contain'><FacturaFacilLogo /></div>
       </div>
 
@@ -29,7 +29,7 @@ export default function Page() {
           </p>
           <Link
             href="/login"
-            className="flex items-center gap-5 self-start rounded-lg bg-green-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-green-400 md:text-base"
+            className="flex items-center gap-5 self-start rounded-lg bg-color-user-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-color-user-400 md:text-base"
           >
             <span>Log in</span> <ArrowRightIcon className="w-5 md:w-6" />
           </Link>
@@ -37,7 +37,7 @@ export default function Page() {
 
           <Link
             href="/dashboard/empresas/create"
-            className="flex items-center gap-5 self-start rounded-lg bg-green-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-green-400 md:text-base"
+            className="flex items-center gap-5 self-start rounded-lg bg-color-user-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-color-user-400 md:text-base"
           >
             Crear Empresa <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
           </Link>

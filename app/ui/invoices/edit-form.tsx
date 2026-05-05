@@ -253,7 +253,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
                   />
                   <label
                     htmlFor="Pagada"
-                    className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white"
+                    className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-color-user-500 px-3 py-1.5 text-xs font-medium text-white"
                   >
                     Pagada <CheckIcon className="h-4 w-4" />
                   </label>
@@ -321,7 +321,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
 
                 <div className="pt-3 border-t border-gray-200 flex justify-between items-end">
                   <span className="text-gray-900 font-extrabold uppercase tracking-widest text-[12px] mb-1">Total Factura</span>
-                  <div className="flex items-center gap-1 font-black text-green-600">
+                  <div className="flex items-center gap-1 font-black text-color-user-600">
                     <span id="total_factura-display">{(invoice.total_factura / 100).toFixed(2)}</span>
                     <CurrencyEuroIcon className="h-6 w-6" />
                   </div>

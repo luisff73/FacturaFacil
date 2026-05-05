@@ -92,7 +92,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
 
   return (
     <form onSubmit={formAction} onKeyDown={handleKeyDown}>
-      <div className="rounded-md bg-green-50/30 dark:bg-gray-800/50 border border-green-100/50 dark:border-gray-700 p-4 md:p-6">
+      <div className="rounded-md bg-color-user-50/30 dark:bg-gray-800/50 border border-color-user-100/50 dark:border-gray-700 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
           <label htmlFor="name" className="mb-2 block text-sm font-medium dark:text-white">
@@ -353,16 +353,16 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
           <legend className="mb-2 block text-sm font-medium dark:text-white">
             Opciones de Impuestos
           </legend>
-          <div className="flex gap-6 rounded-md border border-green-400 dark:border-green-700 bg-green-100 dark:bg-green-700/20 px-4 py-2">
+          <div className="flex gap-6 rounded-md border border-color-user-400 dark:border-color-user-700 bg-color-user-100 dark:bg-color-user-700/20 px-4 py-2">
             <div className="flex items-center">
               <input
                 id="tiene_iva"
                 name="tiene_iva"
                 type="checkbox"
                 defaultChecked
-                className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-green-600 focus:ring-2"
+                className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-color-user-600 focus:ring-2"
               />
-              <label htmlFor="tiene_iva" className="ml-2 text-sm font-medium text-green-700 dark:text-green-300 cursor-pointer">
+              <label htmlFor="tiene_iva" className="ml-2 text-sm font-medium text-color-user-700 dark:text-color-user-300 cursor-pointer">
                 IVA
               </label>
             </div>
@@ -371,9 +371,9 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
                 id="tiene_re"
                 name="tiene_re"
                 type="checkbox"
-                className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-green-600 focus:ring-2"
+                className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-color-user-600 focus:ring-2"
               />
-              <label htmlFor="tiene_re" className="ml-2 text-sm font-medium text-green-700 dark:text-green-300 cursor-pointer">
+              <label htmlFor="tiene_re" className="ml-2 text-sm font-medium text-color-user-700 dark:text-color-user-300 cursor-pointer">
                 RE
               </label>
             </div>
@@ -396,7 +396,7 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
         <Button
           type="submit"
           onClick={() => setRedirectPath('/dashboard/invoices')}
-          className="!bg-green-400 dark:!bg-green-700 !text-white dark:!text-white hover:!bg-green-200 dark:hover:!bg-gray-600"
+          className="!bg-color-user-400 dark:!bg-color-user-700 !text-white dark:!text-white hover:!bg-color-user-200 dark:hover:!bg-gray-600"
         >
           Crear Factura
         </Button>

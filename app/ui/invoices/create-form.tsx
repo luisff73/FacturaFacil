@@ -190,7 +190,7 @@ export default function Form({ customers, series, empresaCif }: { customers: Cus
                 </div>
                 <div className="flex items-center">
                   <input id="Pagada" name="status" type="radio" value="Pagada" className="h-4 w-4 cursor-pointer" />
-                  <label htmlFor="Pagada" className="ml-2 flex items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white">
+                  <label htmlFor="Pagada" className="ml-2 flex items-center gap-1.5 rounded-full bg-color-user-500 px-3 py-1.5 text-xs font-medium text-white">
                     Pagada <CheckIcon className="h-4 w-4" />
                   </label>
                 </div>
@@ -243,7 +243,7 @@ export default function Form({ customers, series, empresaCif }: { customers: Cus
 
                 <div className="pt-3 border-t border-gray-200 flex justify-between items-end">
                   <span className="text-gray-900 font-black uppercase tracking-widest text-[12px] mb-1">Total Factura</span>
-                  <div className="flex items-center gap-1 text-2xl font-black text-green-600">
+                  <div className="flex items-center gap-1 text-2xl font-black text-color-user-600">
                     <span id="total_factura-display">0.00</span>
                     <CurrencyEuroIcon className="h-6 w-6" />
                   </div>

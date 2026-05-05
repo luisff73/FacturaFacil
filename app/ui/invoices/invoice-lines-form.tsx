@@ -221,7 +221,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                       handleSearch(e.target.value, index);
                     }}
                     placeholder="Buscar o escribir descripción..."
-                    className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1"
+                    className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-color-user-500 py-1"
                   />
                   <MagnifyingGlassIcon className="absolute right-2 top-1.5 h-3.5 w-3.5 text-gray-400" /> {/* la lupa es para buscar en la base de datos */}
                 </div>
@@ -232,7 +232,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                       <li
                         key={art.id}
                         onClick={() => selectArticle(art, index)}
-                        className="p-2 hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer transition-colors"
+                        className="p-2 hover:bg-color-user-50 dark:hover:bg-color-user-900/20 cursor-pointer transition-colors"
                       >
                         <div className="flex items-center gap-3">
                           <div className="flex-shrink-0 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-md overflow-hidden relative">
@@ -255,7 +255,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                               <span className="text-[9px] px-1 py-0 bg-gray-100 dark:bg-gray-700 rounded text-gray-500 font-mono">
                                 {art.codigo}
                               </span>
-                              <span className="text-[10px] text-green-600 font-medium">
+                              <span className="text-[10px] text-color-user-600 font-medium">
                                 {(art.precio / 100).toFixed(2)}€
                               </span>
                             </div>
@@ -285,7 +285,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                   tabIndex={-1}
                   onClick={() => setObservaciones(index)}
                   className={`flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-all border ${line.observaciones
-                    ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
+                    ? 'bg-color-user-50 text-color-user-700 border-color-user-200 hover:bg-color-user-100 dark:bg-color-user-900/20 dark:text-color-user-400 dark:border-color-user-800'
                     : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700'
                     }`}
                   title="Editar observaciones"
@@ -310,7 +310,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                     const finalVal = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : val;
                     updateLine(index, 'cantidad', finalVal);
                   }}
-                  className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 text-center font-mono"
+                  className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-color-user-500 py-1 text-center font-mono"
                 />
               </div>
               {/* Precio */}
@@ -327,7 +327,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                     const finalVal = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : val;
                     updateLine(index, 'precio', finalVal);
                   }}
-                  className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 text-center font-mono"
+                  className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-color-user-500 py-1 text-center font-mono"
                 />
               </div>
 
@@ -345,7 +345,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                 <select
                   value={line.iva || 21}
                   onChange={(e) => updateLine(index, 'iva', Number(e.target.value))}
-                  className="w-full text-xs border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 py-1 px-1 text-center"
+                  className="w-full text-xs border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-color-user-500 py-1 px-1 text-center"
                   title="IVA Aplicable"
                 >
                   <option value="21">21%</option>
@@ -376,7 +376,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       <button
         type="button"
         onClick={addLine}
-        className="mt-4 flex items-center gap-2 text-sm text-green-600 hover:text-green-700 font-medium"
+        className="mt-4 flex items-center gap-2 text-sm text-color-user-600 hover:text-color-user-700 font-medium"
       >
         <PlusIcon className="h-4 w-4" /> Añadir línea
       </button>
@@ -387,7 +387,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border dark:border-gray-700 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between p-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
               <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <ChatBubbleLeftEllipsisIcon className="h-5 w-5 text-green-600" />
+                <ChatBubbleLeftEllipsisIcon className="h-5 w-5 text-color-user-600" />
                 Observaciones de la línea {observacionesIndex + 1}
               </h4>
               <button
@@ -408,14 +408,14 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                 value={lines[observacionesIndex].observaciones || ''}
                 onChange={(e) => updateLine(observacionesIndex, 'observaciones', e.target.value)}
                 placeholder="Escribe aquí las observaciones..."
-                className="w-full h-40 text-sm border-gray-300 rounded-lg dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-green-500 focus:border-green-500 resize-none p-3 shadow-inner"
+                className="w-full h-40 text-sm border-gray-300 rounded-lg dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-color-user-500 focus:border-color-user-500 resize-none p-3 shadow-inner"
               />
             </div>
             <div className="bg-gray-50 dark:bg-gray-800/50 px-4 py-3 flex justify-end items-center gap-3">
               <button
                 type="button"
                 onClick={() => setObservaciones(null)}
-                className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors shadow-sm"
+                className="px-4 py-2 text-sm font-medium text-white bg-color-user-600 hover:bg-color-user-700 rounded-lg transition-colors shadow-sm"
               >
                 Guardar cambios
               </button>

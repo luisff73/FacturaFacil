@@ -21,7 +21,7 @@ const SelectorColores: React.FC<{
         onColorChange(colors);
 
         Object.keys(colors).forEach((key) => {
-            document.documentElement.style.setProperty(`--bg-green-${key}`, colors[key as unknown as keyof typeof colors]);
+            document.documentElement.style.setProperty(`--color-user-${key}`, colors[key as unknown as keyof typeof colors]);
         });
     }, [onColorChange]);
 
@@ -47,12 +47,12 @@ const SelectorColores: React.FC<{
 
     return (
         <div>
-            <label className={"block text-sm font-medium text-center bg-opacity-0 text-green-700"}>Color App</label>
+            <label className={"block text-sm font-medium text-center bg-opacity-0 text-color-user-700"}>Color App</label>
             <input
                 type="color"
                 value={baseColor}
                 onChange={handleChange}
-                className="border rounded p-2 w-full bg-green-400 border-green-400 text-color-black"
+                className="border rounded p-2 w-full bg-color-user-400 border-color-user-400 text-color-black"
             />
         </div>
     );

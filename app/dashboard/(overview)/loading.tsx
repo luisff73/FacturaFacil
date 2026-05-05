@@ -9,7 +9,7 @@
 //   return (
 //     <div className="flex items-center justify-center h-screen">
 //       <div className="w-1/2 bg-gray-200 rounded-full h-4">
-//         <div className="bg-green-600 h-4 rounded-full animate-pulse" style={{ width: '50%' }}></div>
+//         <div className="bg-color-user-600 h-4 rounded-full animate-pulse" style={{ width: '50%' }}></div>
 //       </div>
 //       <p className="ml-4 text-gray-700">Cargando...</p>
 //     </div>

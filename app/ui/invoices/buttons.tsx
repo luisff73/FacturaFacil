@@ -6,7 +6,7 @@ export function CreateInvoice() {
   return (
     <Link
       href="/dashboard/invoices/create"
-      className="flex h-10 items-center rounded-lg bg-green-600 px-4 text-sm font-medium text-white transition-colors hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 shadow-sm active:scale-95"
+      className="flex h-10 items-center rounded-lg bg-color-user-600 px-4 text-sm font-medium text-white transition-colors hover:bg-color-user-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-color-user-600 shadow-sm active:scale-95"
     >
       <span className="hidden md:block">Crear documento</span>{' '}
       <PlusIcon className="h-5 md:ml-4" />

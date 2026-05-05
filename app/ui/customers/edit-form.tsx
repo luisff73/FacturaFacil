@@ -340,7 +340,7 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
           <legend className="mb-2 block text-sm font-medium dark:text-gray-400">
             Opciones de Impuestos
           </legend>
-          <div className="flex gap-6 rounded-md border border-green-400 dark:border-green-700 bg-green-100 dark:bg-green-700/20 px-4 py-2">
+          <div className="flex gap-6 rounded-md border border-color-user-400 dark:border-color-user-700 bg-color-user-100 dark:bg-color-user-700/20 px-4 py-2">
             <div className="flex items-center">
               <input
                 id="tiene_iva"
@@ -349,7 +349,7 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
                 defaultChecked={customer.tiene_iva}
                 className="h-4 w-4 cursor-pointer border-gray-300 bg-white text-gray-700 focus:ring-2"
               />
-              <label htmlFor="tiene_iva" className="ml-2 text-sm font-medium text-green-700 dark:text-green-300 cursor-pointer">
+              <label htmlFor="tiene_iva" className="ml-2 text-sm font-medium text-color-user-700 dark:text-color-user-300 cursor-pointer">
                 IVA
               </label>
             </div>
@@ -361,7 +361,7 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
                 defaultChecked={customer.tiene_re}
                 className="h-4 w-4 cursor-pointer border-gray-300 bg-white text-gray-700 focus:ring-2"
               />
-              <label htmlFor="tiene_re" className="ml-2 text-sm font-medium text-green-700 dark:text-green-300 cursor-pointer">
+              <label htmlFor="tiene_re" className="ml-2 text-sm font-medium text-color-user-700 dark:text-color-user-300 cursor-pointer">
                 RE
               </label>
             </div>  

@@ -34,12 +34,12 @@ móviles y solo aceptarán caracteres numéricos). */
 
 
 /* :root {
-  --bg-green-100: #C8E6C9;
-  --bg-green-200: #A5D6A7;
-  --bg-green-400: #4CAF50;
-  --bg-green-500: #388E3C;
-  --bg-green-600: #2E7D32;
-  --bg-green-700: #1B5E20;
+  --color-user-100: #C8E6C9;
+  --color-user-200: #A5D6A7;
+  --color-user-400: #4CAF50;
+  --color-user-500: #388E3C;
+  --color-user-600: #2E7D32;
+  --color-user-700: #1B5E20;
 } */
 
 @media print {

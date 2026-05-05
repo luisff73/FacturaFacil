@@ -25,7 +25,7 @@ export default function ExportPDFButton({
 
   if (!isClient) {
     return (
-      <div className="bg-green-600 text-white px-6 py-2 rounded-lg shadow opacity-50 flex items-center gap-2 font-bold cursor-not-allowed print:hidden">
+      <div className="bg-color-user-600 text-white px-6 py-2 rounded-lg shadow opacity-50 flex items-center gap-2 font-bold cursor-not-allowed print:hidden">
         <ArrowDownTrayIcon className="w-5 h-5" />
         Cargando...
       </div>
@@ -39,7 +39,7 @@ export default function ExportPDFButton({
     <PDFDownloadLink
       document={<InvoicePDFDocument invoice={invoice} lines={lines} customer={customer} empresa={empresa} />}
       fileName={`${fileNamePrefix}_${invoice.id.substring(0, 8).toUpperCase()}.pdf`}
-      className="bg-green-600 text-white px-6 py-2 rounded-lg shadow hover:bg-green-700 transition-colors flex items-center gap-2 font-bold print:hidden"
+      className="bg-color-user-600 text-white px-6 py-2 rounded-lg shadow hover:bg-color-user-700 transition-colors flex items-center gap-2 font-bold print:hidden"
     >
       {({ loading }) => (
         <>

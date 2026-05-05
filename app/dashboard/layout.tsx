@@ -20,7 +20,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
             </div>
 
             {/* BARRA SUPERIOR (Logo y Usuario) - Global */}
-            <div className="w-full flex-none flex justify-between items-end bg-green-500 p-2 print:hidden">
+            <div className="w-full flex-none flex justify-between items-end bg-color-user-500 p-2 print:hidden">
                 <FacturaFacilLogo size="small" />
                 <FacturaFacilUser />
             </div>

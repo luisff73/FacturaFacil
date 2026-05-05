@@ -9,7 +9,7 @@ export default function InvoiceStatus({ status, tipo }: { status: string, tipo?:
         'inline-flex items-center rounded-full px-2 py-1 text-xs',
         {
           'bg-gray-100 text-gray-500': !isPedido && status === 'Pendiente', /*aqui el estado Pendiente/pagado*/
-          'bg-green-500 text-white': !isPedido && status === 'Pagada',
+          'bg-color-user-500 text-white': !isPedido && status === 'Pagada',
           'bg-red-500 text-white': isPedido,
         },
       )}

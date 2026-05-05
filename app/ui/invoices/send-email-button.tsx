@@ -67,7 +67,7 @@ export default function SendInvoiceEmailButton({
           {
             'bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700': status === 'idle',
             'bg-gray-400 text-white cursor-not-allowed border-transparent': status === 'sending',
-            'bg-green-600 text-white border-transparent': status === 'success',
+            'bg-color-user-600 text-white border-transparent': status === 'success',
             'bg-red-600 text-white border-transparent': status === 'error',
           }
         )}
@@ -104,7 +104,7 @@ export default function SendInvoiceEmailButton({
         <div className={clsx(
           "absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-3 py-1 rounded text-xs font-bold animate-bounce shadow-lg z-50",
           {
-            "bg-green-100 text-green-800 border border-green-200": status === 'success',
+            "bg-color-user-100 text-color-user-800 border border-color-user-200": status === 'success',
             "bg-red-100 text-red-800 border border-red-200": status === 'error'
           }
         )}>

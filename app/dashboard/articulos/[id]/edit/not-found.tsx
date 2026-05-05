@@ -9,7 +9,7 @@ export default function NotFound() {
       <p>No se ha podido encontrar el articulo.</p>
       <Link
         href="/dashboard/articulos"
-        className="mt-4 rounded-md bg-green-500 px-4 py-2 text-sm text-white transition-colors hover:bg-green-400"
+        className="mt-4 rounded-md bg-color-user-500 px-4 py-2 text-sm text-white transition-colors hover:bg-color-user-400"
       >
         Volver
       </Link>

@@ -44,7 +44,7 @@ export default async function FacturaFacilLogo({ size = 'large' }: { size?: 'sma
           </p>
         </div>
         {nombreEmpresa && (
-          <p className={`${isSmall ? 'text-[8px]' : 'w-full text-[14px]'} md:text-[24px] mt-1 md:mt-2 text-green-100 font-medium uppercase tracking-wide`}>
+          <p className={`${isSmall ? 'text-[8px]' : 'w-full text-[14px]'} md:text-[24px] mt-1 md:mt-2 text-color-user-100 font-medium uppercase tracking-wide`}>
             {nombreEmpresa}
           </p>
         )}
@@ -93,7 +93,7 @@ export async function FacturaFacilUser() {
       />
       <div className="flex flex-col ml-3 items-center">
         {nombreUsuario && (
-          <p className="text-[8px] md:text-[20px] mt-1 md:mt-2 text-green-100 font-medium uppercase tracking-wide">
+          <p className="text-[8px] md:text-[20px] mt-1 md:mt-2 text-color-user-100 font-medium uppercase tracking-wide">
             {nombreUsuario}
           </p>
         )}

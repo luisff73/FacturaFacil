@@ -73,7 +73,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
             <p className="text-gray-500 font-medium">Fecha: {formatDateToLocal(invoice.date)}</p>
           </div>
           <div className="text-right">
-            <h2 className="text-2xl font-bold text-green-600">{empresa?.nombre}</h2>
+            <h2 className="text-2xl font-bold text-color-user-600">{empresa?.nombre}</h2>
             <p className="text-gray-600">{empresa?.direccion}</p>
             <p className="text-gray-600">{empresa?.c_postal} - {empresa?.poblacion}</p>
             <p className="text-gray-600">{empresa?.provincia}</p>
@@ -175,7 +175,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
               <div className="text-left max-w-[200px]">
                 <p className="text-[10px] font-bold text-blue-600 uppercase tracking-tight flex items-center gap-1.5">
                   VERI*FACTU
-                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(34,197,94,1)]" />
+                  <span className="w-1.5 h-1.5 bg-color-user-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(34,197,94,1)]" />
                 </p>
                 <p className="text-[8px] text-gray-500 mt-1 font-medium leading-tight">Esta factura cumple con los requisitos de la normativa de la Agencia Tributaria.</p>
                 {invoice.hash && (

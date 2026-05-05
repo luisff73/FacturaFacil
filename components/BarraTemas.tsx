@@ -29,7 +29,7 @@ export default function BarraTemas({ initialColor, showUI = true }: { initialCol
         // Accedemos al DOM para inyectar las variables que usará Tailwind
         if (typeof document !== 'undefined') {
             Object.entries(colors).forEach(([key, value]) => {
-                document.documentElement.style.setProperty(`--bg-green-${key}`, value);
+                document.documentElement.style.setProperty(`--color-user-${key}`, value);
             });
         }
     };
@@ -64,10 +64,10 @@ export default function BarraTemas({ initialColor, showUI = true }: { initialCol
     return (
         <>
             {showUI && (
-                <div className="flex space-x-2 bg-green-000">
+                <div className="flex space-x-2 bg-color-user-000">
                     {/* Botón para abrir/cerrar el selector de colores */}
                     <button
-                        className="p-2 rounded-lg bg-green-400 dark:bg-gray-700"
+                        className="p-2 rounded-lg bg-color-user-400 dark:bg-gray-700"
                         onClick={() => setShowColorPicker(!showColorPicker)}
                         title="Cambiar color"
                         aria-label="Cambiar color"
@@ -83,7 +83,7 @@ export default function BarraTemas({ initialColor, showUI = true }: { initialCol
                     {/* Botón para alternar Modo Oscuro / Claro */}
                     <button
                         onClick={() => setDarkMode(!darkMode)}
-                        className="p-2 rounded-lg bg-green-400 dark:bg-gray-700"
+                        className="p-2 rounded-lg bg-color-user-400 dark:bg-gray-700"
                         title={darkMode ? "Activar modo claro" : "Activar modo oscuro"}
                         aria-label={darkMode ? "Activar modo claro" : "Activar modo oscuro"}
                     >

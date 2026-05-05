@@ -39,7 +39,7 @@ export default async function RevenueChart() { // hace el componente asincrono p
             <div key={month.month} className="flex flex-col items-center gap-2">
               {/* bars */}
               <div
-                className="w-full rounded-md bg-green-200"
+                className="w-full rounded-md bg-color-user-200"
                 style={{
                   height: `${(chartHeight / topLabel) * month.revenue}px`,
                 }}
@@ -52,7 +52,7 @@ export default async function RevenueChart() { // hace el componente asincrono p
           ))}
         </div>
         <div className="flex items-center pb-2 pt-6">
-          <CalendarIcon className="h-5 w-5 text-green-500" />
+          <CalendarIcon className="h-5 w-5 text-color-user-500" />
           <h3 className="ml-2 text-sm text-gray-500 ">Ultimos 12 meses</h3>
         </div>
       </div>
