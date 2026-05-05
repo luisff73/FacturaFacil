@@ -19,7 +19,7 @@ export const sendEmail = async (
 ) => {
   try {
     const { data, error } = await resend.emails.send({
-      from: 'FacturaFacil <onboarding@resend.dev>',
+      from: 'Factura Facil Soporte <info@facturafacil.pro>',
       to,
       subject,
       html,

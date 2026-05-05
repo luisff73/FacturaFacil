@@ -56,8 +56,9 @@ export default function BarraTemas({ initialColor, showUI = true }: { initialCol
      * Cuando el usuario elige un color, el hijo le devuelve la paleta completa.
      */
     const handleColorChange = useCallback((colors: { [key: string]: string }) => {
-        const color = colors['700']; // Escogemos el tono oscuro para seguimiento
-        setBgColor(color); // Actualizamos el estado para reflejar el cambio
+        const color = colors['500']; // Usamos el color base (500)
+        setBgColor(color); 
+        aplicarColores(color); // ¡IMPORTANTE! Aplicar los colores al CSS en tiempo real
     }, []);
 
     return (

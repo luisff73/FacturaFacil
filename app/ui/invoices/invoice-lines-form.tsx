@@ -193,9 +193,9 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
 
   return (
     <div className="mt-8">
-      <h3 className="text-lg font-medium mb-4 dark:text-gray-200">Líneas de Factura</h3>
+      <h3 className="text-lg font-medium mb-4 dark:text-gray-200">Líneas del documento</h3>
       <div className="space-y-1">
-        {/* Cabecera para detalle de lineas de factura */}
+        {/* Cabecera para detalle de lineas de documento */}
         <div className="hidden md:grid md:grid-cols-12 gap-1.5 px-1.5 border-b dark:border-gray-700 text-[12px] font-semibold uppercase text-gray-500 tracking-wider">
           <div className="md:col-span-5">Artículo / Descripción</div>
           <div className="md:col-span-2 text-center">Observaciones</div>

@@ -31,13 +31,16 @@ export const formatDateToLocal = (
 
 // Función para generar el eje Y
 export const generateYAxis = (revenue: Revenue[]) => {
-  // Calculate what labels we need to display on the y-axis
-  // based on highest record and in 1000s
   const yAxisLabels = [];
   const highestRecord = Math.max(...revenue.map((month) => month.revenue));
-  const topLabel = Math.ceil(highestRecord / 1000) * 1000;
+  
+  // Determinamos un "salto" proporcional para que siempre haya unas 8 etiquetas
+  const numLabels = 8;
+  // Calculamos el salto (mínimo de 1000 para que se vea la K)
+  const step = Math.max(Math.ceil(highestRecord / numLabels / 1000) * 1000, 1000);
+  const topLabel = Math.ceil(highestRecord / step) * step;
 
-  for (let i = topLabel; i >= 0; i -= 1000) {
+  for (let i = topLabel; i >= 0; i -= step) {
     yAxisLabels.push(`€${i / 1000}K`);
   }
 

@@ -62,19 +62,20 @@ export default function SendInvoiceEmailButton({
         onClick={handleSendEmail}
         disabled={status === 'sending'}
         className={clsx(
-          'flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-all shadow-sm active:scale-95',
+          'flex items-center justify-center gap-2 rounded-md transition-all active:scale-95 border',
+          showText ? 'h-10 px-4 text-sm font-medium shadow-sm' : 'p-2',
           {
-            'bg-blue-600 text-white hover:bg-blue-500': status === 'idle',
-            'bg-gray-400 text-white cursor-not-allowed': status === 'sending',
-            'bg-green-600 text-white': status === 'success',
-            'bg-red-600 text-white': status === 'error',
+            'bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700': status === 'idle',
+            'bg-gray-400 text-white cursor-not-allowed border-transparent': status === 'sending',
+            'bg-green-600 text-white border-transparent': status === 'success',
+            'bg-red-600 text-white border-transparent': status === 'error',
           }
         )}
         title="Enviar factura por email al cliente"
       >
         {status === 'idle' && (
           <>
-            <EnvelopeIcon className="h-5 w-5" />
+            <EnvelopeIcon className="w-5" />
             {showText && <span>Enviar Email</span>}
           </>
         )}

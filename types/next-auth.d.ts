@@ -15,8 +15,8 @@ declare module "next-auth" {
   }
 
   interface User {
-      id_empresa: number
-      type: "admin" | "user"
+    id_empresa: number
+    type: "admin" | "user"
   }
 }
 

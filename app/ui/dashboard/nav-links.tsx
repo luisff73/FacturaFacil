@@ -16,7 +16,7 @@ import clsx from 'clsx'; // importa la libreria clsx
 // Depending on the size of the application, this would be stored in a database.
 const links = [
   { name: 'Inicio', href: '/dashboard', icon: HomeIcon },
-  { name: 'Facturas', href: '/dashboard/invoices', icon: DocumentDuplicateIcon },
+  { name: 'Facturación', href: '/dashboard/invoices', icon: DocumentDuplicateIcon },
   { name: 'Clientes', href: '/dashboard/customers', icon: UserGroupIcon },
   { name: 'Artículos', href: '/dashboard/articulos', icon: TagIcon },
   { name: 'Usuarios', href: '/dashboard/users', icon: UserCircleIcon, adminOnly: true },

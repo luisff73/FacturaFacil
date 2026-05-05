@@ -144,7 +144,7 @@ export async function requestPasswordReset(prevState: any, formData: FormData) {
     
     if (user.rows.length === 0) {
       // Por seguridad, no decimos si el email existe o no
-      return undefined; 
+      return "Este correo electrónico no está registrado en el sistema."; 
     }
 
     const userData = user.rows[0];
@@ -178,8 +178,11 @@ const FormSchema = z.object({
     .number()
     .gt(0, { message: "Por favor introduce un importe mayor a $0." }),
 
-  status: z.enum(["Pendiente", "Pagada", "Proforma"], {
+  status: z.enum(["Pendiente", "Pagada"], {
     invalid_type_error: "Por favor selecciona un estado de factura.",
+  }),
+  tipo: z.enum(["Pedido", "Factura"], {
+    invalid_type_error: "Por favor selecciona un tipo de documento.",
   }),
   fecha: z.string().min(1, { message: "Por favor selecciona una fecha para la factura." }),
   lines: z.string().optional(),
@@ -232,6 +235,7 @@ export type State = {
     customerId?: string[];
     base_imponible?: string[];
     status?: string[];
+    tipo?: string[];
     lines?: string[];
     name?: string[];
     email?: string[];
@@ -250,6 +254,7 @@ export type State = {
     customerId?: string;
     invoice_serie?: string;
     status?: string;
+    tipo?: string;
     fecha?: string;
     base_imponible?: string;
     invoiceNumber?: string;
@@ -263,6 +268,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
     customerId: formData.get("customerId"),
     base_imponible: formData.get("base_imponible"),
     status: formData.get("status"),
+    tipo: formData.get("tipo"),
     lines: formData.get("lines"),
     fecha: formData.get("fecha"),
     invoice_serie: formData.get("invoice_serie"),
@@ -277,6 +283,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
         customerId: formData.get("customerId") as string,
         invoice_serie: formData.get("invoice_serie") as string,
         status: formData.get("status") as string,
+        tipo: formData.get("tipo") as string,
         fecha: formData.get("fecha") as string,
         base_imponible: formData.get("base_imponible") as string,
         lines: formData.get("lines") as string,
@@ -285,7 +292,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
   }
 
   // Prepara los datos para la inserción en la base de datos
-  const { customerId, base_imponible, status, lines, fecha, invoice_serie } = validatedFields.data;
+  const { customerId, base_imponible, status, tipo, lines, fecha, invoice_serie } = validatedFields.data;
   const idEmpresa = await requireEmpresaId();
 
   const [customerResult, empresaResult] = await Promise.all([
@@ -296,20 +303,22 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
   const customer = customerResult.rows[0];
   const empresa = empresaResult.rows[0];
 
-  // Obtener el siguiente número de factura y el hash anterior para Verifactu
+  // Obtener el siguiente número de factura (filtrando por tipo) y el hash anterior para Verifactu
   const [nextNumberResult, lastHashResult] = await Promise.all([
     sql`
       SELECT COALESCE(MAX(invoice_number), 0) + 1 as next_number 
       FROM invoices 
       WHERE id_empresa = ${idEmpresa} 
       AND date_part('year', date) = date_part('year', ${fecha}::date)
+      AND tipo = ${tipo}
     `,
-    sql`
+    tipo === 'Factura' ? sql`
       SELECT hash FROM invoices 
       WHERE id_empresa = ${idEmpresa} 
+      AND tipo = 'Factura' AND hash IS NOT NULL AND hash != ''
       ORDER BY date DESC, invoice_number DESC, id DESC 
       LIMIT 1
-    `
+    ` : Promise.resolve({ rows: [] })
   ]);
 
   const invoice_number = nextNumberResult.rows[0].next_number;
@@ -337,10 +346,12 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
 
   const totalInCents = base_imponibleInCents + tax_ivaInCents + tax_rec_equivalenciaInCents;
 
-  // Cálculo de la huella digital (Verifactu)
-  // Concatenamos datos según normativa: NIF_Emisor|Num_Serie-Num_Factura|Fecha|Total|PrevHash
-  const hashData = `${empresa.cif || ''}|${invoice_serie ? invoice_serie + '-' : ''}${invoice_number}|${fecha}|${totalInCents}|${prev_hash}`;
-  const hash = generateInvoiceHash(hashData);
+  // Cálculo de la huella digital (Verifactu) solo si es Factura
+  let hash = '';
+  if (tipo === 'Factura') {
+    const hashData = `${empresa.cif || ''}|${invoice_serie ? invoice_serie + '-' : ''}${invoice_number}|${fecha}|${totalInCents}|${prev_hash}`;
+    hash = generateInvoiceHash(hashData);
+  }
 
   try {
     const result = await sql`
@@ -348,6 +359,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
         customer_id, 
         base_imponible, 
         status, 
+        tipo,
         date, 
         id_empresa, 
         total_iva, 
@@ -363,6 +375,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
         ${customerId}, 
         ${base_imponibleInCents}, 
         ${status}, 
+        ${tipo},
         ${fecha}, 
         ${idEmpresa}, 
         ${tax_ivaInCents}, 
@@ -371,8 +384,8 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
         ${invoice_number},
         ${invoice_serie},
         ${customer.cif},
-        ${hash},
-        ${prev_hash}
+        ${hash || null},
+        ${prev_hash || null}
       )
       RETURNING id, invoice_number;
     `;
@@ -424,6 +437,7 @@ export async function updateInvoice(
     customerId: formData.get("customerId"),
     base_imponible: formData.get("base_imponible"),
     status: formData.get("status"),
+    tipo: formData.get("tipo"),
     lines: formData.get("lines"),
     fecha: formData.get("fecha"),
     invoiceNumber: formData.get("invoiceNumber"),
@@ -438,6 +452,7 @@ export async function updateInvoice(
         customerId: formData.get("customerId") as string,
         invoice_serie: formData.get("invoice_serie") as string,
         status: formData.get("status") as string,
+        tipo: formData.get("tipo") as string,
         fecha: formData.get("fecha") as string,
         base_imponible: formData.get("base_imponible") as string,
         invoiceNumber: formData.get("invoiceNumber") as string,
@@ -446,7 +461,7 @@ export async function updateInvoice(
     };
   }
 
-  const { customerId, base_imponible, status, lines, fecha, invoiceNumber, invoice_serie } = validatedFields.data;
+  const { customerId, base_imponible, status, tipo, lines, fecha, invoiceNumber, invoice_serie } = validatedFields.data;
   const idEmpresa = await requireEmpresaId();
 
   // Obtener datos del cliente para calcular impuestos
@@ -478,18 +493,49 @@ export async function updateInvoice(
   const totalInCents = base_imponibleInCents + tax_ivaInCents + tax_rec_equivalenciaInCents;
 
   try {
+    // Obtener estado actual de la factura en BD
+    const currentInvoiceResult = await sql`SELECT tipo, hash FROM invoices WHERE id = ${id} AND id_empresa = ${idEmpresa}`;
+    const currentInvoice = currentInvoiceResult.rows[0];
+    const currentTipo = currentInvoice.tipo;
+    
+    let finalInvoiceNumber = invoiceNumber;
+    let finalHash = currentInvoice.hash || null;
+    let finalPrevHash = null;
+
+    // Si pasa de Pedido a Factura, o si es Factura pero el usuario borró su hash manualmente (como indicaste), le generamos el hash y posiblemente un nuevo número
+    if (tipo === 'Factura' && (currentTipo === 'Pedido' || !currentInvoice.hash)) {
+      const [nextNumberResult, lastHashResult, empresaResult] = await Promise.all([
+        sql`SELECT COALESCE(MAX(invoice_number), 0) + 1 as next_number FROM invoices WHERE id_empresa = ${idEmpresa} AND date_part('year', date) = date_part('year', ${fecha}::date) AND tipo = 'Factura'`,
+        sql`SELECT hash FROM invoices WHERE id_empresa = ${idEmpresa} AND tipo = 'Factura' AND hash IS NOT NULL AND hash != '' ORDER BY date DESC, invoice_number DESC, id DESC LIMIT 1`,
+        sql`SELECT cif FROM empresas WHERE id = ${idEmpresa}`
+      ]);
+      
+      // Si era un Pedido, le asignamos el SIGUIENTE número correlativo de las facturas
+      if (currentTipo === 'Pedido') {
+        finalInvoiceNumber = nextNumberResult.rows[0].next_number;
+      }
+      
+      finalPrevHash = lastHashResult.rows[0]?.hash || '';
+      const empresa = empresaResult.rows[0];
+      const hashData = `${empresa.cif || ''}|${invoice_serie ? invoice_serie + '-' : ''}${finalInvoiceNumber}|${fecha}|${totalInCents}|${finalPrevHash}`;
+      finalHash = generateInvoiceHash(hashData);
+    }
+
     await sql`
         UPDATE invoices
         SET customer_id = ${customerId}, 
             base_imponible = ${base_imponibleInCents}, 
             status = ${status}, 
+            tipo = ${tipo},
             date = ${fecha}, 
             total_iva = ${tax_ivaInCents}, 
             total_recargo = ${tax_rec_equivalenciaInCents}, 
             total_factura = ${totalInCents},
-            invoice_number = ${invoiceNumber},
+            invoice_number = ${finalInvoiceNumber},
             invoice_serie = ${invoice_serie},
-            cif = ${customer.cif}
+            cif = ${customer.cif},
+            hash = COALESCE(${finalHash}, hash),
+            prev_hash = COALESCE(${finalPrevHash}, prev_hash)
         WHERE id = ${id} AND id_empresa = ${idEmpresa}
       `;
 

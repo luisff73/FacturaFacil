@@ -37,24 +37,25 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
-          Volver a facturas
+          Volver a documentos
         </Link>
         <div className="flex gap-4">
           <PrintButton />
           {invoice && customer && empresa && (
             <>
+                            <ExportPDFButton
+                invoice={invoice}
+                lines={lines}
+                customer={customer}
+                empresa={empresa}
+              />
               <SendInvoiceEmailButton
                 invoice={invoice}
                 lines={lines}
                 customer={customer}
                 empresa={empresa}
               />
-              <ExportPDFButton
-                invoice={invoice}
-                lines={lines}
-                customer={customer}
-                empresa={empresa}
-              />
+
             </>
           )}
         </div>
@@ -62,10 +63,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
       {/* Contenido principal flexible */}
       <div className="flex-grow">
-        {/* Cabecera de la factura */}
+        {/* Cabecera del documento */}
         <div className="flex justify-between items-start border-b-2 border-gray-100 pb-8 mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-800 uppercase tracking-tight mb-2">Factura</h1>
+            <h1 className="text-4xl font-bold text-gray-800 uppercase tracking-tight mb-2">{invoice.tipo}</h1>
             <p className="text-gray-500 font-medium tracking-wide">
               Nº: {new Date(invoice.date).getFullYear()}/{invoice.invoice_serie ? invoice.invoice_serie + '/' : ''}{invoice.invoice_number}
             </p>
@@ -159,7 +160,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           </div>
 
           {/* QR de verificación Verifactu (AEAT) */}
-          {invoice.status !== 'Proforma' && empresa?.cif && (
+          {invoice.tipo === 'Factura' && empresa?.cif && (
             <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100 print:bg-transparent print:border-none">
               <div className="w-16 h-16 bg-white p-1 rounded-lg shadow-sm border border-gray-100">
                 <QRCodePreview

@@ -13,7 +13,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
     const Color_usuario = (session?.user as any)?.css || '#2b3643ff';
 
     return (
-        <div className="flex h-auto md:h-screen flex-col print:h-auto print:block relative overflow-hidden">
+        <div className="flex h-auto md:h-screen flex-col print:h-auto print:block relative overflow-y-auto md:overflow-hidden">
             {/* Barra de temas fija */}
             <div className="fixed top-4 right-4 z-[60] print:hidden">
                 <BarraTemas initialColor={Color_usuario} showUI={true} />
@@ -34,7 +34,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
                 </div>
 
                 {/* CONTENIDO PRINCIPAL */}
-                <div className="flex-grow p-4 md:p-12 overflow-y-auto print:p-0 print:overflow-visible">
+                <div className="flex-grow p-4 md:p-12 overflow-visible md:overflow-y-auto print:p-0 print:overflow-visible">
                     {children}
                 </div>
             </div>

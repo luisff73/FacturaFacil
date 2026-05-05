@@ -36,11 +36,11 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
                           <div className="flex items-center gap-3">
                             <Image
                               src={getImageUrl(customer.image_url) || `https://ui-avatars.com/api/?name=${customer.name}&background=random`}
-                              className="rounded-full"
+                              className="rounded-full object-cover"
                               alt={`${customer.name}'s profile picture`}
                               width={28}
                               height={28}
-                              style={{ height: 'auto' }}
+                              style={{ width: '28px', height: '28px' }}
                             />
                             <p className="dark:text-white">{customer.name}</p>
                           </div>
@@ -89,7 +89,7 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
                       Total Pagado
                     </th>
                     <th scope="col" className="px-4 py-5 font-medium dark:text-gray-200">
-                      Total Proforma
+                      Total Pedidos
                     </th>
                     <th scope="col" className="px-4 py-5 font-medium dark:text-gray-200">
                       Acciones
@@ -104,11 +104,11 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
                         <div className="flex items-center gap-3">
                           <Image
                             src={getImageUrl(customer.image_url) || `https://ui-avatars.com/api/?name=${customer.name}&background=random`}
-                            className="rounded-full"
+                            className="rounded-full object-cover"
                             alt={`${customer.name}'s profile picture`}
                             width={28}
                             height={28}
-                            style={{ height: 'auto' }}
+                            style={{ width: '28px', height: '28px' }}
                           />
                           <p>{customer.name}</p>
                         </div>

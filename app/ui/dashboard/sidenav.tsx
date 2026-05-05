@@ -9,7 +9,7 @@ export default async function SideNav() {
 
   return (
     <div className="flex h-auto md:h-full flex-col px-3 py-4 md:px-2 bg-gray-100 dark:bg-gray-900">
-      <div className="grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2 flex">
+      <div className="grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2 flex overflow-x-auto md:overflow-visible">
         <NavLinks user={session?.user as any} />
         <div className="hidden h-auto w-full grow rounded-md bg-gray-50 md:block"></div>
         <form

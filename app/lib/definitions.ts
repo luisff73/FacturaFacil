@@ -47,9 +47,9 @@ export type Invoice = {
   id_empresa: number;
   customer_id: string;
   base_imponible: number;
-  // In TypeScript, this is called a string union type.
-  // It means that the "status" property can only be one of the two strings: 'Pendiente' or 'Pagada'.
-  status: "Pendiente" | "Pagada" | "Proforma";
+
+  tipo: "Pedido" | "Factura";
+  status: "Pendiente" | "Pagada";
   date: string;
   total_iva: number;
   total_recargo: number;
@@ -80,7 +80,8 @@ export type InvoicesTable = {
   image_url: string;
   date: string;
   base_imponible: number;
-  status: "Pendiente" | "Pagada" | "Proforma";
+  tipo: "Pedido" | "Factura";
+  status: "Pendiente" | "Pagada";
   total_iva: number;
   total_recargo: number;
   total_factura: number;

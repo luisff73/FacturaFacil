@@ -83,7 +83,9 @@ export default function ExportListButton({ invoices, companyName }: { invoices: 
 
   if (!isClient) {
     return (
-      <div className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow opacity-50 flex items-center gap-2 text-sm font-medium cursor-not-allowed">
+      <div 
+        className="bg-green-600 text-white px-4 py-2 rounded-lg shadow opacity-50 flex items-center gap-2 text-sm font-medium cursor-not-allowed"
+      >
         <DocumentArrowDownIcon className="w-5 h-5" />
         Cargando...
       </div>
@@ -99,7 +101,7 @@ export default function ExportListButton({ invoices, companyName }: { invoices: 
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setShowExportMenu(!showExportMenu)} // al hacer clic en el botón se abre o se cierra el desplegable
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm font-medium"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-500 transition-all flex items-center gap-2 text-sm font-medium"
             aria-label="Opciones de exportación"
           >
             <DocumentArrowDownIcon className="w-5 h-5" />
@@ -138,7 +140,7 @@ export default function ExportListButton({ invoices, companyName }: { invoices: 
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={`p-2 rounded-lg border transition-colors ${showFilters || desdeFecha || hastaFecha || numberFilter || filtroCliente || statusFilter
-            ? 'bg-blue-50 border-blue-200 text-blue-600'
+            ? 'bg-green-600 border-transparent text-white shadow-sm'
             : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
             }`}
           title="Filtrar listado"
@@ -148,8 +150,8 @@ export default function ExportListButton({ invoices, companyName }: { invoices: 
             <div className="relative">
               <FunnelIcon className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
               </span>
             </div>
           ) : (

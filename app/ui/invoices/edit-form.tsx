@@ -66,7 +66,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
         <div className="mb-4 grid grid-cols-1 md:grid-cols-12 gap-6">
 
           {/* Seleccion de cliente */}
-          <div className="flex flex-col col-span-1 md:col-span-7">
+          <div className="flex flex-col col-span-1 md:col-span-5">
             <label htmlFor="customer" className="mb-2 block text-sm font-medium">
               Seleccione un cliente
             </label>
@@ -93,6 +93,33 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
             <div id="customer-error" aria-live="polite" aria-atomic="true">
               {state.errors?.customerId &&
                 state.errors.customerId.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
+            </div>
+          </div>
+
+          {/* Selector de Tipo de Documento */}
+          <div className="mb-4 col-span-1 md:col-span-2">
+            <label htmlFor="tipo" className="mb-2 block text-sm font-medium">
+              Tipo de Documento
+            </label>
+            <div className="relative">
+              <select
+                id="tipo"
+                name="tipo"
+                className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 text-sm outline-2 placeholder:text-gray-500"
+                defaultValue={state.values?.tipo || invoice.tipo || "Factura"}
+                aria-describedby="tipo-error"
+              >
+                <option value="Factura">Factura</option>
+                <option value="Pedido">Pedido</option>
+              </select>
+            </div>
+            <div id="tipo-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.tipo &&
+                state.errors.tipo.map((error: string) => (
                   <p className="mt-2 text-sm text-red-500" key={error}>
                     {error}
                   </p>
@@ -128,8 +155,8 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
 
           {/* Seleccion de numero de factura */}
           <div className="mb-4 col-span-1 md:col-span-2">
-            <label htmlFor="invoiceNumber" className="mb-2 block text-sm font-medium">
-              Número de la factura
+            <label htmlFor="invoiceNumber" className="mb-2 block text-sm font-medium text-center">
+              Número
             </label>
             <input
               id="invoiceNumber"
@@ -153,8 +180,8 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
 
           {/* Seleccion de fecha */}
           <div className="col-span-2">
-            <label htmlFor="fecha" className="mb-2 block text-sm font-medium">
-              Fecha de la factura
+            <label htmlFor="fecha" className="mb-2 block text-sm font-medium text-center">
+              Fecha
             </label>
             <div className="relative">
               <input
@@ -217,22 +244,6 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
                 </div>
                 <div className="flex items-center">
                   <input
-                    id="Proforma"
-                    name="status"
-                    type="radio"
-                    value="Proforma"
-                    defaultChecked={invoice.status === 'Proforma'}
-                    className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                  />
-                  <label
-                    htmlFor="Proforma"
-                    className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600"
-                  >
-                    Proforma <CloudIcon className="h-4 w-4" />
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
                     id="Pagada"
                     name="status"
                     type="radio"
@@ -263,7 +274,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
           <div className="w-full md:w-auto mt-6 md:mt-0 flex flex-col md:flex-row gap-6 items-start">
             
             {/* QR de Verifactu (Vista previa) */}
-            {invoice.status !== 'Proforma' && (
+            {invoice.tipo !== 'Pedido' && (
               <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center gap-2">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Vista previa QR Hacienda</p>
                 <div className="relative w-32 h-32 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100">
@@ -349,7 +360,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
         >
           Cancelar
         </Link>
-        <Button type="submit">Actualizar Factura</Button>
+        <Button type="submit">Actualizar documento</Button>
       </div>
     </form>
   );

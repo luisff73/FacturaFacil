@@ -22,7 +22,7 @@ interface ResetPasswordEmailProps {
 
 export const ResetPasswordEmail = ({
   userFirstname = 'Usuario',
-  resetPasswordLink = 'https://facturafacil.com/reset-password',
+  resetPasswordLink = 'https://facturafacil.pro/auth/new-password',
 }: ResetPasswordEmailProps) => {
   return (
     <Html>

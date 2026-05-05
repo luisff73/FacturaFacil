@@ -32,8 +32,8 @@ export default function ExportPDFButton({
     );
   }
 
-  const isProforma = invoice.status === 'Proforma';
-  const fileNamePrefix = isProforma ? 'Proforma' : 'Factura';
+  const isProforma = invoice.tipo === 'Pedido';
+  const fileNamePrefix = isProforma ? 'Pedido' : 'Factura';
 
   return (
     <PDFDownloadLink

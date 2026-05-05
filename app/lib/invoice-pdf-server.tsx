@@ -60,8 +60,8 @@ export async function generateInvoicePDFBuffer(invoice: Invoice, lines: invoices
   
   const qrCodeUrl = await QRCode.toDataURL(verifactuUrl, { margin: 1 });
 
-  const isProforma = invoice.status === 'Proforma';
-  const title = isProforma ? 'Factura Proforma' : 'Factura';
+  const isProforma = invoice.tipo === 'Pedido';
+  const title = isProforma ? 'Pedido' : 'Factura';
   const accentColor = isProforma ? '#64748b' : '#30374cff';
 
   const MyDoc = (

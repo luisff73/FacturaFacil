@@ -35,11 +35,11 @@ export default async function Page(props: {
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
-        <h1 className={`${lusitana.className} text-2xl`}>Facturas</h1>
+        <h1 className={`${lusitana.className} text-2xl`}>Documentos</h1>
         <ExportListButton invoices={allInvoices} companyName={companyName} />
       </div>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <Search placeholder="Busqueda de facturas ..." />
+        <Search placeholder="Busqueda de documentos ..." />
         <CreateInvoice />
       </div>
       <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>

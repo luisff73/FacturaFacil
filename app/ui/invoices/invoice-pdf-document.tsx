@@ -208,8 +208,8 @@ interface InvoicePDFProps {
 
 export default function InvoicePDFDocument({ invoice, lines, customer, empresa }: InvoicePDFProps) {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
-  const isProforma = invoice.status === 'Proforma';
-  const title = isProforma ? 'Factura Proforma' : 'Factura';
+  const isProforma = invoice.tipo === 'Pedido';
+  const title = isProforma ? 'Pedido' : 'Factura';
   const accentColor = isProforma ? '#64748b' : '#30374cff'; // Gris azulado para proforma, tu color para el resto
 
   useEffect(() => {

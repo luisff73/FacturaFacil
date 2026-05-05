@@ -36,19 +36,49 @@ export async function requireEmpresaId(): Promise<number> {
 export async function fetchRevenue() {
   const idEmpresa = await requireEmpresaId();
   try {
-    const data = await sql<Revenue>`SELECT * FROM revenue where id_empresa = ${idEmpresa}`;
+    const data = await sql<Revenue>`
+      WITH months AS (
+        SELECT generate_series(
+          date_trunc('month', CURRENT_DATE) - INTERVAL '11 months',
+          date_trunc('month', CURRENT_DATE),
+          '1 month'
+        )::date AS month_date
+      )
+      SELECT 
+        TO_CHAR(m.month_date, 'Mon') AS month,
+        COALESCE(SUM(i.base_imponible) / 100, 0) AS revenue,
+        ${idEmpresa} as id_empresa
+      FROM months m
+      LEFT JOIN invoices i ON 
+        date_trunc('month', i.date) = m.month_date 
+        AND i.id_empresa = ${idEmpresa}
+        AND i.tipo = 'Factura'
+      GROUP BY m.month_date
+      ORDER BY m.month_date ASC;
+    `;
 
-    return data.rows;
+    // Mapeo para traducir meses al español (valores)
+    const monthTranslations: { [key: string]: string } = {
+      'Jan': 'Ene', 'Feb': 'Feb', 'Mar': 'Mar', 'Apr': 'Abr',
+      'May': 'May', 'Jun': 'Jun', 'Jul': 'Jul', 'Aug': 'Ago',
+      'Sep': 'Sep', 'Oct': 'Oct', 'Nov': 'Nov', 'Dec': 'Dic'
+    };
+
+    const translatedData = data.rows.map(row => ({
+      ...row,
+      month: monthTranslations[row.month] || row.month
+    }));
+
+    return translatedData;
   } catch (error) {
     console.error("Database Error:", error);
-    throw new Error("Error en el fetch revenue data.");
+    throw new Error("Error en el fetch revenue data dinámico.");
   }
 }
 
 export async function fetchLatestInvoices() {
   const idEmpresa = await requireEmpresaId();
   try {
-    //Cambiar el 1 por el id de la empresa que quieras mostrar las facturas
     const data = await sql<LatestInvoiceRaw>`
       SELECT 
         invoices.base_imponible,
@@ -58,7 +88,7 @@ export async function fetchLatestInvoices() {
         invoices.id
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id
-      WHERE invoices.id_empresa = ${idEmpresa}
+      WHERE invoices.id_empresa = ${idEmpresa} AND invoices.tipo = 'Factura'
       ORDER BY invoices.date DESC
       LIMIT 5`;
 
@@ -79,12 +109,12 @@ export async function fetchCardData() {
     // You can probably combine these into a single SQL query
     // However, we are intentionally splitting them to demonstrate
     // how to initialize multiple queries in parallel with JS.
-    const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices where invoices.id_empresa = ${idEmpresa}`;
+    const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices where invoices.id_empresa = ${idEmpresa} AND invoices.tipo = 'Factura'`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers where customers.id_empresa = ${idEmpresa}`;
     const invoiceStatusPromise = sql`SELECT
-         SUM(CASE WHEN status = 'Pagada' THEN base_imponible ELSE 0 END) AS "Pagada",
-         SUM(CASE WHEN status = 'Pendiente' THEN base_imponible ELSE 0 END) AS "Pendiente",
-         SUM(CASE WHEN status = 'Proforma' THEN base_imponible ELSE 0 END) AS "Proforma"
+         SUM(CASE WHEN status = 'Pagada' AND tipo = 'Factura' THEN base_imponible ELSE 0 END) AS "Pagada",
+         SUM(CASE WHEN status = 'Pendiente' AND tipo = 'Factura' THEN base_imponible ELSE 0 END) AS "Pendiente",
+         SUM(CASE WHEN tipo = 'Pedido' THEN base_imponible ELSE 0 END) AS "Proforma"
          FROM invoices where invoices.id_empresa = ${idEmpresa}`;
 
     const data = await Promise.all([
@@ -110,9 +140,9 @@ export async function fetchCardData() {
       totalPendingInvoices,
       totalProformaInvoices,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Database Error:", error);
-    throw new Error("Error en el fetch card data.");
+    throw new Error("Error en el fetch card data: " + (error.message || error));
   }
 }
 
@@ -131,6 +161,7 @@ export async function fetchFilteredInvoices(
         invoices.base_imponible,
         invoices.date,
         invoices.status,
+        invoices.tipo,
         invoices.total_iva,
         invoices.total_recargo,
         invoices.total_factura,
@@ -191,6 +222,7 @@ export async function fetchAllFilteredInvoices(query: string) {
         invoices.base_imponible,
         invoices.date,
         invoices.status,
+        invoices.tipo,
         invoices.total_iva,
         invoices.total_recargo,
         invoices.total_factura,
@@ -227,6 +259,7 @@ export async function fetchInvoiceById(id: string) {
         invoices.customer_id,
         invoices.base_imponible,
         invoices.status,
+        invoices.tipo,
         invoices.date,
         invoices.id_empresa,
         invoices.total_iva,
@@ -339,10 +372,10 @@ export async function fetchFilteredCustomers(query: string) {
 		  customers.name,
 		  customers.email,
 		  customers.image_url,
-		  COUNT(invoices.id) AS total_invoices,
-		  SUM(CASE WHEN invoices.status = 'Pendiente' THEN invoices.base_imponible ELSE 0 END) AS total_pendiente,
-		  SUM(CASE WHEN invoices.status = 'Pagada' THEN invoices.base_imponible ELSE 0 END) AS total_pagada,
-      SUM(CASE WHEN invoices.status = 'Proforma' THEN invoices.base_imponible ELSE 0 END) AS total_proforma
+		  COUNT(CASE WHEN invoices.tipo = 'Factura' THEN 1 END) AS total_invoices,
+		  SUM(CASE WHEN invoices.status = 'Pendiente' AND invoices.tipo = 'Factura' THEN invoices.base_imponible ELSE 0 END) AS total_pendiente,
+		  SUM(CASE WHEN invoices.status = 'Pagada' AND invoices.tipo = 'Factura' THEN invoices.base_imponible ELSE 0 END) AS total_pagada,
+      SUM(CASE WHEN invoices.tipo = 'Pedido' THEN invoices.base_imponible ELSE 0 END) AS total_proforma
 		FROM customers
 		LEFT JOIN invoices ON customers.id = invoices.customer_id
     WHERE customers.id_empresa = ${idEmpresa} AND (

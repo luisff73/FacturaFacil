@@ -91,6 +91,33 @@ export default function Form({ customers, series, empresaCif }: { customers: Cus
             </div>
           </div>
 
+          {/* Selector de Tipo de Documento */}
+          <div className="mb-4 md:col-span-3">
+            <label htmlFor="tipo" className="mb-2 block text-sm font-medium">
+              Tipo de Documento
+            </label>
+            <div className="relative">
+              <select
+                id="tipo"
+                name="tipo"
+                className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 text-sm outline-2 placeholder:text-gray-500"
+                defaultValue={state.values?.tipo || "Factura"}
+                aria-describedby="tipo-error"
+              >
+                <option value="Factura">Factura</option>
+                <option value="Pedido">Pedido (Proforma)</option>
+              </select>
+            </div>
+            <div id="tipo-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.tipo &&
+                state.errors.tipo.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
+            </div>
+          </div>
+
           {/* Selector de Serie */}
           <div className="mb-4 md:col-span-2">
             <label htmlFor="invoice_serie" className="mb-2 block text-sm font-medium">
@@ -159,12 +186,6 @@ export default function Form({ customers, series, empresaCif }: { customers: Cus
                   <input id="Pendiente" name="status" type="radio" value="Pendiente" defaultChecked className="h-4 w-4 cursor-pointer" />
                   <label htmlFor="Pendiente" className="ml-2 flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600">
                     Pendiente <ClockIcon className="h-4 w-4" />
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input id="Proforma" name="status" type="radio" value="Proforma" className="h-4 w-4 cursor-pointer" />
-                  <label htmlFor="Proforma" className="ml-2 flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600">
-                    Proforma <CloudIcon className="h-4 w-4" />
                   </label>
                 </div>
                 <div className="flex items-center">

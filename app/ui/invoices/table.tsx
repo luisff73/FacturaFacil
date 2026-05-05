@@ -22,26 +22,27 @@ export default async function InvoicesTable({
         <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-2 md:pt-0">
           <div className="md:hidden"> {/* Este div es para móviles */}
             {invoices?.map((invoice) => (
-              <div key={invoice.id} className="mb-2 w-full rounded-md bg-white dark:bg-gray-900 p-4">
-                <div className="flex items-center justify-between border-b dark:border-gray-700 pb-4">
+              <div key={invoice.id} className="mb-4 w-full rounded-md bg-white dark:bg-gray-900 p-2">
+                <div className="flex items-center justify-between">
                   <div>
-                    <div className="mb-2 flex items-center">
-                      <p className="dark:text-white font-bold">
-                        {new Date(invoice.date).getFullYear()}/{invoice.invoice_number}
+                    <div className="flex items-center">
+                      <p className="text-sm dark:text-white">
+                        {new Date(invoice.date).getFullYear()}/{invoice.invoice_serie}/{invoice.invoice_number}
                       </p>
                       <p className="dark:text-white ml-2">{invoice.name}</p>
                     </div>
                   </div>
-                  <InvoiceStatus status={invoice.status} />
+                  {/* <InvoiceStatus status={invoice.status} tipo={invoice.tipo} /> */}
                 </div>
-                <div className="flex w-full items-center justify-between pt-4">
+                <div className="flex w-full items-center justify-between">
                   <div>
-                    <p className="text-xl font-medium dark:text-white">
+                    <p className="dark:text-gray-300">{formatDateToLocal(invoice.date)}</p>
+                    <p className="text-lg font-medium dark:text-white">
                       {formatCurrency(invoice.total_factura)}
                     </p>
-                    <p className="dark:text-gray-300">{formatDateToLocal(invoice.date)}</p>
+
                   </div>
-                  <div className="flex justify-end gap-2 whitespace-nowrap px-6 py-4 text-sm">
+                  <div className="flex justify-end gap-2 px-2 py-4 text-sm flex-wrap">
                     <SendInvoiceEmailButton invoiceId={invoice.id} showText={false} />
                     <PrintInvoice id={invoice.id} />
                     <UpdateInvoice id={invoice.id} />
@@ -54,7 +55,7 @@ export default async function InvoicesTable({
           <table className="hidden min-w-full text-gray-900 dark:text-white md:table"><thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-4 py-5 font-medium dark:text-gray-200 sm:pl-6">
-                  Nº Factura
+                  Nº Documento
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
                   Fecha
@@ -66,7 +67,7 @@ export default async function InvoicesTable({
                   Total
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
-                  Estado
+                  Tipo
                 </th>
                 <th scope="col" className="relative py-3 pl-6 pr-3">
                   <span className="sr-only">Edit</span>
@@ -99,10 +100,10 @@ export default async function InvoicesTable({
                                 ? `${BLOB_URL}/${invoice.image_url}`
                               : `https://ui-avatars.com/api/?name=${invoice.name}&background=random`
                         }
-                        className="rounded-full"
+                        className="rounded-full object-cover"
                         width={28}
                         height={28}
-                        style={{ height: 'auto' }}
+                        style={{ width: '28px', height: '28px' }}
                         alt={`${invoice.name}'s profile picture`}
                       />
                       <p className="dark:text-white">{invoice.name}</p>
@@ -112,7 +113,7 @@ export default async function InvoicesTable({
                     {formatCurrency(invoice.total_factura)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    <InvoiceStatus status={invoice.status} />
+                    <InvoiceStatus status={invoice.status} tipo={invoice.tipo} />
                   </td>
                   <td className="flex justify-end gap-2 whitespace-nowrap px-6 py-4 text-sm">
                     <SendInvoiceEmailButton invoiceId={invoice.id} showText={false} />
