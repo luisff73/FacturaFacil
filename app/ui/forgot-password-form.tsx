@@ -3,7 +3,7 @@
 import { AtSymbolIcon, ExclamationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from '@/app/ui/button';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState } from 'react';
 import Link from 'next/link';
 import { requestPasswordReset } from '@/app/lib/actions';
 
@@ -30,20 +30,20 @@ export default function ForgotPasswordForm() {
         </p>
 
         {isSuccess ? (
-          <div className="bg-color-user-50 dark:bg-color-user-900/30 border border-color-user-200 dark:border-color-user-800 rounded-lg p-4 mb-4">
+          <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4 mb-4">
             <div className="flex items-center gap-3">
-              <CheckCircleIcon className="h-5 w-5 text-color-user-600 dark:text-color-user-400" />
-              <p className="text-sm text-color-user-800 dark:text-color-user-200 font-medium">
+              <CheckCircleIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">
                 ¡Email enviado! Revisa tu bandeja de entrada.
               </p>
             </div>
-            <p className="text-xs text-color-user-700 dark:text-color-user-300 mt-2 ml-8">
+            <p className="text-xs text-gray-700 dark:text-gray-300 mt-2 ml-8">
               Si no recibes el correo en unos minutos, revisa tu carpeta de spam.
             </p>
             <div className="mt-6 flex justify-center">
               <Link
                 href="/login"
-                className="text-sm font-bold text-color-user-600 hover:text-color-user-500 flex items-center gap-2"
+                className="text-sm font-bold text-gray-600 hover:text-gray-500 flex items-center gap-2"
               >
                 Volver al login <ArrowRightIcon className="h-4 w-4" />
               </Link>
@@ -60,7 +60,7 @@ export default function ForgotPasswordForm() {
               </label>
               <div className="relative">
                 <input
-                  className="peer block w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-3 pl-10 text-sm outline-none focus:ring-2 focus:ring-color-user-500 focus:border-transparent transition-all dark:text-white"
+                  className="peer block w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-3 pl-10 text-sm outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all dark:text-white"
                   id="email"
                   type="email"
                   name="email"
@@ -68,11 +68,11 @@ export default function ForgotPasswordForm() {
                   required
                   autoComplete="email"
                 />
-                <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400 peer-focus:text-color-user-500 transition-colors" />
+                <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400 peer-focus:text-gray-500 transition-colors" />
               </div>
             </div>
 
-            <Button className="mt-8 w-full bg-color-user-600 hover:bg-color-user-500 text-white font-bold py-3 rounded-lg shadow-lg shadow-color-user-500/20" aria-disabled={isPending}>
+            <Button className="mt-8 w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 rounded-lg shadow-lg shadow-gray-500/20" aria-disabled={isPending}>
               {isPending ? 'Enviando...' : 'Enviar enlace de recuperación'}
               {!isPending && <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />}
             </Button>
@@ -80,7 +80,7 @@ export default function ForgotPasswordForm() {
             <div className="flex justify-center mt-6">
               <Link
                 href="/login"
-                className="text-xs text-gray-500 hover:text-color-user-600 transition-colors"
+                className="text-xs text-gray-500 hover:text-gray-600 transition-colors"
               >
                 Recordé mi contraseña, volver al login
               </Link>

@@ -13,12 +13,16 @@ const config: Config = {
         "13": "repeat(13, minmax(0, 1fr))",
       },
       colors: { 'color-user': {
-          100: "var(--bg-color-user-100)", // Usar la variable CSS Un color muy claro
-          200: "var(--bg-color-user-200)", // Usar la variable CSS Un color para hovers
-          400: "var(--bg-color-user-400)", // Usar la variable CSS Un color más
-          500: "var(--bg-color-user-500)", // Usar la variable CSS Un color medio
-          600: "var(--bg-color-user-600)", // Usar la variable CSS Un color más oscuro
-          700: "var(--bg-color-user-700)", // Usar la variable CSS Un color muy oscuro
+          50: "var(--color-user-50)",
+          100: "var(--color-user-100)",
+          200: "var(--color-user-200)",
+          300: "var(--color-user-300)",
+          400: "var(--color-user-400)",
+          500: "var(--color-user-500)",
+          600: "var(--color-user-600)",
+          700: "var(--color-user-700)",
+          800: "var(--color-user-800)",
+          900: "var(--color-user-900)",
         },
       },
     },

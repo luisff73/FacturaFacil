@@ -7,7 +7,7 @@ export default function LoginPage() {
   return (
     <main className="flex items-center justify-center h-screen overflow-hidden">
       <div className="relative mx-auto flex w-full max-w-[450px] flex-col space-y-2.5 p-4">
-        <div className="flex h-34 w-full items-center justify-center rounded-lg bg-color-user-400 p-3">
+        <div className="flex h-34 w-full items-center justify-center rounded-lg bg-gray-600 p-3">
           <div className="h-full w-full text-white flex justify-center">
             <FacturaFacilLogo />
           </div>

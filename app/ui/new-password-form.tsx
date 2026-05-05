@@ -38,15 +38,15 @@ export default function NewPasswordForm() {
   if (isSuccess) {
     return (
       <div className="flex-1 rounded-lg bg-gray-50 dark:bg-gray-800 px-6 pb-4 pt-8 shadow-xl border border-gray-100 dark:border-gray-700">
-        <div className="bg-color-user-50 dark:bg-color-user-900/30 border border-color-user-200 dark:border-color-user-800 rounded-lg p-6 text-center">
-          <CheckCircleIcon className="h-12 w-12 text-color-user-600 dark:text-color-user-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-color-user-800 dark:text-color-user-200 mb-2">¡Contraseña actualizada!</h2>
-          <p className="text-sm text-color-user-700 dark:text-color-user-300 mb-6">
+        <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6 text-center">
+          <CheckCircleIcon className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">¡Contraseña actualizada!</h2>
+          <p className="text-sm text-gray-700 dark:text-gray-300 mb-6">
             Tu contraseña ha sido cambiada correctamente. Ya puedes iniciar sesión con tus nuevas credenciales.
           </p>
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 bg-color-user-600 hover:bg-color-user-500 text-white font-bold py-2 px-6 rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg transition-colors"
           >
             Ir al Login <ArrowRightIcon className="h-4 w-4" />
           </Link>
@@ -71,7 +71,7 @@ export default function NewPasswordForm() {
             </label>
             <div className="relative">
               <input
-                className="peer block w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-3 pl-10 pr-10 text-sm outline-none focus:ring-2 focus:ring-color-user-500 focus:border-transparent transition-all dark:text-white"
+                className="peer block w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-3 pl-10 pr-10 text-sm outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all dark:text-white"
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 name="password"
@@ -79,7 +79,7 @@ export default function NewPasswordForm() {
                 required
                 minLength={6}
               />
-              <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400 peer-focus:text-color-user-500 transition-colors" />
+              <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400 peer-focus:text-gray-500 transition-colors" />
               <button
                 type="button"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -97,7 +97,7 @@ export default function NewPasswordForm() {
             </label>
             <div className="relative">
               <input
-                className="peer block w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-3 pl-10 text-sm outline-none focus:ring-2 focus:ring-color-user-500 focus:border-transparent transition-all dark:text-white"
+                className="peer block w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-3 pl-10 text-sm outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all dark:text-white"
                 id="confirmPassword"
                 type="password"
                 name="confirmPassword"
@@ -105,11 +105,11 @@ export default function NewPasswordForm() {
                 required
                 minLength={6}
               />
-              <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400 peer-focus:text-color-user-500 transition-colors" />
+              <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400 peer-focus:text-gray-500 transition-colors" />
             </div>
           </div>
 
-          <Button className="mt-8 w-full bg-color-user-600 hover:bg-color-user-500 text-white font-bold py-3 rounded-lg shadow-lg shadow-color-user-500/20" aria-disabled={isPending}>
+          <Button className="mt-8 w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 rounded-lg shadow-lg shadow-gray-500/20" aria-disabled={isPending}>
             {isPending ? 'Cambiando...' : 'Cambiar contraseña'}
             {!isPending && <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />}
           </Button>

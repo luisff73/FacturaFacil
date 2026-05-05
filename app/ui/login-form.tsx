@@ -11,7 +11,7 @@ import { Button } from '@/app/ui/button';
 import { useActionState } from 'react';
 import { authenticate } from '@/app/lib/actions';
 import { useSearchParams } from 'next/navigation';
-import { FaGoogle, FaGithub } from 'react-icons/fa';
+// import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { useState } from 'react';
 import Link from 'next/link';
 
@@ -25,17 +25,17 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   // Handlers para los botones de Social Login
-  const handleGoogleLogin = () => {
-    console.log('Inicio de sesión con Google');
-    // Lógica para redirigir a la autenticación con Google
-    window.location.href = '/api/auth/signin/google'; // Cambia la URL según tu implementación
-  };
+  // const handleGoogleLogin = () => {
+  //   console.log('Inicio de sesión con Google');
+  //   // Lógica para redirigir a la autenticación con Google
+  //   window.location.href = '/api/auth/signin/google'; // Cambiar la URL según la implementación
+  // };
 
-  const handleGitHubLogin = () => {
-    console.log('Inicio de sesión con GitHub');
-    // Lógica para redirigir a la autenticación con GitHub
-    window.location.href = '/api/auth/signin/github'; // Cambia la URL según tu implementación
-  };
+  // const handleGitHubLogin = () => {
+  //   console.log('Inicio de sesión con GitHub');
+  //   // Lógica para redirigir a la autenticación con GitHub
+  //   window.location.href = '/api/auth/signin/github'; // Cambiar la URL según la implementación
+  // };
 
   return (
     <form action={formAction} className="space-y-3">
@@ -51,7 +51,7 @@ export default function LoginForm() {
             </label>
             <div className="relative">
               <input
-                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
+                className="peer block w-full rounded-md border border-gray-300 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
                 id="email"
                 type="email"
                 name="email"
@@ -96,7 +96,7 @@ export default function LoginForm() {
             <div className="flex justify-end mt-2">
               <Link
                 href="/forgot-password"
-                className="text-xs text-color-user-600 hover:text-color-user-500 transition-colors"
+                className="text-xs text-gray-600 hover:text-gray-500 transition-colors"
               >
                 ¿Olvidaste tu contraseña?
               </Link>
@@ -105,7 +105,7 @@ export default function LoginForm() {
         </div>
         <input type="hidden" name="redirectTo" value={callbackUrl} />
         <Button className="mt-4 w-full" aria-disabled={isPending}>
-          Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
+          Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-200" />
         </Button>
 
 

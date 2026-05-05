@@ -32,15 +32,19 @@ todos tus campos de tipo número se verán como campos de texto planos,
 pero seguirán funcionando como números (abrirán el teclado numérico en 
 móviles y solo aceptarán caracteres numéricos). */
 
-
-/* :root {
-  --color-user-100: #C8E6C9;
-  --color-user-200: #A5D6A7;
-  --color-user-400: #4CAF50;
-  --color-user-500: #388E3C;
-  --color-user-600: #2E7D32;
-  --color-user-700: #1B5E20;
-} */
+/* estas son las variables que se usan por defecto en toda la app cuando el usuario no esta logueado*/
+:root {
+  --color-user-50: #f9fafb;
+  --color-user-100: #f3f4f6;
+  --color-user-200: #e5e7eb;
+  --color-user-300: #d1d5db;
+  --color-user-400: #9ca3af;
+  --color-user-500: #6b7280;
+  --color-user-600: #4b5563;
+  --color-user-700: #374151;
+  --color-user-800: #1f2937;
+  --color-user-900: #111827;
+}
 
 @media print {
   @page {
