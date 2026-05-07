@@ -58,6 +58,7 @@ export type Invoice = {
   invoice_serie: string;
   hash?: string;
   prev_hash?: string;
+  bloqueada?: boolean;
 };
 
 export type LatestInvoice = {
@@ -89,6 +90,7 @@ export type InvoicesTable = {
   invoice_serie:string;  
   hash?: string;
   prev_hash?: string;
+  bloqueada?: boolean;
 };
 
 export type invoices_lines = {

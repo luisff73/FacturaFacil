@@ -6,24 +6,25 @@ import {
   HomeIcon,
   DocumentDuplicateIcon,
   TagIcon,
+  BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link'; // importa el componente Link de next
 import { usePathname } from 'next/navigation';// importa el hook usePathname de next
 import clsx from 'clsx'; // importa la libreria clsx
 
 
-// Map of links to display in the side navigation.
-// Depending on the size of the application, this would be stored in a database.
-const links = [
-  { name: 'Inicio', href: '/dashboard', icon: HomeIcon },
-  { name: 'Facturación', href: '/dashboard/invoices', icon: DocumentDuplicateIcon },
-  { name: 'Clientes', href: '/dashboard/customers', icon: UserGroupIcon },
-  { name: 'Artículos', href: '/dashboard/articulos', icon: TagIcon },
-  { name: 'Usuarios', href: '/dashboard/users', icon: UserCircleIcon, adminOnly: true },
-];
-
-export default function NavLinks({ user }: { user?: { type?: 'admin' | 'user' } }) {
+export default function NavLinks({ user }: { user?: { type?: 'admin' | 'user', id_empresa?: number } }) {
   const pathname = usePathname();
+
+  // Map of links to display in the side navigation.
+  const links = [
+    { name: 'Inicio', href: '/dashboard', icon: HomeIcon },
+    { name: 'Facturación', href: '/dashboard/invoices', icon: DocumentDuplicateIcon },
+    { name: 'Clientes', href: '/dashboard/customers', icon: UserGroupIcon },
+    { name: 'Artículos', href: '/dashboard/articulos', icon: TagIcon },
+    { name: 'Usuarios', href: '/dashboard/users', icon: UserCircleIcon, adminOnly: true },
+    { name: 'Empresa', href: `/dashboard/empresas/${user?.id_empresa}/edit`, icon: BuildingOfficeIcon, adminOnly: true },
+  ];
 
   // Filtramos los enlaces según el tipo de usuario
   const visibleLinks = links.filter(link => {

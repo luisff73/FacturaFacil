@@ -25,13 +25,18 @@ export function UpdateInvoice({ id }: { id: string }) {
   );
 }
 
-export function PrintInvoice({ id }: { id: string }) {
+export function PrintInvoice({ id, showText = false }: { id: string, showText?: boolean }) {
   return (
     <Link
       href={`/dashboard/invoices/${id}/view`}
-      className="rounded-md border p-2 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+      className={
+        showText
+          ? "flex h-10 items-center rounded-lg bg-white px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 gap-2 border border-gray-200 shadow-sm"
+          : "rounded-md border p-2 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 flex items-center justify-center"
+      }
     >
-      <PrinterIcon className="w-5" />
+      <PrinterIcon className="w-5 h-5" />
+      {showText && <span>Imprimir</span>}
     </Link>
   );
 }

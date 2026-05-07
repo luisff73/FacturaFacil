@@ -1,11 +1,12 @@
-import { CheckIcon, ClockIcon, CloudIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, ClockIcon, CloudIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';  /* importamos el fichero para aplicar las clases condicionalmente dependiendo de su estado */
 
-export default function InvoiceStatus({ status, tipo }: { status: string, tipo?: string }) {
+export default function InvoiceStatus({ status, tipo, bloqueada }: { status: string, tipo?: string, bloqueada?: boolean }) {
   const isPedido = tipo === 'Pedido';
   return (
-    <span
-      className={clsx(
+    <div className="flex items-center gap-2">
+      <span
+        className={clsx(
         'inline-flex items-center rounded-full px-2 py-1 text-xs',
         {
           'bg-gray-100 text-gray-500': !isPedido && status === 'Pendiente', /*aqui el estado Pendiente/pagado*/
@@ -33,5 +34,11 @@ export default function InvoiceStatus({ status, tipo }: { status: string, tipo?:
         </>
       ) : null}
     </span>
+      {bloqueada && (
+        <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-1.5 text-red-600" title="Factura bloqueada (VeriFactu)">
+          <LockClosedIcon className="w-4 h-4" />
+        </span>
+      )}
+    </div>
   );
 }

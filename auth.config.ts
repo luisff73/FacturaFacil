@@ -42,6 +42,7 @@ export const authConfig = {
       const isOnLogin = nextUrl.pathname === '/login'; // si esta en el login
       const isPublicEmpresaPath = nextUrl.pathname === '/dashboard/empresas/create' || nextUrl.pathname === '/dashboard/empresas'; // si esta en la creacion de empresas
       const isUsersAdminPath = nextUrl.pathname.startsWith('/dashboard/users'); // si esta en la ruta de usuarios
+      const isEmpresasAdminPath = nextUrl.pathname.startsWith('/dashboard/empresas') && !isPublicEmpresaPath;
 
       // Si estamos en el dashboard
       if (isOnDashboard) {
@@ -53,8 +54,8 @@ export const authConfig = {
         // Para el resto del dashboard REQUIRE login + id_empresa
         if (!isLoggedIn || !hasEmpresa) return false;
 
-        // Si es ruta de usuarios administrador y NO es admin, redirigir al dashboard
-        if (isUsersAdminPath && !isAdmin) {
+        // Si es ruta de usuarios o empresas administrador y NO es admin, redirigir al dashboard
+        if ((isUsersAdminPath || isEmpresasAdminPath) && !isAdmin) {
           return Response.redirect(new URL('/dashboard', nextUrl));
         }
 

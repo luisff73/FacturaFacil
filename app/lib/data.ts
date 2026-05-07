@@ -168,6 +168,9 @@ export async function fetchFilteredInvoices(
         invoices.invoice_number,
         invoices.invoice_serie,
         invoices.cif,
+        invoices.hash,
+        invoices.prev_hash,
+        invoices.bloqueada,
         customers.name,
         customers.email,
         customers.image_url
@@ -229,6 +232,9 @@ export async function fetchAllFilteredInvoices(query: string) {
         invoices.invoice_number,
         invoices.invoice_serie,
         invoices.cif,
+        invoices.hash,
+        invoices.prev_hash,
+        invoices.bloqueada,
         customers.name,
         customers.email,
         customers.image_url
@@ -267,7 +273,10 @@ export async function fetchInvoiceById(id: string) {
         invoices.total_factura,
         invoices.invoice_number,
         invoices.invoice_serie,
-        invoices.cif
+        invoices.cif,
+        invoices.hash,
+        invoices.prev_hash,
+        invoices.bloqueada
       FROM invoices where invoices.id_empresa = ${idEmpresa}
       and invoices.id = ${id};
     `;

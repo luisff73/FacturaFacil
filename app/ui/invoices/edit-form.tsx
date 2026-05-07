@@ -1,8 +1,9 @@
 'use client';
 import { Customer, Invoice, invoices_lines } from '@/app/lib/definitions';
-import { CheckIcon, ClockIcon, CloudIcon, CurrencyEuroIcon, UserCircleIcon, CalendarIcon, HashtagIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, ClockIcon, CloudIcon, CurrencyEuroIcon, UserCircleIcon, CalendarIcon, HashtagIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
+import { PrintInvoice } from '@/app/ui/invoices/buttons';
 import { updateInvoice, State } from '@/app/lib/actions';
 import { useActionState, useState, useEffect } from 'react';
 import InvoiceLinesForm from '@/app/ui/invoices/invoice-lines-form';
@@ -59,7 +60,18 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
   };
 
   return (
-    <form action={formAction} onKeyDown={handleKeyDown}>
+    <form action={formAction} onKeyDown={handleKeyDown} className="relative">
+      {invoice.bloqueada && (
+        <div className="absolute inset-0 z-40 bg-white/40 backdrop-blur-[1px] cursor-not-allowed border rounded-md" />
+      )}
+      
+      {invoice.bloqueada && (
+        <div className="mb-6 rounded-md bg-red-50 p-4 border border-red-200 flex items-center gap-3 relative z-50">
+          <LockClosedIcon className="h-6 w-6 text-red-600" />
+          <p className="text-sm text-red-800 font-medium">Esta factura ha sido confirmada y bloqueada para cumplir con la normativa VeriFactu. No se puede modificar.</p>
+        </div>
+      )}
+
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
 
         {/* Nombre, fecha y numero de la factura */}
@@ -274,7 +286,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
           <div className="w-full md:w-auto mt-6 md:mt-0 flex flex-col md:flex-row gap-6 items-start">
             
             {/* QR de Verifactu (Vista previa) */}
-            {invoice.tipo !== 'Pedido' && (
+            {invoice.tipo !== 'Pedido' && invoice.hash && (
               <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center gap-2">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Vista previa QR Hacienda</p>
                 <div className="relative w-32 h-32 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100">
@@ -353,14 +365,24 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
           ) : null}
         </div>
       </div>
-      <div className="mt-6 flex justify-end gap-4">
+      <div className="mt-6 flex justify-end items-center gap-4 relative z-50">
         <Link
           href="/dashboard/invoices"
           className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
         >
-          Cancelar
+          {invoice.bloqueada ? "Volver" : "Cancelar"}
         </Link>
-        <Button type="submit">Actualizar documento</Button>
+        {!invoice.bloqueada && (
+          <>
+          <PrintInvoice id={invoice.id} showText={true} /> 
+            <Button type="submit" name="action" value="update">Actualizar documento</Button>
+            {(state.values?.tipo || invoice.tipo) === 'Factura' && (
+              <Button type="submit" name="action" value="lock" className="bg-red-600 hover:bg-red-700 focus-visible:outline-red-600 flex items-center gap-2">
+                <LockClosedIcon className="h-4 w-4 text-white" /> Confirmar y Bloquear
+              </Button>
+            )}
+          </>
+        )}
       </div>
     </form>
   );

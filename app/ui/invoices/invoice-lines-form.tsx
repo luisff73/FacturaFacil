@@ -144,6 +144,9 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
         re: getReRate(21, !!customer?.tiene_re)
       }
     ]);
+    setTimeout(() => {
+      document.getElementById(`descripcion-${lines.length}`)?.focus();
+    }, 50);
   };
 
   const removeLine = (index: number) => {
@@ -189,6 +192,13 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
     setLines(newLines);
     setSearchResults([]);
     setActiveSearchIndex(null);
+    setTimeout(() => {
+      const qtyInput = document.getElementById(`cantidad-${index}`) as HTMLInputElement;
+      if (qtyInput) {
+        qtyInput.focus();
+        qtyInput.select();
+      }
+    }, 50);
   };
 
   return (
@@ -214,11 +224,22 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                 <label className="block text-xs font-medium text-gray-500 mb-1 leading-none md:hidden">Artículo / Descripción</label>
                 <div className="relative">
                   <input
+                    id={`descripcion-${index}`}
                     type="text"
                     value={line.descripcion || ''}
+                    onFocus={(e) => e.target.select()}
                     onChange={(e) => {
                       updateLine(index, 'descripcion', e.target.value);
                       handleSearch(e.target.value, index);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (searchResults.length === 0) {
+                          document.getElementById(`cantidad-${index}`)?.focus();
+                        }
+                      }
                     }}
                     placeholder="Buscar o escribir descripción..."
                     className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-color-user-500 py-1"
@@ -301,14 +322,23 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
               <div className="md:col-span-1 flex flex-col">
                 <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">Cant.</label>
                 <input
+                  id={`cantidad-${index}`}
                   type="text"
                   inputMode="decimal"
                   value={line.cantidad || 1}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => {
                     const val = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
                     const parts = val.split('.');
                     const finalVal = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : val;
                     updateLine(index, 'cantidad', finalVal);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      document.getElementById(`precio-${index}`)?.focus();
+                    }
                   }}
                   className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-color-user-500 py-1 text-center font-mono"
                 />
@@ -317,15 +347,24 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
               <div className="md:col-span-1 flex flex-col">
                 <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">Precio</label>
                 <input
+                  id={`precio-${index}`}
                   type="text"
                   inputMode="decimal"
                   value={line.precio || 0}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => {
                     // Normalización total de comas y basura
                     const val = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
                     const parts = val.split('.');
                     const finalVal = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : val;
                     updateLine(index, 'precio', finalVal);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      document.getElementById(`iva-${index}`)?.focus();
+                    }
                   }}
                   className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-color-user-500 py-1 text-center font-mono"
                 />
@@ -343,8 +382,16 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
               <div className="md:col-span-1 flex flex-col">
                 <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">IVA</label>
                 <select
+                  id={`iva-${index}`}
                   value={line.iva || 21}
                   onChange={(e) => updateLine(index, 'iva', Number(e.target.value))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      document.getElementById('btn-add-line')?.focus();
+                    }
+                  }}
                   className="w-full text-xs border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-color-user-500 py-1 px-1 text-center"
                   title="IVA Aplicable"
                 >
@@ -374,8 +421,16 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       </div>
 
       <button
+        id="btn-add-line"
         type="button"
         onClick={addLine}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            addLine();
+          }
+        }}
         className="mt-4 flex items-center gap-2 text-sm text-color-user-600 hover:text-color-user-700 font-medium"
       >
         <PlusIcon className="h-4 w-4" /> Añadir línea

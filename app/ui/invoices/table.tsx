@@ -32,7 +32,7 @@ export default async function InvoicesTable({
                       <p className="dark:text-white ml-2">{invoice.name}</p>
                     </div>
                   </div>
-                  {/* <InvoiceStatus status={invoice.status} tipo={invoice.tipo} /> */}
+                  {/* <InvoiceStatus status={invoice.status} tipo={invoice.tipo} bloqueada={invoice.bloqueada} /> */}
                 </div>
                 <div className="flex w-full items-center justify-between">
                   <div>
@@ -113,7 +113,7 @@ export default async function InvoicesTable({
                     {formatCurrency(invoice.total_factura)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    <InvoiceStatus status={invoice.status} tipo={invoice.tipo} />
+                    <InvoiceStatus status={invoice.status} tipo={invoice.tipo} bloqueada={invoice.bloqueada} />
                   </td>
                   <td className="flex justify-end gap-2 whitespace-nowrap px-6 py-4 text-sm">
                     <SendInvoiceEmailButton invoiceId={invoice.id} showText={false} />

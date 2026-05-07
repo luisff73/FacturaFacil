@@ -494,17 +494,26 @@ export async function updateInvoice(
 
   try {
     // Obtener estado actual de la factura en BD
-    const currentInvoiceResult = await sql`SELECT tipo, hash FROM invoices WHERE id = ${id} AND id_empresa = ${idEmpresa}`;
+    const currentInvoiceResult = await sql`SELECT tipo, hash, bloqueada FROM invoices WHERE id = ${id} AND id_empresa = ${idEmpresa}`;
     const currentInvoice = currentInvoiceResult.rows[0];
+    
+    if (currentInvoice.bloqueada) {
+      return { message: "Esta factura está bloqueada y no puede ser modificada." };
+    }
+
     const currentTipo = currentInvoice.tipo;
+    const isLocking = formData.get("action") === "lock";
+    let bloqueada = false;
     
     let finalInvoiceNumber = invoiceNumber;
     let finalHash = currentInvoice.hash || null;
     let finalPrevHash = null;
 
-    // Si pasa de Pedido a Factura, o si es Factura pero el usuario borró su hash manualmente (como indicaste), le generamos el hash y posiblemente un nuevo número
-    if (tipo === 'Factura' && (currentTipo === 'Pedido' || !currentInvoice.hash)) {
-      const [nextNumberResult, lastHashResult, empresaResult] = await Promise.all([
+    // Si se bloquea y es Factura, generamos el hash (y número si venía de Pedido)
+    if (isLocking && tipo === 'Factura') {
+      bloqueada = true;
+      if (currentTipo === 'Pedido' || !currentInvoice.hash) {
+        const [nextNumberResult, lastHashResult, empresaResult] = await Promise.all([
         sql`SELECT COALESCE(MAX(invoice_number), 0) + 1 as next_number FROM invoices WHERE id_empresa = ${idEmpresa} AND date_part('year', date) = date_part('year', ${fecha}::date) AND tipo = 'Factura'`,
         sql`SELECT hash FROM invoices WHERE id_empresa = ${idEmpresa} AND tipo = 'Factura' AND hash IS NOT NULL AND hash != '' ORDER BY date DESC, invoice_number DESC, id DESC LIMIT 1`,
         sql`SELECT cif FROM empresas WHERE id = ${idEmpresa}`
@@ -519,6 +528,7 @@ export async function updateInvoice(
       const empresa = empresaResult.rows[0];
       const hashData = `${empresa.cif || ''}|${invoice_serie ? invoice_serie + '-' : ''}${finalInvoiceNumber}|${fecha}|${totalInCents}|${finalPrevHash}`;
       finalHash = generateInvoiceHash(hashData);
+      }
     }
 
     await sql`
@@ -535,7 +545,8 @@ export async function updateInvoice(
             invoice_serie = ${invoice_serie},
             cif = ${customer.cif},
             hash = COALESCE(${finalHash}, hash),
-            prev_hash = COALESCE(${finalPrevHash}, prev_hash)
+            prev_hash = COALESCE(${finalPrevHash}, prev_hash),
+            bloqueada = ${bloqueada}
         WHERE id = ${id} AND id_empresa = ${idEmpresa}
       `;
 
@@ -574,6 +585,11 @@ export async function updateInvoice(
 export async function deleteInvoice(id: string, formData?: FormData) {
   const idEmpresa = await requireEmpresaId();
   try {
+    const currentInvoiceResult = await sql`SELECT bloqueada FROM invoices WHERE id = ${id} AND id_empresa = ${idEmpresa}`;
+    if (currentInvoiceResult.rows.length > 0 && currentInvoiceResult.rows[0].bloqueada) {
+      return { message: "No se puede eliminar una factura que está bloqueada/confirmada." };
+    }
+
     // Primero borramos las líneas asociadas para evitar el error de clave foránea
     await sql`DELETE FROM invoices_lines WHERE id_invoice = ${id} and id_empresa = ${idEmpresa}`;
     // Ahora podemos borrar la factura

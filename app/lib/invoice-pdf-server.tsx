@@ -139,14 +139,23 @@ export async function generateInvoicePDFBuffer(invoice: Invoice, lines: invoices
             <Text>Gracias por su confianza.</Text>
             <Text style={{ marginTop: 4 }}>{empresa.nombre} - Generado por FacturaFácil</Text>
           </View>
-          {!isProforma && qrCodeUrl && (
-            <View style={styles.qrContainer}>
-              <Image src={qrCodeUrl} style={styles.qrImage} />
-              <View style={styles.qrText}>
-                <Text style={{ fontWeight: 700, color: '#2563eb', marginBottom: 2 }}>VERI*FACTU</Text>
-                <Text>Esta factura cumple con la normativa de la Agencia Tributaria.</Text>
+          {!isProforma && (
+            invoice.bloqueada && qrCodeUrl ? (
+              <View style={styles.qrContainer}>
+                <Image src={qrCodeUrl} style={styles.qrImage} />
+                <View style={styles.qrText}>
+                  <Text style={{ fontWeight: 700, color: '#2563eb', marginBottom: 2 }}>VERI*FACTU</Text>
+                  <Text>Esta factura cumple con la normativa de la Agencia Tributaria.</Text>
+                </View>
               </View>
-            </View>
+            ) : (
+              <View style={[styles.qrContainer, { padding: 15, backgroundColor: '#fffbeb', borderLeftWidth: 4, borderLeftColor: '#f59e0b', borderRadius: 4, marginTop: 20 }]}>
+                <View style={[styles.qrText, { maxWidth: '100%' }]}>
+                  <Text style={{ fontWeight: 700, color: '#d97706', marginBottom: 2 }}>PENDIENTE DE VALIDACIÓN FISCAL</Text>
+                  <Text style={{ color: '#92400e' }}>Documento interno sin validez fiscal hasta su confirmación y bloqueo definitivo.</Text>
+                </View>
+              </View>
+            )
           )}
         </View>
       </Page>

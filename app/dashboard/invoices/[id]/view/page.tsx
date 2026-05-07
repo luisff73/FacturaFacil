@@ -161,30 +161,41 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
           {/* QR de verificación Verifactu (AEAT) */}
           {invoice.tipo === 'Factura' && empresa?.cif && (
-            <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100 print:bg-transparent print:border-none">
-              <div className="w-16 h-16 bg-white p-1 rounded-lg shadow-sm border border-gray-100">
-                <QRCodePreview
-                  cif={empresa.cif}
-                  serie={invoice.invoice_serie}
-                  numero={invoice.invoice_number}
-                  fecha={invoice.date}
-                  importe={invoice.total_factura}
-                  size={64}
-                />
+            invoice.bloqueada ? (
+              <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100 print:bg-transparent print:border-none">
+                <div className="w-16 h-16 bg-white p-1 rounded-lg shadow-sm border border-gray-100">
+                  <QRCodePreview
+                    cif={empresa.cif}
+                    serie={invoice.invoice_serie}
+                    numero={invoice.invoice_number}
+                    fecha={invoice.date}
+                    importe={invoice.total_factura}
+                    size={64}
+                  />
+                </div>
+                <div className="text-left max-w-[200px]">
+                  <p className="text-[10px] font-bold text-blue-600 uppercase tracking-tight flex items-center gap-1.5">
+                    VERI*FACTU
+                    <span className="w-1.5 h-1.5 bg-color-user-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(34,197,94,1)] print:hidden" />
+                  </p>
+                  <p className="text-[8px] text-gray-500 mt-1 font-medium leading-tight">Esta factura cumple con los requisitos de la normativa de la Agencia Tributaria.</p>
+                  {invoice.hash && (
+                    <div className="mt-2 text-[7px] text-gray-300 font-mono break-all leading-none bg-gray-50/50 p-1 rounded border border-gray-100/50">
+                      ID_HUÉRGARA: {invoice.hash.substring(0, 16)}...
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="text-left max-w-[200px]">
-                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-tight flex items-center gap-1.5">
-                  VERI*FACTU
-                  <span className="w-1.5 h-1.5 bg-color-user-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(34,197,94,1)]" />
-                </p>
-                <p className="text-[8px] text-gray-500 mt-1 font-medium leading-tight">Esta factura cumple con los requisitos de la normativa de la Agencia Tributaria.</p>
-                {invoice.hash && (
-                  <div className="mt-2 text-[7px] text-gray-300 font-mono break-all leading-none bg-gray-50/50 p-1 rounded border border-gray-100/50">
-                    ID_HUÉRGARA: {invoice.hash.substring(0, 16)}...
-                  </div>
-                )}
+            ) : (
+              <div className="flex items-center gap-4 bg-amber-50 p-4 rounded-xl border-l-4 border-amber-500 print:bg-transparent print:border-l-4 print:border-amber-500">
+                <div className="text-left">
+                  <p className="text-[12px] font-bold text-amber-600 uppercase tracking-tight mb-1">
+                    PENDIENTE DE VALIDACIÓN FISCAL
+                  </p>
+                  <p className="text-[10px] text-amber-800 font-medium leading-tight">Documento interno sin validez fiscal hasta su confirmación y bloqueo definitivo.</p>
+                </div>
               </div>
-            </div>
+            )
           )}
         </div>
       </footer>
