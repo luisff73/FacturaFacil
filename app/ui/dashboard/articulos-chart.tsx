@@ -10,7 +10,7 @@ export default async function ArticulosChart() {
   }
 
   const totalGeneral = articulos.reduce((acc, art) => acc + Number(art.total), 0);
-  
+
   // Usamos el valor máximo como el 100% del ancho de la barra para que la más grande llene el contenedor
   const maxTotal = Math.max(...articulos.map(art => Number(art.total)));
 
@@ -49,8 +49,7 @@ export default async function ArticulosChart() {
 
                 {/* Barra de progreso */}
                 <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
-                  <div 
-                    className="bg-color-user-300 h-full rounded-full" 
+                  <div className="bg-color-user-400 h-full rounded-full"
                     style={{ width: `${percentageOfMax}%` }}
                   ></div>
                 </div>
