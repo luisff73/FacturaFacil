@@ -5,6 +5,7 @@ import { sql } from "@vercel/postgres";
 import { z } from "zod";
 import type { User } from "@/app/lib/definitions";
 import { authConfig } from "./auth.config";
+import { saveAuditLog } from "@/app/lib/audit";
 
 // esta función obtiene un usuario de la base de datos por su email
 async function getUser(email: string): Promise<User | undefined> {
@@ -37,7 +38,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
           const passwordsMatch = await bcrypt.compare(password, user.password);
           console.log("¿Contraseña coincide?:", passwordsMatch);
-          if (passwordsMatch)
+          if (passwordsMatch) {
+            await saveAuditLog({
+              id_empresa: user.id_empresa,
+              user_id: user.id,
+              event_type: 'LOGIN_SUCCESS',
+              resource_type: 'USER',
+              resource_id: user.id,
+              details: `Usuario ${user.email} ha iniciado sesión correctamente.`
+            });
             return {
               id: user.id,
               name: user.name,
@@ -46,6 +55,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               id_empresa: user.id_empresa, // Incluir el campo id_empresa
               css: user.css, // Incluir el campo css  
             };
+          }
         }
 
         console.log("Invalid credentials");

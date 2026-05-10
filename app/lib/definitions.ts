@@ -49,7 +49,7 @@ export type Invoice = {
   base_imponible: number;
 
   tipo: "Pedido" | "Factura";
-  status: "Pendiente" | "Pagada";
+  status: "Pendiente" | "Pagada" | "Anulada";
   date: string;
   total_iva: number;
   total_recargo: number;
@@ -82,7 +82,7 @@ export type InvoicesTable = {
   date: string;
   base_imponible: number;
   tipo: "Pedido" | "Factura";
-  status: "Pendiente" | "Pagada";
+  status: "Pendiente" | "Pagada" | "Anulada";
   total_iva: number;
   total_recargo: number;
   total_factura: number;
@@ -163,4 +163,13 @@ export type Series = {
   id: string;
   id_empresa: number;
   name: string;
+}
+
+export type ArticulosMostWanted = {
+  id_articulo: string;
+  id_empresa: number;
+  descripcion: string;
+  imagen: { id: number; ruta: string }[] | null;
+  cantidad: number;
+  total: number;
 }

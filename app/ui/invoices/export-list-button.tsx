@@ -37,12 +37,12 @@ export default function ExportListButton({ invoices, companyName }: { invoices: 
   }, []);
 
   const handleExportCSV = () => {
-    const headers = ['Serie', 'Nº Factura', 'Fecha', 'Cliente', 'CIF', 'Base Imponible', 'IVA', 'Recargo', 'Total', 'Estado'];
+    const headers = ['Serie', 'Nº Factura', 'Fecha', 'Cliente', 'CIF', 'Base Imponible', 'IVA', 'Recargo', 'Total', 'Estado', 'Bloqueada', 'Huella (Hash)'];
     
     const csvContent = [
       headers.join(';'),
       ...filteredInvoices.map(invoice => [
-        `"${invoice.invoice_serie}"`,
+        `"${invoice.invoice_serie || ''}"`,
         `"${new Date(invoice.date).getFullYear()}/${invoice.invoice_number}"`,
         `"${formatDateToLocal(invoice.date)}"`,
         `"${invoice.name}"`,
@@ -51,7 +51,9 @@ export default function ExportListButton({ invoices, companyName }: { invoices: 
         (invoice.total_iva / 100).toString().replace('.', ','),
         (invoice.total_recargo / 100).toString().replace('.', ','),
         (invoice.total_factura / 100).toString().replace('.', ','),
-        `"${invoice.status}"`
+        `"${invoice.status}"`,
+        `"${invoice.bloqueada ? 'SÍ' : 'NO'}"`,
+        `"${invoice.hash || ''}"`
       ].join(';'))
     ].join('\n');
 
@@ -61,6 +63,10 @@ export default function ExportListButton({ invoices, companyName }: { invoices: 
     const link = document.createElement('a');
     link.setAttribute('href', url);
     link.setAttribute('download', `Listado_Facturas_${new Date().toISOString().split('T')[0]}.csv`);
+    
+    // Log de exportación (Fase 4)
+    import('@/app/lib/actions').then(m => m.logExport('INVOICE', `Exportación de listado de facturas (${filteredInvoices.length} registros) a CSV.`));
+    
     link.click();
     setShowExportMenu(false);
   };

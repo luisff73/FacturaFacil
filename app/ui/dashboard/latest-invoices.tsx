@@ -1,6 +1,7 @@
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import { fetchLatestInvoices } from '@/app/lib/data';
+import { fetchLatestInvoices } from '@/app/lib/data'; 
+import { lusitana } from '@/app/ui/fonts';
 
 const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || '';
 
@@ -9,7 +10,7 @@ export default async function LatestInvoices() {
 
   return (
     <div className="flex w-full flex-col md:col-span-4">
-      <h2 className="mb-4 text-xl md:text-2xl dark:text-white">
+      <h2 className={`${lusitana.className} mb-4 text-xl md:text-2xl dark:text-white`}>
         Ultimas Facturas
       </h2>
       <div className="flex grow flex-col justify-between rounded-xl bg-gray-50 dark:bg-gray-800 p-4">

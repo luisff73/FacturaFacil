@@ -49,7 +49,8 @@ const EditEmpresasForm: React.FC<EditFormProps> = ({ empresa }) => {
 
     try {
       await updateEmpresa(empresa.id.toString(), data);
-      router.push('/dashboard/empresas');
+      //router.push('/dashboard/empresas');
+      setState({ errors: {}, message: 'Empresa actualizada correctamente' })
     } catch (error) {
       if (error instanceof Error) {
         setState({ errors: (error as any).errors || {}, message: error.message });
@@ -313,7 +314,7 @@ const EditEmpresasForm: React.FC<EditFormProps> = ({ empresa }) => {
         </div>
 
         {/* activa*/}
-        <div className="mb-4">
+        <div className="mb-4 w-1/12">
           <label htmlFor="activa" className="mb-2 block text-sm font-medium dark:text-gray-200">
             Activa
           </label>
@@ -323,7 +324,7 @@ const EditEmpresasForm: React.FC<EditFormProps> = ({ empresa }) => {
               name="activa"
               type="checkbox"
               defaultChecked={empresa.activa}
-              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+              className="peer block w-1/12 rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="activa-error"
             />
           </div>
@@ -339,7 +340,15 @@ const EditEmpresasForm: React.FC<EditFormProps> = ({ empresa }) => {
 
         <div aria-live="polite" aria-atomic="true">
           {state.message && (
-            <p className="mt-2 text-sm text-red-500 dark:text-red-400">{state.message}</p>
+            <div 
+              className={`mt-4 p-4 text-sm rounded-md ${
+                state.message === 'Empresa actualizada correctamente' 
+                  ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-100'
+                  : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100'
+              }`}
+            >
+              <p>{state.message}</p>
+            </div>
           )}
         </div>
       </div>

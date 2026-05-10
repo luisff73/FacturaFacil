@@ -10,6 +10,8 @@ import QRCodePreview from '@/app/ui/invoices/qrcode-preview';
 
 import SendInvoiceEmailButton from '@/app/ui/invoices/send-email-button';
 
+const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || '';
+
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const id = params.id;
@@ -72,7 +74,18 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
             </p>
             <p className="text-gray-500 font-medium">Fecha: {formatDateToLocal(invoice.date)}</p>
           </div>
-          <div className="text-right">
+          <div className="text-right flex flex-col items-end">
+            {empresa?.logotipo ? (
+              <img 
+                src={empresa.logotipo.startsWith('http') ? empresa.logotipo : `${BLOB_URL}/${empresa.logotipo}`} 
+                alt="Logo Empresa"
+                className="w-24 h-24 object-contain mb-2" 
+              />
+            ) : (
+              <div className="w-32 h-12 bg-gray-50 border border-dashed border-gray-300 rounded flex items-center justify-center mb-2">
+                <span className="text-xs text-gray-400 font-bold">SU LOGO AQUÍ</span>
+              </div>
+            )}
             <h2 className="text-2xl font-bold text-color-user-600">{empresa?.nombre}</h2>
             <p className="text-gray-600">{empresa?.direccion}</p>
             <p className="text-gray-600">{empresa?.c_postal} - {empresa?.poblacion}</p>

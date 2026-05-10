@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { UpdateInvoice, DeleteInvoice, PrintInvoice } from '@/app/ui/invoices/buttons';
+import { UpdateInvoice, DeleteInvoice, PrintInvoice, AnnulInvoice } from '@/app/ui/invoices/buttons';
 import SendInvoiceEmailButton from '@/app/ui/invoices/send-email-button';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
@@ -46,7 +46,11 @@ export default async function InvoicesTable({
                     <SendInvoiceEmailButton invoiceId={invoice.id} showText={false} />
                     <PrintInvoice id={invoice.id} />
                     <UpdateInvoice id={invoice.id} />
-                    <DeleteInvoice id={invoice.id} />
+                    {invoice.bloqueada && invoice.status !== 'Anulada' ? (
+                      <AnnulInvoice id={invoice.id} />
+                    ) : !invoice.bloqueada && (
+                      <DeleteInvoice id={invoice.id} />
+                    )}
                   </div>
                 </div>
               </div>
@@ -119,7 +123,11 @@ export default async function InvoicesTable({
                     <SendInvoiceEmailButton invoiceId={invoice.id} showText={false} />
                     <PrintInvoice id={invoice.id} />
                     <UpdateInvoice id={invoice.id} />
-                    <DeleteInvoice id={invoice.id} />
+                    {invoice.bloqueada && invoice.status !== 'Anulada' ? (
+                      <AnnulInvoice id={invoice.id} />
+                    ) : !invoice.bloqueada && (
+                      <DeleteInvoice id={invoice.id} />
+                    )}
                   </td>
                 </tr>
               ))}

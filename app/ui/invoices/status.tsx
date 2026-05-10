@@ -1,4 +1,4 @@
-import { CheckIcon, ClockIcon, CloudIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, ClockIcon, CloudIcon, LockClosedIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';  /* importamos el fichero para aplicar las clases condicionalmente dependiendo de su estado */
 
 export default function InvoiceStatus({ status, tipo, bloqueada }: { status: string, tipo?: string, bloqueada?: boolean }) {
@@ -11,6 +11,7 @@ export default function InvoiceStatus({ status, tipo, bloqueada }: { status: str
         {
           'bg-gray-100 text-gray-500': !isPedido && status === 'Pendiente', /*aqui el estado Pendiente/pagado*/
           'bg-color-user-500 text-white': !isPedido && status === 'Pagada',
+          'bg-red-100 text-red-700 border border-red-200': !isPedido && status === 'Anulada',
           'bg-red-500 text-white': isPedido,
         },
       )}
@@ -25,6 +26,12 @@ export default function InvoiceStatus({ status, tipo, bloqueada }: { status: str
         <>
           Pagada
           <CheckIcon className="ml-1 w-4 text-white" />
+        </>
+      ) : null}
+      {!isPedido && status === 'Anulada' ? (
+        <>
+          Anulada
+          <XCircleIcon className="ml-1 w-4 text-red-700" />
         </>
       ) : null}
       {isPedido ? (

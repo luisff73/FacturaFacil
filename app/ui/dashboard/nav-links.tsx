@@ -7,6 +7,7 @@ import {
   DocumentDuplicateIcon,
   TagIcon,
   BuildingOfficeIcon,
+  ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link'; // importa el componente Link de next
 import { usePathname } from 'next/navigation';// importa el hook usePathname de next
@@ -19,11 +20,12 @@ export default function NavLinks({ user }: { user?: { type?: 'admin' | 'user', i
   // Map of links to display in the side navigation.
   const links = [
     { name: 'Inicio', href: '/dashboard', icon: HomeIcon },
-    { name: 'Facturación', href: '/dashboard/invoices', icon: DocumentDuplicateIcon },
+    { name: 'Gestión', href: '/dashboard/invoices', icon: DocumentDuplicateIcon },
     { name: 'Clientes', href: '/dashboard/customers', icon: UserGroupIcon },
     { name: 'Artículos', href: '/dashboard/articulos', icon: TagIcon },
     { name: 'Usuarios', href: '/dashboard/users', icon: UserCircleIcon, adminOnly: true },
     { name: 'Empresa', href: `/dashboard/empresas/${user?.id_empresa}/edit`, icon: BuildingOfficeIcon, adminOnly: true },
+    { name: 'Auditoría', href: '/dashboard/audit', icon: ClipboardDocumentCheckIcon, adminOnly: true },
   ];
 
   // Filtramos los enlaces según el tipo de usuario

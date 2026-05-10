@@ -18,6 +18,7 @@ import {
   Empresas,
   invoices_lines,
   Series,
+  ArticulosMostWanted,
 } from "./definitions";
 
 import { formatCurrency } from "./utils";
@@ -31,6 +32,24 @@ export async function requireEmpresaId(): Promise<number> {
     return 0;
   }
   return Number(session.user.id_empresa);
+}
+
+export async function fetchArticulosMostWanted(){
+  const idEmpresa = await requireEmpresaId();
+  try {
+    const data = await sql<ArticulosMostWanted>`
+      SELECT invoices_lines.id_empresa, invoices_lines.id_articulo, invoices_lines.descripcion, articulos.imagen, SUM(invoices_lines.cantidad) as cantidad, SUM(invoices_lines.total) as total
+      FROM invoices_lines JOIN articulos ON invoices_lines.id_articulo = articulos.id
+      WHERE invoices_lines.id_empresa = ${idEmpresa}
+      GROUP BY invoices_lines.id_empresa, invoices_lines.id_articulo, invoices_lines.descripcion, articulos.imagen  
+      ORDER BY total DESC
+      LIMIT 10`;
+    
+    return data.rows;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Error en el fetch the latest invoices.");
+  }
 }
 
 export async function fetchRevenue() {
@@ -53,6 +72,7 @@ export async function fetchRevenue() {
         date_trunc('month', i.date) = m.month_date 
         AND i.id_empresa = ${idEmpresa}
         AND i.tipo = 'Factura'
+        AND i.deleted_at IS NULL
       GROUP BY m.month_date
       ORDER BY m.month_date ASC;
     `;
@@ -88,7 +108,7 @@ export async function fetchLatestInvoices() {
         invoices.id
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id
-      WHERE invoices.id_empresa = ${idEmpresa} AND invoices.tipo = 'Factura'
+      WHERE invoices.id_empresa = ${idEmpresa} AND invoices.tipo = 'Factura' AND invoices.deleted_at IS NULL
       ORDER BY invoices.date DESC
       LIMIT 5`;
 
@@ -109,13 +129,13 @@ export async function fetchCardData() {
     // You can probably combine these into a single SQL query
     // However, we are intentionally splitting them to demonstrate
     // how to initialize multiple queries in parallel with JS.
-    const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices where invoices.id_empresa = ${idEmpresa} AND invoices.tipo = 'Factura'`;
+    const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices where invoices.id_empresa = ${idEmpresa} AND invoices.tipo = 'Factura' AND deleted_at IS NULL`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers where customers.id_empresa = ${idEmpresa}`;
     const invoiceStatusPromise = sql`SELECT
          SUM(CASE WHEN status = 'Pagada' AND tipo = 'Factura' THEN base_imponible ELSE 0 END) AS "Pagada",
          SUM(CASE WHEN status = 'Pendiente' AND tipo = 'Factura' THEN base_imponible ELSE 0 END) AS "Pendiente",
          SUM(CASE WHEN tipo = 'Pedido' THEN base_imponible ELSE 0 END) AS "Proforma"
-         FROM invoices where invoices.id_empresa = ${idEmpresa}`;
+         FROM invoices where invoices.id_empresa = ${idEmpresa} AND deleted_at IS NULL`;
 
     const data = await Promise.all([
       invoiceCountPromise,
@@ -176,7 +196,7 @@ export async function fetchFilteredInvoices(
         customers.image_url
       FROM invoices 
       JOIN customers ON invoices.customer_id = customers.id
-      where invoices.id_empresa = ${idEmpresa} AND (
+      where invoices.id_empresa = ${idEmpresa} AND invoices.deleted_at IS NULL AND (
         customers.name ILIKE ${`%${query}%`} OR
         customers.email ILIKE ${`%${query}%`} OR
         invoices.base_imponible::text ILIKE ${`%${query}%`} OR
@@ -199,7 +219,7 @@ export async function fetchInvoicesPages(query: string) {
     const count = await sql`SELECT COUNT(*)
     FROM invoices 
     JOIN customers ON invoices.customer_id = customers.id
-    where invoices.id_empresa = ${idEmpresa} AND (
+    where invoices.id_empresa = ${idEmpresa} AND invoices.deleted_at IS NULL AND (
       customers.name ILIKE ${`%${query}%`} OR
       customers.email ILIKE ${`%${query}%`} OR
       invoices.base_imponible::text ILIKE ${`%${query}%`} OR
@@ -240,7 +260,7 @@ export async function fetchAllFilteredInvoices(query: string) {
         customers.image_url
       FROM invoices 
       JOIN customers ON invoices.customer_id = customers.id
-      where invoices.id_empresa = ${idEmpresa} AND (
+      where invoices.id_empresa = ${idEmpresa} AND invoices.deleted_at IS NULL AND (
         customers.name ILIKE ${`%${query}%`} OR
         customers.email ILIKE ${`%${query}%`} OR
         invoices.base_imponible::text ILIKE ${`%${query}%`} OR
@@ -277,7 +297,7 @@ export async function fetchInvoiceById(id: string) {
         invoices.hash,
         invoices.prev_hash,
         invoices.bloqueada
-      FROM invoices where invoices.id_empresa = ${idEmpresa}
+      FROM invoices where invoices.id_empresa = ${idEmpresa} AND invoices.deleted_at IS NULL
       and invoices.id = ${id};
     `;
 
@@ -647,15 +667,17 @@ export async function fetchFilteredEmpresas(
   query: string,
   currentPage: number,
 ) {
+  const idEmpresa = await requireEmpresaId();
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
     const data = await sql<Empresas>`
       SELECT *
       FROM empresas
       WHERE 
+        id = ${idEmpresa} AND (
         nombre ILIKE ${`%${query}%`} OR
-        email ILIKE ${`%${query}%`}
-      
+        email ILIKE ${`%${query}%`}) AND 
+        (activa = true)
       ORDER BY nombre ASC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
@@ -706,6 +728,72 @@ export async function fetchSeries() {
     console.error("Database Error:", err);
     throw new Error("Error en el fetch all de la tabla series.");
   }
-} 
+}
 
+export async function fetchAuditLogs(query: string, currentPage: number) {
+  const idEmpresa = await requireEmpresaId();
+  const offset = (currentPage - 1) * 16; // ITEMS_PER_PAGE
+  try {
+    const logs = await sql`
+      SELECT 
+        audit_log.*,
+        users.name as user_name
+      FROM audit_log
+      LEFT JOIN users ON audit_log.user_id = users.id
+      WHERE audit_log.id_empresa = ${idEmpresa} AND (
+        event_type ILIKE ${'%' + query + '%'} OR
+        resource_type ILIKE ${'%' + query + '%'} OR
+        details ILIKE ${'%' + query + '%'}
+      )
+      ORDER BY timestamp DESC
+      LIMIT 16 OFFSET ${offset}
+    `;
+    return logs.rows;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Error fetching audit logs.");
+  }
+}
+
+export async function fetchAuditPages(query: string) {
+  const idEmpresa = await requireEmpresaId();
+  try {
+    const count = await sql`SELECT COUNT(*)
+      FROM audit_log
+      WHERE id_empresa = ${idEmpresa} AND (
+        event_type ILIKE ${'%' + query + '%'} OR
+        resource_type ILIKE ${'%' + query + '%'} OR
+        details ILIKE ${'%' + query + '%'}
+      )
+    `;
+    const totalPages = Math.ceil(Number(count.rows[0].count) / 16);
+    return totalPages;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Error fetching audit pages.");
+  }
+}
+
+export async function fetchAllAuditLogs(query: string) {
+  const idEmpresa = await requireEmpresaId();
+  try {
+    const logs = await sql`
+      SELECT 
+        audit_log.*,
+        users.name as user_name
+      FROM audit_log
+      LEFT JOIN users ON audit_log.user_id = users.id
+      WHERE audit_log.id_empresa = ${idEmpresa} AND (
+        event_type ILIKE ${'%' + query + '%'} OR
+        resource_type ILIKE ${'%' + query + '%'} OR
+        details ILIKE ${'%' + query + '%'}
+      )
+      ORDER BY timestamp DESC
+    `;
+    return logs.rows;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Error fetching all audit logs.");
+  }
+}
  

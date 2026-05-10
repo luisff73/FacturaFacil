@@ -21,7 +21,7 @@ export default async function CardWrapper() {
 
   return (
     <>
-      <Card title="Facturado" value={totalPaidInvoices} type="collected" />
+      <Card title="Facturado" value={totalPaidInvoices} type="invoices" />
       <Card title="Pendiente" value={totalPendingInvoices} type="pending" />
       <Card title="Total Pedidos" value={totalProformaInvoices} type="pedidos" />
       <Card title="Total Clientes"value={numberOfCustomers}type="customers" />
@@ -36,18 +36,17 @@ export function Card({
 }: {
   title: string;
   value: number | string;
-  type: 'invoices' | 'customers' | 'pending' | 'collected' | 'pedidos';
+  type: 'invoices' | 'customers' | 'pending' |  'pedidos';
 }) {
   const Icon = iconMap[type];
 
   return (
-    <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-2 shadow-sm">
-      <div className="flex p-4">
+    <div className={`${lusitana.className} rounded-xl bg-gray-100 dark:bg-gray-800 p-2 shadow-sm`}>
+      <div className="flex p-2">
         {Icon ? <Icon className="h-5 w-5 text-gray-700 dark:text-gray-200" /> : null}
         <h3 className="ml-2 text-sm font-medium dark:text-gray-200">{title}</h3>
       </div>
-      <p className={`${lusitana.className}
-    truncate rounded-xl bg-white dark:bg-gray-900 px-4 py-8 text-center text-2xl dark:text-white`}>
+      <p className= "truncate rounded-xl bg-white dark:bg-gray-900 px-4 py-8 text-center text-2xl dark:text-white">
         {value}
       </p>
     </div>

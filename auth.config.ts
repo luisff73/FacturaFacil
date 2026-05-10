@@ -42,13 +42,19 @@ export const authConfig = {
       const isOnLogin = nextUrl.pathname === '/login'; // si esta en el login
       const isPublicEmpresaPath = nextUrl.pathname === '/dashboard/empresas/create' || nextUrl.pathname === '/dashboard/empresas'; // si esta en la creacion de empresas
       const isUsersAdminPath = nextUrl.pathname.startsWith('/dashboard/users'); // si esta en la ruta de usuarios
-      const isEmpresasAdminPath = nextUrl.pathname.startsWith('/dashboard/empresas') && !isPublicEmpresaPath;
+      const isAuditPath = nextUrl.pathname.startsWith('/dashboard/audit'); // si esta en la ruta de auditoria
+      const isEmpresasAdminPath = (nextUrl.pathname.startsWith('/dashboard/empresas') && !isPublicEmpresaPath);
 
       // Si estamos en el dashboard
       if (isOnDashboard) {
         // PERMITIR registro de empresa sin id_empresa (pero logueado)
         if (isPublicEmpresaPath) {
           return true; // Permitimos a los usuarios logueados o no el registro de empresa inicial
+        }
+
+        // Proteger rutas admin
+        if ((isUsersAdminPath || isEmpresasAdminPath || isAuditPath) && !isAdmin) {
+          return Response.redirect(new URL('/dashboard', nextUrl));
         }
 
         // Para el resto del dashboard REQUIRE login + id_empresa

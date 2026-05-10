@@ -1,6 +1,7 @@
 import { generateYAxis } from '@/app/lib/utils';
 import { CalendarIcon } from '@heroicons/react/24/outline';
 import { fetchRevenue } from '@/app/lib/data';
+import { lusitana } from '@/app/ui/fonts';
 
 // This component is representational only.
 // For data visualization UI, check out:
@@ -15,12 +16,12 @@ export default async function RevenueChart() { // hace el componente asincrono p
   const { yAxisLabels, topLabel } = generateYAxis(revenue);
 
   if (!revenue || revenue.length === 0) {
-    return <p className="mt-4 text-gray-400">No hay datos de ingresos disponibles.</p>;
+    return <p className={`${lusitana.className} mt-4 text-gray-400`}>No hay datos de ingresos disponibles.</p>;
   }
 
   return (
     <div className="w-full md:col-span-4">
-      <h2 className="mb-4 text-xl md:text-2xl dark:text-white">
+      <h2 className={`${lusitana.className} mb-4 text-xl md:text-2xl dark:text-white`}>
         Evolucion de ingresos
       </h2>
       <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-4">

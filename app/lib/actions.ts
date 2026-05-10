@@ -13,6 +13,7 @@ import { sendPasswordResetEmail, sendInvoiceEmail } from "@/app/lib/mail";
 import { Invoice, invoices_lines, Customer, Empresas, ArticulosTableType, User } from "@/app/lib/definitions";
 import { fetchInvoiceById, fetchinvoices_lines, fetchCustomersById, fetchEmpresaById } from "@/app/lib/data";
 import { requireEmpresaId } from "./data";
+import { saveAuditLog } from './audit';
 import { generateInvoiceHash } from "./utils";
 import bcrypt from 'bcryptjs';
 
@@ -178,7 +179,7 @@ const FormSchema = z.object({
     .number()
     .gt(0, { message: "Por favor introduce un importe mayor a $0." }),
 
-  status: z.enum(["Pendiente", "Pagada"], {
+  status: z.enum(["Pendiente", "Pagada", "Anulada"], {
     invalid_type_error: "Por favor selecciona un estado de factura.",
   }),
   tipo: z.enum(["Pedido", "Factura"], {
@@ -293,6 +294,8 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
 
   // Prepara los datos para la inserción en la base de datos
   const { customerId, base_imponible, status, tipo, lines, fecha, invoice_serie } = validatedFields.data;
+  const session = await auth();
+  const user_id = session?.user?.id;
   const idEmpresa = await requireEmpresaId();
 
   const [customerResult, empresaResult] = await Promise.all([
@@ -415,6 +418,17 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
         `;
       }
     }
+
+    // Registro de auditoría para la creación (Trazabilidad)
+    await saveAuditLog({
+      id_empresa: idEmpresa,
+      user_id: user_id,
+      event_type: 'CREATE',
+      resource_type: 'INVOICE',
+      resource_id: invoiceId,
+      payload: { ...validatedFields.data, invoice_number, hash, totalInCents },
+      details: `Factura ${tipo} ${invoice_serie || ''}${invoice_number} creada.`
+    });
   } catch (error) {
     console.error("Error al crear la factura:", error);
     return {
@@ -462,6 +476,8 @@ export async function updateInvoice(
   }
 
   const { customerId, base_imponible, status, tipo, lines, fecha, invoiceNumber, invoice_serie } = validatedFields.data;
+  const session = await auth();
+  const user_id = session?.user?.id;
   const idEmpresa = await requireEmpresaId();
 
   // Obtener datos del cliente para calcular impuestos
@@ -498,6 +514,15 @@ export async function updateInvoice(
     const currentInvoice = currentInvoiceResult.rows[0];
     
     if (currentInvoice.bloqueada) {
+      // Intentar modificar una factura bloqueada queda registrado como un evento sospechoso
+      await saveAuditLog({
+        id_empresa: idEmpresa,
+        user_id: user_id,
+        event_type: 'UPDATE_DENIED',
+        resource_type: 'INVOICE',
+        resource_id: id,
+        details: 'Intento de modificación de factura bloqueada.'
+      });
       return { message: "Esta factura está bloqueada y no puede ser modificada." };
     }
 
@@ -550,6 +575,17 @@ export async function updateInvoice(
         WHERE id = ${id} AND id_empresa = ${idEmpresa}
       `;
 
+    // Registro de auditoría para la actualización (Trazabilidad)
+    await saveAuditLog({
+      id_empresa: idEmpresa,
+      user_id: user_id,
+      event_type: isLocking ? 'LOCK' : 'UPDATE',
+      resource_type: 'INVOICE',
+      resource_id: id,
+      payload: { ...validatedFields.data, bloqueada, hash: finalHash },
+      details: isLocking ? 'Factura confirmada y bloqueada (huella VeriFactu generada).' : 'Factura actualizada.'
+    });
+
     // Actualizar líneas: borrar las viejas e insertar las nuevas
     await sql`DELETE FROM invoices_lines WHERE id_invoice = ${id} AND id_empresa = ${idEmpresa}`;
 
@@ -583,6 +619,8 @@ export async function updateInvoice(
 }
 
 export async function deleteInvoice(id: string, formData?: FormData) {
+  const session = await auth();
+  const user_id = session?.user?.id;
   const idEmpresa = await requireEmpresaId();
   try {
     const currentInvoiceResult = await sql`SELECT bloqueada FROM invoices WHERE id = ${id} AND id_empresa = ${idEmpresa}`;
@@ -590,17 +628,111 @@ export async function deleteInvoice(id: string, formData?: FormData) {
       return { message: "No se puede eliminar una factura que está bloqueada/confirmada." };
     }
 
-    // Primero borramos las líneas asociadas para evitar el error de clave foránea
-    await sql`DELETE FROM invoices_lines WHERE id_invoice = ${id} and id_empresa = ${idEmpresa}`;
-    // Ahora podemos borrar la factura
-    await sql`DELETE FROM invoices WHERE id = ${id} and id_empresa = ${idEmpresa}`;
+    // En VeriFactu NO se borran registros, se marcan como eliminados/anulados (Soft Delete)
+    // para mantener la integridad y trazabilidad de la serie numérica.
+    await sql`UPDATE invoices SET deleted_at = NOW() WHERE id = ${id} AND id_empresa = ${idEmpresa}`;
     
+    // Registro de auditoría para el borrado (Trazabilidad)
+    await saveAuditLog({
+      id_empresa: idEmpresa,
+      user_id: user_id,
+      event_type: 'DELETE',
+      resource_type: 'INVOICE',
+      resource_id: id,
+      details: 'Factura eliminada (borrado lógico para trazabilidad).'
+    });
+
     revalidatePath("/dashboard/invoices");
     return { message: "Factura eliminada correctamente." };
   } catch (error) {
     console.error("Error al eliminar la factura:", error);
     return { message: "Error al borrar la factura y sus líneas." };
   }
+}
+
+export async function annulInvoice(id: string) {
+  const session = await auth();
+  const user_id = session?.user?.id;
+  const idEmpresa = await requireEmpresaId();
+
+  try {
+    // 1. Obtener la factura actual
+    const currentInvoiceResult = await sql`
+      SELECT tipo, invoice_number, invoice_serie, date, total_factura, hash, bloqueada, deleted_at 
+      FROM invoices 
+      WHERE id = ${id} AND id_empresa = ${idEmpresa}
+    `;
+    
+    if (currentInvoiceResult.rows.length === 0) {
+      return { success: false, message: "Factura no encontrada." };
+    }
+
+    const invoice = currentInvoiceResult.rows[0];
+
+    if (invoice.deleted_at) {
+      return { success: false, message: "No se puede anular una factura ya eliminada." };
+    }
+
+    if (!invoice.bloqueada) {
+      return { success: false, message: "Solo se pueden anular facturas que ya han sido confirmadas/bloqueadas." };
+    }
+
+    // 2. Generar el hash de anulación (Chained hash para VeriFactu)
+    const lastHashResult = await sql`
+      SELECT hash FROM invoices 
+      WHERE id_empresa = ${idEmpresa} 
+      AND tipo = 'Factura' AND hash IS NOT NULL AND hash != ''
+      ORDER BY date DESC, invoice_number DESC, id DESC 
+      LIMIT 1
+    `;
+    const prev_hash = lastHashResult.rows[0]?.hash || '';
+    
+    const empresaResult = await sql`SELECT cif FROM empresas WHERE id = ${idEmpresa}`;
+    const empresa = empresaResult.rows[0];
+    
+    const hashData = `ANULACION|${empresa.cif || ''}|${invoice.invoice_serie ? invoice.invoice_serie + '-' : ''}${invoice.invoice_number}|${invoice.date}|${invoice.total_factura}|${prev_hash}`;
+    const annulHash = generateInvoiceHash(hashData);
+
+    // 3. Actualizar la factura a estado 'Anulada' y guardar el nuevo hash
+    await sql`
+      UPDATE invoices 
+      SET status = 'Anulada', 
+          hash = ${annulHash},
+          prev_hash = ${prev_hash}
+      WHERE id = ${id} AND id_empresa = ${idEmpresa}
+    `;
+
+    // 4. Registrar en Auditoría (Trazabilidad)
+    await saveAuditLog({
+      id_empresa: idEmpresa,
+      user_id: user_id,
+      event_type: 'ANNUL',
+      resource_type: 'INVOICE',
+      resource_id: id,
+      payload: { annulHash, prev_hash },
+      details: `Factura ${invoice.invoice_serie || ''}${invoice.invoice_number} ANULADA físicamente (registro de anulación generado).`
+    });
+
+    revalidatePath("/dashboard/invoices");
+    return { success: true, message: "Factura anulada correctamente." };
+  } catch (error) {
+    console.error("Error al anular la factura:", error);
+    return { success: false, message: "Error en la base de datos al anular la factura." };
+  }
+}
+
+export async function logExport(resource: string, details: string) {
+  const session = await auth();
+  const user_id = session?.user?.id;
+  const idEmpresa = await requireEmpresaId();
+
+  await saveAuditLog({
+    id_empresa: idEmpresa,
+    user_id: user_id,
+    event_type: 'EXPORT',
+    resource_type: resource,
+    details: details
+  });
 }
 
 // Función para crear un cliente

@@ -10,6 +10,8 @@ import { formatCurrency, formatDateToLocal } from '@/app/lib/utils';
 import { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 
+const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || '';
+
 // Registramos la fuente roboto
 Font.register({
   family: 'Roboto',
@@ -54,6 +56,29 @@ const styles = StyleSheet.create({
   },
   companyInfo: {
     textAlign: 'right',
+  },
+  logo: {
+    width: 60,
+    height: 60,
+    marginBottom: 5,
+    alignSelf: 'flex-end',
+  },
+  placeholderLogo: {
+    width: 100,
+    height: 30,
+    backgroundColor: '#f3f4f6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 5,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    alignSelf: 'flex-end',
+  },
+  placeholderLogoText: {
+    fontSize: 8,
+    color: '#9ca3af',
+    fontWeight: 700,
   },
   companyName: {
     fontSize: 16,
@@ -247,6 +272,9 @@ export default function InvoicePDFDocument({ invoice, lines, customer, empresa }
             <Text style={styles.invoiceMeta}>Fecha: {formatDateToLocal(invoice.date)}</Text>
           </View>
           <View style={styles.companyInfo}>
+            <View style={styles.placeholderLogo}>
+              <Text style={styles.placeholderLogoText}>SU LOGO AQUÍ</Text>
+            </View>
             <Text style={[styles.companyName, { color: accentColor }]}>{empresa.nombre}</Text>
             <Text style={styles.companyText}>{empresa.direccion}</Text>
             <Text style={styles.companyText}>{empresa.c_postal} - {empresa.poblacion}</Text>
