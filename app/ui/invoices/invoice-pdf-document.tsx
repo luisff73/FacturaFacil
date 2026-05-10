@@ -272,9 +272,16 @@ export default function InvoicePDFDocument({ invoice, lines, customer, empresa }
             <Text style={styles.invoiceMeta}>Fecha: {formatDateToLocal(invoice.date)}</Text>
           </View>
           <View style={styles.companyInfo}>
-            <View style={styles.placeholderLogo}>
-              <Text style={styles.placeholderLogoText}>SU LOGO AQUÍ</Text>
-            </View>
+            {empresa.logotipo ? (
+              <Image 
+                src={empresa.logotipo.startsWith('http') ? empresa.logotipo : `${BLOB_URL}/${empresa.logotipo}`} 
+                style={styles.logo} 
+              />
+            ) : (
+              <View style={styles.placeholderLogo}>
+                <Text style={styles.placeholderLogoText}>SU LOGO AQUÍ</Text>
+              </View>
+            )}
             <Text style={[styles.companyName, { color: accentColor }]}>{empresa.nombre}</Text>
             <Text style={styles.companyText}>{empresa.direccion}</Text>
             <Text style={styles.companyText}>{empresa.c_postal} - {empresa.poblacion}</Text>
