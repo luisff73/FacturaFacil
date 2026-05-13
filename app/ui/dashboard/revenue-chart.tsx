@@ -40,7 +40,8 @@ export default async function RevenueChart() { // hace el componente asincrono p
             <div key={month.month} className="flex flex-col items-center gap-2">
               {/* bars */}
               <div
-                className="w-full rounded-md bg-color-user-200"
+                className="w-full rounded-md bg-color-user-200 hover:bg-color-user-300 transition-colors cursor-pointer"
+                title={`${month.revenue.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}`}
                 style={{
                   height: `${(chartHeight / topLabel) * month.revenue}px`,
                 }}

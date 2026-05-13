@@ -195,10 +195,11 @@ export async function fetchFilteredInvoices(
         customers.email,
         customers.image_url
       FROM invoices 
-      JOIN customers ON invoices.customer_id = customers.id
+      LEFT JOIN customers ON invoices.customer_id = customers.id
       where invoices.id_empresa = ${idEmpresa} AND invoices.deleted_at IS NULL AND (
         customers.name ILIKE ${`%${query}%`} OR
         customers.email ILIKE ${`%${query}%`} OR
+        invoices.invoice_number::text ILIKE ${`%${query}%`} OR
         invoices.base_imponible::text ILIKE ${`%${query}%`} OR
         invoices.date::text ILIKE ${`%${query}%`} OR
         invoices.status ILIKE ${`%${query}%`})
@@ -218,10 +219,11 @@ export async function fetchInvoicesPages(query: string) {
   try {
     const count = await sql`SELECT COUNT(*)
     FROM invoices 
-    JOIN customers ON invoices.customer_id = customers.id
+    LEFT JOIN customers ON invoices.customer_id = customers.id
     where invoices.id_empresa = ${idEmpresa} AND invoices.deleted_at IS NULL AND (
       customers.name ILIKE ${`%${query}%`} OR
       customers.email ILIKE ${`%${query}%`} OR
+      invoices.invoice_number::text ILIKE ${`%${query}%`} OR
       invoices.base_imponible::text ILIKE ${`%${query}%`} OR
       invoices.date::text ILIKE ${`%${query}%`} OR
       invoices.status ILIKE ${`%${query}%`})
@@ -259,10 +261,11 @@ export async function fetchAllFilteredInvoices(query: string) {
         customers.email,
         customers.image_url
       FROM invoices 
-      JOIN customers ON invoices.customer_id = customers.id
+      LEFT JOIN customers ON invoices.customer_id = customers.id
       where invoices.id_empresa = ${idEmpresa} AND invoices.deleted_at IS NULL AND (
         customers.name ILIKE ${`%${query}%`} OR
         customers.email ILIKE ${`%${query}%`} OR
+        invoices.invoice_number::text ILIKE ${`%${query}%`} OR
         invoices.base_imponible::text ILIKE ${`%${query}%`} OR
         invoices.date::text ILIKE ${`%${query}%`} OR
         invoices.status ILIKE ${`%${query}%`})
@@ -732,7 +735,7 @@ export async function fetchSeries() {
 
 export async function fetchAuditLogs(query: string, currentPage: number) {
   const idEmpresa = await requireEmpresaId();
-  const offset = (currentPage - 1) * 16; // ITEMS_PER_PAGE
+  const offset = (currentPage - 1) * 100; // ITEMS_PER_PAGE
   try {
     const logs = await sql`
       SELECT 
@@ -746,7 +749,7 @@ export async function fetchAuditLogs(query: string, currentPage: number) {
         details ILIKE ${'%' + query + '%'}
       )
       ORDER BY timestamp DESC
-      LIMIT 16 OFFSET ${offset}
+      LIMIT ${100} OFFSET ${offset}
     `;
     return logs.rows;
   } catch (error) {

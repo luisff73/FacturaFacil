@@ -57,7 +57,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                 customer={customer}
                 empresa={empresa}
               />
-
             </>
           )}
         </div>

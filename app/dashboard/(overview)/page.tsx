@@ -1,20 +1,19 @@
+export const dynamic = 'force-dynamic'; // indicamos a next.js que queremos que la pagina sea renderizada en el servidor ya que sino el grafico no se renderiza
 
-
-
-//import { Card } from '@/app/ui/dashboard/cards'; // Importamos el componente Card para usarlo en el dashboard
 import RevenueChart from '@/app/ui/dashboard/revenue-chart';
 import LatestInvoices from '@/app/ui/dashboard/latest-invoices';
 import ArticulosMostWanted from '@/app/ui/dashboard/articulos-chart';
 import { lusitana } from '@/app/ui/fonts';
-// import { fetchCardData } from '@/app/lib/data'; // Importamos la función fetchRevenue de data.ts
 import { Suspense } from 'react';
 import CardWrapper from '@/app/ui/dashboard/cards';
 import { RevenueChartSkeleton, LatestInvoicesSkeleton, CardsSkeleton, } from '@/app/ui/skeletons';
 
 export default async function Page() { // componente asiincrono para poder hacer la peticion a la api
-    // remove fetchrevenue const revenue = await fetchRevenue(); // Llamamos a la función fetchRevenue y guardamos el resultado en la variable revenue
+    // remove fetchrevenue const revenue = await fetchRevenue(); 
+    // Llamamos a la función fetchRevenue y guardamos el resultado en la variable revenue
     // hasta que no se resuelva la promesa no se renderiza el componente y no continua latestInvoices
-    // const latestInvoices = await fetchLatestInvoices(); // Llamamos a la función fetchLatestInvoices y guardamos el resultado en la variable latestInvoices
+    // const latestInvoices = await fetchLatestInvoices(); 
+    // Llamamos a la función fetchLatestInvoices y guardamos el resultado en la variable latestInvoices
     // hasta que no se resuelva la promesa no se renderiza el componente y no continua fetchCardData
     // Llamamos a la función fetchCardData y guardamos el resultado en las variables numberOfInvoices, numberOfCustomers, totalPaidInvoices y totalPendingInvoices    
     // const { numberOfInvoices, numberOfCustomers, totalPaidInvoices, totalPendingInvoices } = await fetchCardData();

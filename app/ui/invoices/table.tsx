@@ -82,17 +82,17 @@ export default async function InvoicesTable({
               {invoices?.map((invoice) => (
                 <tr
                   key={invoice.id}
-                  className="w-full border-b dark:border-gray-700 py-3 text-sm last-of-type:border-none hover:bg-gray-100 dark:hover:bg-gray-800 [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
+                  className="w-full border-b dark:border-gray-700 py-1 text-sm last-of-type:border-none hover:bg-gray-100 dark:hover:bg-gray-800 [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                  <td className="whitespace-nowrap py-1 pl-6 pr-3">
                     <span className="font-bold">
                       {new Date(invoice.date).getFullYear()}/{invoice.invoice_serie}/{invoice.invoice_number}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
+                  <td className="whitespace-nowrap px-3 py-1">
                     {formatDateToLocal(invoice.date)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
+                  <td className="whitespace-nowrap px-3 py-1">
                     <div className="flex items-center gap-3">
                       <Image
                         src={
@@ -113,13 +113,13 @@ export default async function InvoicesTable({
                       <p className="dark:text-white">{invoice.name}</p>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 dark:text-gray-200">
+                  <td className="whitespace-nowrap px-3 py-1 dark:text-gray-200">
                     {formatCurrency(invoice.total_factura)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
+                  <td className="whitespace-nowrap px-3 py-1">
                     <InvoiceStatus status={invoice.status} tipo={invoice.tipo} bloqueada={invoice.bloqueada} />
                   </td>
-                  <td className="flex justify-end gap-2 whitespace-nowrap px-6 py-4 text-sm">
+                  <td className="flex justify-end gap-2 whitespace-nowrap px-2 py-1 text-sm">
                     <SendInvoiceEmailButton invoiceId={invoice.id} showText={false} />
                     <PrintInvoice id={invoice.id} />
                     <UpdateInvoice id={invoice.id} />

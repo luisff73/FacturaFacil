@@ -17,11 +17,11 @@ export default async function AuditTable({
           <table className="min-w-full text-gray-900 dark:text-white md:table">
             <thead className="rounded-lg text-left text-sm font-bold uppercase tracking-wider text-gray-500 border-b border-gray-200">
               <tr>
-                <th scope="col" className="px-4 py-5 sm:pl-6">Fecha / Hora</th>
-                <th scope="col" className="px-3 py-5">Usuario</th>
-                <th scope="col" className="px-3 py-5">Evento</th>
-                <th scope="col" className="px-3 py-5">Recurso</th>
-                <th scope="col" className="px-3 py-5">Detalles</th>
+                <th scope="col" className="px-4 py-2 sm:pl-6">Fecha / Hora</th>
+                <th scope="col" className="px-3 py-2">Usuario</th>
+                <th scope="col" className="px-3 py-2">Evento</th>
+                <th scope="col" className="px-3 py-2">Recurso</th>
+                <th scope="col" className="px-3 py-2">Detalles</th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-100">
@@ -30,13 +30,13 @@ export default async function AuditTable({
                   key={log.id}
                   className="w-full text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
-                  <td className="whitespace-nowrap py-4 pl-6 pr-3 font-medium text-gray-600">
+                  <td className="whitespace-nowrap py-1 pl-6 pr-3 font-medium text-gray-600">
                     {new Date(log.timestamp).toLocaleString('es-ES')}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-gray-500">
+                  <td className="whitespace-nowrap px-3 py-1 text-gray-500">
                     {log.user_name || 'Sistema'}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-4">
+                  <td className="whitespace-nowrap px-3 py-1">
                     <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
                       log.event_type === 'CREATE' ? 'bg-green-100 text-green-700' :
                       log.event_type === 'UPDATE' ? 'bg-blue-100 text-blue-700' :
@@ -47,10 +47,10 @@ export default async function AuditTable({
                       {log.event_type}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-gray-500">
+                  <td className="whitespace-nowrap px-3 py-1 text-gray-500">
                     {log.resource_type}
                   </td>
-                  <td className="px-3 py-4 text-gray-600 max-w-xs truncate" title={log.details}>
+                  <td className="px-3 py-1 text-gray-600 max-w-xs truncate" title={log.details}>
                     {log.details}
                   </td>
                 </tr>

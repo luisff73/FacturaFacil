@@ -602,7 +602,7 @@ export async function updateInvoice(
             ${Math.round(line.cantidad * 100)}, 
             ${Math.round(line.precio * 100)}, 
             ${Math.round(line.total * 100)}, 
-            ${line.id_articulo}, 
+            ${line.id_articulo || null}, 
             ${idEmpresa}, 
             ${line.iva || 21}, 
             ${line.re || 0}
@@ -798,10 +798,18 @@ export async function updateCustomer(id: string, data: Omit<Customer, "id">) {
   }
 }
 
-export async function deleteCustomers(id: string) {
+export async function deleteCustomers(id: string, prevState: any, formData?: FormData) {
   const idEmpresa = await requireEmpresaId();
+  
+  // Verificar si el cliente tiene facturas asociadas
+  const invoicesCount = await sql`SELECT COUNT(*) FROM invoices WHERE customer_id = ${id} AND id_empresa = ${idEmpresa} AND deleted_at IS NULL`;
+  if (Number(invoicesCount.rows[0].count) > 0) {
+    return { message: "No se puede eliminar este cliente porque tiene facturas asociadas." };
+  }
+
   await sql`DELETE FROM customers WHERE id = ${id} and id_empresa = ${idEmpresa}`;
   revalidatePath("/dashboard/customers");
+  return { message: "Cliente eliminado correctamente." };
 }
 
 export async function authenticate(
@@ -823,10 +831,18 @@ export async function authenticate(
   }
 }
 
-export async function deleteArticulo(id: string) {
+export async function deleteArticulo(id: string, prevState: any, formData?: FormData) {
   const idEmpresa = await requireEmpresaId();
+  
+  // Verificar si el artículo está en alguna línea de factura
+  const linesCount = await sql`SELECT COUNT(*) FROM invoices_lines WHERE id_articulo = ${id} AND id_empresa = ${idEmpresa}`;
+  if (Number(linesCount.rows[0].count) > 0) {
+    return { message: "No se puede eliminar este artículo porque está incluido en facturas." };
+  }
+
   await sql`DELETE FROM articulos WHERE id = ${id} and id_empresa = ${idEmpresa}`;
   revalidatePath("/dashboard/articulos");
+  return { message: "Artículo eliminado correctamente." };
 }
 
 // Función para actualizar un articulo

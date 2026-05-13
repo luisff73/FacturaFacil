@@ -18,6 +18,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
   const initialState: State = { message: '', errors: {} };
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id); //bind para pasar el id de la factura
   const [state, formAction] = useActionState(updateInvoiceWithId, initialState); //useActionState para manejar el estado de la accion de editar la factura
+  const [showLockModal, setShowLockModal] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState(state.values?.customerId || invoice.customer_id); //useState para manejar el id del cliente seleccionado
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId); //find para encontrar el cliente seleccionado
 
@@ -72,7 +73,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
         </div>
       )}
 
-      <div className="rounded-md bg-gray-50 p-4 md:p-6">
+      <div className="rounded-md bg-gray-50 dark:bg-gray-900 p-4 md:p-6 dark:text-white">
 
         {/* Nombre, fecha y numero de la factura */}
         <div className="mb-4 grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -86,7 +87,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
               <select
                 id="customer"
                 name="customerId"
-                className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                className="peer block w-full cursor-pointer rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 pl-10 text-sm outline-2 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 value={selectedCustomerId}
                 onChange={(e) => setSelectedCustomerId(e.target.value)}
                 aria-describedby="customer-error"
@@ -121,7 +122,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
               <select
                 id="tipo"
                 name="tipo"
-                className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 text-sm outline-2 placeholder:text-gray-500"
+                className="peer block w-full cursor-pointer rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 text-sm outline-2 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 defaultValue={state.values?.tipo || invoice.tipo || "Factura"}
                 aria-describedby="tipo-error"
               >
@@ -150,7 +151,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
                 name="invoice_serie"
                 type="text"
                 placeholder="A, B..."
-                className="peer block w-full rounded-md border border-gray-200 py-2 text-sm outline-2 placeholder:text-gray-500 text-center"
+                className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 text-sm outline-2 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 text-center"
                 defaultValue={state.values?.invoice_serie || invoice.invoice_serie}
                 aria-describedby="serie-error"
               />
@@ -176,7 +177,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
               type="number"
               step="any"
               lang="en"
-              className="peer block w-full rounded-md border border-gray-200 py-2 text-sm outline-2 placeholder:text-gray-500 text-center"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 text-sm outline-2 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 text-center"
               defaultValue={invoice.invoice_number}
               aria-describedby="invoiceNumber-error"
             />
@@ -200,7 +201,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
                 id="fecha"
                 name="fecha"
                 type="date"
-                className="text-left peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-6 text-sm outline-2 placeholder:text-gray-500"
+                className="text-left peer block w-full cursor-pointer rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 pl-6 text-sm outline-2 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 defaultValue={
                   state.values?.fecha || (invoice.date
                     ? (typeof invoice.date === 'string'
@@ -377,9 +378,44 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
           <PrintInvoice id={invoice.id} showText={true} /> 
             <Button type="submit" name="action" value="update">Actualizar documento</Button>
             {(state.values?.tipo || invoice.tipo) === 'Factura' && (
-              <Button type="submit" name="action" value="lock" className="bg-red-600 hover:bg-red-700 focus-visible:outline-red-600 flex items-center gap-2">
-                <LockClosedIcon className="h-4 w-4 text-white" /> Confirmar y Bloquear
-              </Button>
+              <>
+                <Button 
+                  type="button" 
+                  onClick={() => setShowLockModal(true)} 
+                  className="bg-red-600 hover:bg-red-700 focus-visible:outline-red-600 flex items-center gap-2"
+                >
+                  <LockClosedIcon className="h-4 w-4 text-white" /> Confirmar y Bloquear
+                </Button>
+
+                {showLockModal && (
+                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full m-4">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">¿Confirmar y Bloquear?</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                        Esta acción generará la huella VeriFactu y bloqueará la factura. No podrás modificarla después. ¿Estás seguro?
+                      </p>
+                      <div className="flex justify-end gap-3">
+                        <button 
+                          type="button" 
+                          onClick={() => setShowLockModal(false)}
+                          className="px-4 py-2 border rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          Cancelar
+                        </button>
+                        <Button 
+                          type="submit" 
+                          name="action" 
+                          value="lock" 
+                          onClick={() => setShowLockModal(false)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Sí, Confirmar y Bloquear
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}

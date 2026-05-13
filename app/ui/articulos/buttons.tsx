@@ -1,7 +1,9 @@
+'use client';
 
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { deleteArticulo } from '@/app/lib/actions';
+import { useActionState, useState } from 'react';
 
 export function CreateArticulo() {
   return (
@@ -28,13 +30,55 @@ export function UpdateArticulo({ id }: { id: string }) {
 
 export function DeleteArticulo({ id }: { id: string }) {
   const deleteArticuloWithId = deleteArticulo.bind(null, id);
+  const [state, formAction] = useActionState(deleteArticuloWithId, { message: '' });
+  const [showConfirm, setShowConfirm] = useState(false);
 
   return (
-    <form action={deleteArticuloWithId}>
-      <button className="rounded-md border p-2 hover:bg-gray-100">
+    <div className="relative">
+      <button 
+        onClick={() => setShowConfirm(!showConfirm)}
+        className="rounded-md border p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+      >
         <span className="sr-only">Borrar</span>
         <TrashIcon className="w-5" />
       </button>
-    </form>
+
+      {showConfirm && !state?.message && (
+        <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-3 shadow-lg min-w-[200px]">
+          <p className="text-xs text-gray-700 dark:text-gray-200 mb-2">¿Estás seguro de que quieres borrar este artículo?</p>
+          <div className="flex justify-end gap-2">
+            <button 
+              type="button"
+              onClick={() => setShowConfirm(false)}
+              className="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              Cancelar
+            </button>
+            <form action={formAction}>
+              <button 
+                type="submit"
+                onClick={() => setShowConfirm(false)}
+                className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Borrar
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {state?.message && (
+        <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-md p-2 shadow-lg min-w-[200px]">
+          <p className="text-red-500 text-xs">{state.message}</p>
+          <button 
+            type="button"
+            onClick={() => { state.message = ''; setShowConfirm(false); }}
+            className="text-[10px] text-gray-500 mt-1 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            Cerrar
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
