@@ -200,6 +200,7 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
               ref={inputFileRef} // referencia al input file para poder acceder a el
               type="file" // tipo de input file para poder subir archivos
               accept="image/jpeg, image/png, image/webp"
+              capture="environment" // solo sirve para moviles, obliga a usar la camara
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file && file.size > 3 * 1024 * 1024) {

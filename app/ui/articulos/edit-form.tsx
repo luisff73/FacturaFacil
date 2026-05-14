@@ -246,6 +246,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               ref={inputFileRef}
               type="file"
               accept="image/jpeg, image/png, image/webp"
+              capture="environment" // solo sirve para moviles, obliga a usar la camara
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file && file.size > 3 * 1024 * 1024) {
