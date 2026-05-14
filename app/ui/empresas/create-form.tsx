@@ -17,7 +17,7 @@ type FieldErrors = Record<string, string[]>;
 const EmpresaSchema = z.object({
   nombre: z.string().min(1, { message: "El nombre es obligatorio." }),
   direccion: z.string().min(1, { message: "La dirección es obligatoria." }),
-  c_postal: z.string().min(1, { message: "El código postal es obligatorio." }),
+  c_postal: z.string().min(1, { message: "El código postal es obligatorio." }).max(12, { message: "El código postal no puede exceder 12 caracteres." }),
   poblacion: z.string().min(1, { message: "La población es obligatoria." }),
   provincia: z.string().min(1, { message: "La provincia es obligatoria." }),
   telefono: z.string().default(''),
@@ -27,11 +27,14 @@ const EmpresaSchema = z.object({
   activa: z.boolean().default(true),
 });
 
-// Esquema de validación para el usuario inicial
 const UserSchema = z.object({
   name: z.string().min(1, { message: "El nombre del administrador es obligatorio." }),
   email: z.string().email({ message: "Introduce un email válido para el administrador." }),
   password: z.string().min(6, { message: "La contraseña del administrador debe tener al menos 6 caracteres." }),
+  confirm_password: z.string(),
+}).refine((data) => data.password === data.confirm_password, {
+  message: "Las contraseñas no coinciden.",
+  path: ["confirm_password"],
 });
 
 function ErrorMessages({ field, errors }: { field: string; errors?: string[] }) {
@@ -97,6 +100,7 @@ const CreateEmpresaForm: React.FC = () => {
       name: (form.user_name as HTMLInputElement).value,
       email: (form.user_email as HTMLInputElement).value,
       password: (form.user_password as HTMLInputElement).value,
+      confirm_password: (form.user_confirm_password as HTMLInputElement).value,
     });
 
     if (!validatedEmpresa.success || !validatedUser.success) {
@@ -111,6 +115,7 @@ const CreateEmpresaForm: React.FC = () => {
         if (userErrors.name) allErrors.user_name = userErrors.name;
         if (userErrors.email) allErrors.user_email = userErrors.email;
         if (userErrors.password) allErrors.user_password = userErrors.password;
+        if (userErrors.confirm_password) allErrors.user_confirm_password = userErrors.confirm_password;
       }
 
       setErrors(allErrors);
@@ -277,6 +282,24 @@ const CreateEmpresaForm: React.FC = () => {
               />
             </div>
             <ErrorMessages field="user_password" errors={errors.user_password} />
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="user_confirm_password" className="mb-2 block text-sm font-medium dark:text-gray-200">
+              Repetir contraseña
+            </label>
+            <div className="relative">
+              <input
+                id="user_confirm_password"
+                name="user_confirm_password"
+                type="password"
+                autoComplete="new-password"
+                placeholder="Repite la contraseña para confirmar"
+                className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+                aria-describedby="user_confirm_password-error"
+              />
+            </div>
+            <ErrorMessages field="user_confirm_password" errors={errors.user_confirm_password} />
           </div>
 
           <div className="mb-4">

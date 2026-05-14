@@ -18,6 +18,14 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
   const formAction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirm_password') as string;
+
+    if (password && password !== confirmPassword) {
+      setState({ errors: { password: ["Las contraseñas no coinciden."] }, message: "Por favor, corrige los errores del formulario." });
+      return;
+    }
+
     const fileInput = inputFileRef.current?.files?.[0];
     let imageUrl = user.image_url;
 
@@ -141,6 +149,25 @@ const EditUsersForm: React.FC<EditFormProps> = ({ user }) => {
                 {error}
               </p>
             ))}
+          </div>
+        </div>
+
+        {/* Repetir Contraseña */}
+        <div className="mb-4">
+          <label htmlFor="confirm_password" className="mb-2 block text-sm font-medium dark:text-gray-200">
+            Repetir Contraseña
+          </label>
+          <div className="relative">
+            <input
+              id="confirm_password"
+              name="confirm_password"
+              type="password"
+              defaultValue=""
+              placeholder="Repite la contraseña si la vas a cambiar"
+              autoComplete="new-password"
+              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+              aria-describedby="password-error"
+            />
           </div>
         </div>
 
