@@ -7,7 +7,7 @@ import { ArticulosTableType } from '@/app/lib/definitions';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
 
-interface FormProps { 
+interface FormProps {
   articulos: ArticulosTableType[]; // recibe todos los artículos de la funcion fetchArticulos() de dashboard/articulos/page.tsx
 }
 
@@ -20,13 +20,13 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
     event.preventDefault();  // evita que la pagina se recargue al enviar el formulario
     const formData = new FormData(event.target as HTMLFormElement); // crea un objeto FormData con los datos del formulario
     const fileInput = inputFileRef.current?.files?.[0]; // obtiene el archivo seleccionado del input file
-    let imageUrl = ''; 
+    let imageUrl = '';
 
     if (fileInput && fileInput.size > 0) { // si se ha seleccionado un archivo y tiene tamaño
       // Crear un FormData con solo el archivo para enviarlo a la Server Action
       const uploadData = new FormData();
       uploadData.append('file', fileInput);
-      
+
       const uploadedPath = await uploadImage(uploadData); // sube la imagen a la carpeta de imagenes en blob storage
       if (uploadedPath) { // si la imagen se ha subido correctamente
         imageUrl = uploadedPath; // almacena la ruta de la imagen
@@ -45,7 +45,7 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
 
     try {
       await createArticulo(data);
-      router.push('/dashboard/articulos'); 
+      router.push('/dashboard/articulos');
     } catch (error) {
       if (error instanceof Error) {
         setState({ errors: (error as any).errors || {}, message: error.message }); // actualiza el estado del formulario y muestra los errores
@@ -55,7 +55,7 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
 
   return (
     // Formulario para crear un artículo
-    <form onSubmit={formAction}> 
+    <form onSubmit={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Articulo Código */}
         <div className="mb-4">
@@ -199,7 +199,18 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
               name="file"
               ref={inputFileRef} // referencia al input file para poder acceder a el
               type="file" // tipo de input file para poder subir archivos
-              accept="image/jpeg, image/png, image/webp" 
+              accept="image/jpeg, image/png, image/webp"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file && file.size > 3 * 1024 * 1024) {
+                  setState({ errors: { ...state.errors, imagen: ['La imagen no puede pesar más de 3MB'] }, message: '' });
+                  e.target.value = '';
+                } else if (file) {
+                  const nuevasOpciones = { ...state.errors };
+                  delete nuevasOpciones.imagen;
+                  setState({ errors: nuevasOpciones, message: '' });
+                }
+              }}
               className="peer block w-full rounded-md border border-gray-200 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400"
               aria-describedby="imagen-error"
             />

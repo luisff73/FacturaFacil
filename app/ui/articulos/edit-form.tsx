@@ -246,6 +246,18 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               ref={inputFileRef}
               type="file"
               accept="image/jpeg, image/png, image/webp"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file && file.size > 3 * 1024 * 1024) {
+                  setState({ errors: { ...state.errors, imagen: ['La imagen no puede pesar más de 3MB'] }, message: '' });
+                  e.target.value = '';
+                } else if (file) {
+                  const nuevasOpciones = { ...state.errors };
+                  delete nuevasOpciones.imagen;
+                  setState({ errors: nuevasOpciones, message: '' });
+                }
+              }}
+
               className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
               aria-describedby="imagen-error"
             />
