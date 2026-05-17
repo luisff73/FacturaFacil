@@ -31,7 +31,8 @@ export default function ArticulosTable({ articulos }: ArticulosTableProps) {
                               alt={articulo.descripcion}
                               width={50}
                               height={50}
-                              className="rounded-full"
+                              className="rounded-full object-cover"
+                              style={{ width: "auto", height: "auto" }}
                             />
                             <div>
                               <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -98,7 +99,8 @@ export default function ArticulosTable({ articulos }: ArticulosTableProps) {
                             alt={articulo.descripcion}
                             width={28}
                             height={28}
-                            className="rounded-full"
+                            className="rounded-full object-cover"
+                            style={{ width: "auto", height: "auto" }}
                           />
                           <p>{articulo.descripcion}</p>
                         </div>

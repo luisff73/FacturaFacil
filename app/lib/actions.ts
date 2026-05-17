@@ -10,12 +10,35 @@ import { AuthError } from "next-auth";
 import { validateDocument } from "@/app/lib/valitacionnifcif";
 import { generatePasswordResetToken, getPasswordResetTokenByToken, deletePasswordResetToken } from "@/app/lib/tokens";
 import { sendPasswordResetEmail, sendInvoiceEmail } from "@/app/lib/mail";
-import { Invoice, invoices_lines, Customer, Empresas, ArticulosTableType, User } from "@/app/lib/definitions";
+import { Customer, Empresas, ArticulosTableType, User } from "@/app/lib/definitions";
 import { fetchInvoiceById, fetchinvoices_lines, fetchCustomersById, fetchEmpresaById } from "@/app/lib/data";
-import { requireEmpresaId } from "./data";
+import { requireEmpresaId, requireAdmin, requireSession } from "./auth-utils";
 import { saveAuditLog } from './audit';
 import { generateInvoiceHash } from "./utils";
 import bcrypt from 'bcryptjs';
+
+const BCRYPT_ROUNDS = 10;
+const MAX_UPLOAD_BYTES = 3 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
+
+async function putValidatedImage(file: File): Promise<string | null> {
+  if (!file?.name || file.size === 0 || file.size > MAX_UPLOAD_BYTES) {
+    return null;
+  }
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    return null;
+  }
+  const blob = await put(file.name, file, {
+    access: "public",
+    addRandomSuffix: true,
+  });
+  return blob.pathname;
+}
 
 const ResetSchema = z.object({
   email: z.string().email({
@@ -82,27 +105,9 @@ export async function resetPassword(prevState: any, formData: FormData, token: s
   }
 }
 
-export async function sendInvoiceEmailAction(
-  invoice: Invoice,
-  lines: invoices_lines[],
-  customer: Customer,
-  empresa: Empresas
-) {
-  try {
-    const result = await sendInvoiceEmail(invoice, lines, customer, empresa);
-    if (result.success) {
-      return { success: true, message: "Factura enviada correctamente" };
-    } else {
-      return { success: false, message: "Error al enviar la factura" };
-    }
-  } catch (error) {
-    console.error("Error en sendInvoiceEmailAction:", error);
-    return { success: false, message: "Error inesperado al enviar la factura" };
-  }
-}
-
 export async function sendInvoiceEmailByIdAction(invoiceId: string) {
   try {
+    await requireEmpresaId();
     const invoice = await fetchInvoiceById(invoiceId);
     if (!invoice) return { success: false, message: "Factura no encontrada" };
 
@@ -149,8 +154,7 @@ export async function requestPasswordReset(prevState: any, formData: FormData) {
     }
 
     const userData = user.rows[0];
-    
-    // Generar Token
+
     const token = await generatePasswordResetToken(email);
     if (!token) {
       return "Error al generar el token. Inténtalo de nuevo.";
@@ -159,7 +163,7 @@ export async function requestPasswordReset(prevState: any, formData: FormData) {
     // Enviar Email
     await sendPasswordResetEmail(userData.email, token, userData.name);
 
-    return undefined; // Éxito
+    return undefined;
   } catch (error) {
     console.error("Error en requestPasswordReset:", error);
     return "Algo salió mal. Inténtalo de nuevo más tarde.";
@@ -228,8 +232,52 @@ const CustomerSchema = z.object({
 });
 
 const CreateCustomer = CustomerSchema.omit({ id: true });
-//const UpdateCustomer = CustomerSchema.omit({ id: true });
+const UpdateCustomer = CustomerSchema.omit({ id: true });
 
+const InvoiceLineSchema = z.object({
+  linea: z.coerce.number().optional(),
+  descripcion: z.string().optional(),
+  observaciones: z.string().optional(),
+  cantidad: z.coerce.number(),
+  precio: z.coerce.number(),
+  total: z.coerce.number().optional(),
+  id_articulo: z.union([z.string(), z.number()]).optional().nullable(),
+  iva: z.coerce.number().optional(),
+  re: z.coerce.number().optional(),
+});
+
+const CreateEmpresaSchema = z.object({
+  nombre: z.string().min(1),
+  direccion: z.string().min(1),
+  c_postal: z.string().min(1).max(12),
+  poblacion: z.string().min(1),
+  provincia: z.string().min(1),
+  telefono: z.string().default(""),
+  cif: z.string().min(1),
+  email: z.string().email(),
+  logotipo: z.string().default(""),
+  activa: z.boolean().default(true),
+});
+
+const CreateEmpresaUserSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  password: z.string().min(6),
+  token: z.string().default(""),
+  css: z.string().default("#1a1c1eff"),
+  image_url: z.string().default(""),
+});
+
+function parseInvoiceLines(lines: string | undefined) {
+  if (!lines) return [];
+  try {
+    const raw = JSON.parse(lines);
+    const result = z.array(InvoiceLineSchema).safeParse(raw);
+    return result.success ? result.data : [];
+  } catch {
+    return [];
+  }
+}
 
 export type State = { 
   errors?: {
@@ -331,10 +379,10 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
   let tax_ivaInCents = 0;
   let tax_rec_equivalenciaInCents = 0;
 
-  const parsedLines = lines ? JSON.parse(lines) : [];
+  const parsedLines = parseInvoiceLines(lines);
 
   if (customer.tiene_iva) {
-    parsedLines.forEach((line: any) => {
+    parsedLines.forEach((line) => {
       const lineBaseInCents = Math.round((Number(line.cantidad) * Number(line.precio)) * 100);
       const lineIvaRate = Number(line.iva) || 21;
       
@@ -398,7 +446,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
 
     // Insertar las líneas de la factura si existen
     if (lines) {
-      const parsedLines = JSON.parse(lines);
+      const parsedLines = parseInvoiceLines(lines);
       for (const line of parsedLines) {
         await sql`
           INSERT INTO invoices_lines (id_invoice, linea, descripcion, observaciones, cantidad, precio, total, id_articulo, id_empresa, iva, re)
@@ -409,7 +457,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
             ${line.observaciones}, 
             ${Math.round(line.cantidad * 100)}, 
             ${Math.round(line.precio * 100)}, 
-            ${Math.round(line.total * 100)}, 
+            ${Math.round((line.total ?? line.cantidad * line.precio) * 100)}, 
             ${line.id_articulo}, 
             ${idEmpresa}, 
             ${line.iva || 21}, 
@@ -490,10 +538,10 @@ export async function updateInvoice(
   let tax_ivaInCents = 0;
   let tax_rec_equivalenciaInCents = 0;
 
-  const parsedLines = lines ? JSON.parse(lines) : [];
+  const parsedLines = parseInvoiceLines(lines);
 
   if (customer.tiene_iva) {
-    parsedLines.forEach((line: any) => {
+    parsedLines.forEach((line) => {
       const lineBaseInCents = Math.round((Number(line.cantidad) * Number(line.precio)) * 100);
       const lineIvaRate = Number(line.iva) || 21;
       
@@ -534,25 +582,32 @@ export async function updateInvoice(
     let finalHash = currentInvoice.hash || null;
     let finalPrevHash = null;
 
-    // Si se bloquea y es Factura, generamos el hash (y número si venía de Pedido)
+    // Si el usuario cambia el tipo de documento (ej: de Pedido a Factura o viceversa),
+    // siempre debemos asignarle el siguiente número correlativo disponible para ese nuevo tipo.
+    if (currentTipo !== tipo) {
+      const nextNumberResult = await sql`
+        SELECT COALESCE(MAX(invoice_number), 0) + 1 as next_number 
+        FROM invoices 
+        WHERE id_empresa = ${idEmpresa} 
+        AND date_part('year', date) = date_part('year', ${fecha}::date)
+        AND tipo = ${tipo}
+      `;
+      finalInvoiceNumber = nextNumberResult.rows[0].next_number;
+    }
+
+    // Si se bloquea y es Factura, generamos el hash (VeriFactu)
     if (isLocking && tipo === 'Factura') {
       bloqueada = true;
-      if (currentTipo === 'Pedido' || !currentInvoice.hash) {
-        const [nextNumberResult, lastHashResult, empresaResult] = await Promise.all([
-        sql`SELECT COALESCE(MAX(invoice_number), 0) + 1 as next_number FROM invoices WHERE id_empresa = ${idEmpresa} AND date_part('year', date) = date_part('year', ${fecha}::date) AND tipo = 'Factura'`,
-        sql`SELECT hash FROM invoices WHERE id_empresa = ${idEmpresa} AND tipo = 'Factura' AND hash IS NOT NULL AND hash != '' ORDER BY date DESC, invoice_number DESC, id DESC LIMIT 1`,
-        sql`SELECT cif FROM empresas WHERE id = ${idEmpresa}`
-      ]);
-      
-      // Si era un Pedido, le asignamos el SIGUIENTE número correlativo de las facturas
-      if (currentTipo === 'Pedido') {
-        finalInvoiceNumber = nextNumberResult.rows[0].next_number;
-      }
-      
-      finalPrevHash = lastHashResult.rows[0]?.hash || '';
-      const empresa = empresaResult.rows[0];
-      const hashData = `${empresa.cif || ''}|${invoice_serie ? invoice_serie + '-' : ''}${finalInvoiceNumber}|${fecha}|${totalInCents}|${finalPrevHash}`;
-      finalHash = generateInvoiceHash(hashData);
+      if (!currentInvoice.hash) {
+        const [lastHashResult, empresaResult] = await Promise.all([
+          sql`SELECT hash FROM invoices WHERE id_empresa = ${idEmpresa} AND tipo = 'Factura' AND hash IS NOT NULL AND hash != '' ORDER BY date DESC, invoice_number DESC, id DESC LIMIT 1`,
+          sql`SELECT cif FROM empresas WHERE id = ${idEmpresa}`
+        ]);
+        
+        finalPrevHash = lastHashResult.rows[0]?.hash || '';
+        const empresa = empresaResult.rows[0];
+        const hashData = `${empresa.cif || ''}|${invoice_serie ? invoice_serie + '-' : ''}${finalInvoiceNumber}|${fecha}|${totalInCents}|${finalPrevHash}`;
+        finalHash = generateInvoiceHash(hashData);
       }
     }
 
@@ -590,7 +645,7 @@ export async function updateInvoice(
     await sql`DELETE FROM invoices_lines WHERE id_invoice = ${id} AND id_empresa = ${idEmpresa}`;
 
     if (lines) {
-      const parsedLines = JSON.parse(lines);
+      const parsedLines = parseInvoiceLines(lines);
       for (const line of parsedLines) {
         await sql`
           INSERT INTO invoices_lines (id_invoice, linea, descripcion, observaciones, cantidad, precio, total, id_articulo, id_empresa, iva, re)
@@ -601,7 +656,7 @@ export async function updateInvoice(
             ${line.observaciones}, 
             ${Math.round(line.cantidad * 100)}, 
             ${Math.round(line.precio * 100)}, 
-            ${Math.round(line.total * 100)}, 
+            ${Math.round((line.total ?? line.cantidad * line.precio) * 100)}, 
             ${line.id_articulo || null}, 
             ${idEmpresa}, 
             ${line.iva || 21}, 
@@ -614,8 +669,8 @@ export async function updateInvoice(
     console.error("Error al actualizar la factura:", error);
     return { message: "Error en la base de datos: No se ha podido actualizar la factura." };
   }
-  revalidatePath("/dashboard/invoices");
-  redirect("/dashboard/invoices");
+  revalidatePath("/dashboard/invoices"); // Usamos revalidatePath para limpiar la caché de la ruta /dashboard/invoices
+  redirect("/dashboard/invoices"); // Usamos redirect para redirigir a la ruta /dashboard/invoices
 }
 
 export async function deleteInvoice(id: string, formData?: FormData) {
@@ -759,6 +814,8 @@ export async function createCustomer(data: Omit<Customer, "id">): Promise<State>
       VALUES (${name}, ${email}, ${image_url}, ${direccion},${c_postal},${poblacion},${provincia},${telefono},${cif},${pais}, ${id_empresa}, ${tiene_iva}, ${tiene_re})
     `;
 
+    revalidatePath("/dashboard/customers"); // para que se refleje en las vistas de facturas
+
     // Devolver el cliente creado
     return {
       success: true,
@@ -775,7 +832,15 @@ export async function createCustomer(data: Omit<Customer, "id">): Promise<State>
 
 // Función para actualizar un cliente
 export async function updateCustomer(id: string, data: Omit<Customer, "id">) {
-  const {name, email, image_url, direccion, c_postal, poblacion, provincia, telefono, cif, pais, tiene_iva, tiene_re,} = data;
+  const validatedFields = UpdateCustomer.safeParse(data);
+  if (!validatedFields.success) {
+    return {
+      success: false,
+      message: "Datos del cliente inválidos. Revisa los campos en rojo.",
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+  const {name, email, image_url, direccion, c_postal, poblacion, provincia, telefono, cif, pais, tiene_iva, tiene_re,} = validatedFields.data;
   const idEmpresa = await requireEmpresaId();
   try {
     // Consulta SQL para actualizar un cliente
@@ -853,22 +918,27 @@ export async function updateArticulo(
   const { codigo, descripcion, precio, iva, stock, imagen } = data;
   const idEmpresa = await requireEmpresaId();
 
+  // Convertir precio y stock a céntimos antes de guardar
+  const precioCentimos = Math.round(Number(precio) * 100);
+  const stockCentimos = Math.round(Number(stock) * 100);
+
   // Consulta SQL para actualizar un artículo
   const result = await sql`
     UPDATE articulos
     SET 
       codigo = ${codigo}, 
       descripcion = ${descripcion}, 
-      precio = ${precio}, 
+      precio = ${precioCentimos}, 
       iva = ${iva}, 
-      stock = ${stock}, 
+      stock = ${stockCentimos}, 
       imagen = ${JSON.stringify(imagen)}
     WHERE id = ${id} and id_empresa = ${idEmpresa}
     RETURNING id, codigo, descripcion, precio, iva, stock, imagen;
   `;
 
-  // Devolver el artículo actualizado
-  return result.rows[0];
+  revalidatePath("/dashboard/articulos");
+
+  return { success: true, data: result.rows[0] };
 }
 
 // Función para crear un artículo
@@ -878,21 +948,27 @@ export async function createArticulo(
   const { codigo, descripcion, precio, iva, stock, imagen } = data;
   const idEmpresa = await requireEmpresaId();
 
+  // Convertir precio y stock a céntimos antes de guardar
+  const precioCentimos = Math.round(Number(precio) * 100);
+  const stockCentimos = Math.round(Number(stock) * 100);
+
   // Consulta SQL para insertar un nuevo artículo
   const result = await sql`
     INSERT INTO articulos (codigo, descripcion, precio, iva, stock, imagen, id_empresa)
-    VALUES (${codigo}, ${descripcion}, ${precio}, ${iva}, ${stock}, ${JSON.stringify(
+    VALUES (${codigo}, ${descripcion}, ${precioCentimos}, ${iva}, ${stockCentimos}, ${JSON.stringify(
       imagen,
     )}, ${idEmpresa})
     RETURNING id, codigo, descripcion, precio, iva, stock, imagen;
   `;
 
-  // Devolver el artículo creado
-  return result.rows[0];
+  revalidatePath("/dashboard/articulos");
+
+  return { success: true, data: result.rows[0] };
 }
 
 // Función para eliminar una imagen de un artículo
 export async function deleteArticuloImage(articuloId: number, imageId: number) {
+  const idEmpresa = await requireEmpresaId();
   try {
     const result = await sql`
 UPDATE articulos
@@ -903,7 +979,7 @@ UPDATE articulos
         )
         FROM jsonb_array_elements(imagen) elem
       )
-      WHERE id = ${articuloId}
+      WHERE id = ${articuloId} AND id_empresa = ${idEmpresa}
     `;
     return result;
   } catch (error) {
@@ -930,45 +1006,51 @@ export async function handleDeleteImage(articuloId: number, imageId: number) {
 }
 
 export async function deleteUser(id: string) {
-  await sql`DELETE FROM users WHERE id = ${id}`;
+  await requireAdmin();
+  const idEmpresa = await requireEmpresaId();
+  await sql`DELETE FROM users WHERE id = ${id} AND id_empresa = ${idEmpresa}`;
   revalidatePath("/dashboard/users");
 }
 
 // Función para actualizar un usuario
 export async function updateUser(id: string, data: Omit<User, "id">) {
+  await requireAdmin();
+  const idEmpresa = await requireEmpresaId();
   const { name, email, password, type, token, css, image_url } = data;
 
-  // Encriptar la contraseña si se proporciona una nueva
   if (password) {
-    const saltRounds = 5; // nivel de seguridad de bcrypt mas alto es 10 mas lento pero mas seguro
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    
-    // Consulta SQL para actualizar un usuario (excluyendo nombre y email que son inmutables)
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
+
     const result = await sql`
       UPDATE users
       SET password = ${hashedPassword}, type = ${type}, token = ${token}, css = ${css}, image_url = ${image_url}
-      WHERE id = ${id}
-      RETURNING id, name, email, password, type, token, css, image_url;
+      WHERE id = ${id} AND id_empresa = ${idEmpresa}
+      RETURNING id, id_empresa, name, email, type, token, css, image_url;
     `;
-    return result.rows[0];
-  } else {
-    const result = await sql`
-      UPDATE users
-      SET type = ${type}, token = ${token}, css = ${css}, image_url = ${image_url}
-      WHERE id = ${id}
-      RETURNING id, name, email, password, type, token, css, image_url;
-    `;
-    
-    // Devolver el usuario actualizado
-    return result.rows[0];
+    revalidatePath("/dashboard/users");
+    return { success: true, data: result.rows[0] };
   }
+
+  const result = await sql`
+    UPDATE users
+    SET type = ${type}, token = ${token}, css = ${css}, image_url = ${image_url}
+    WHERE id = ${id} AND id_empresa = ${idEmpresa}
+    RETURNING id, id_empresa, name, email, type, token, css, image_url;
+  `;
+
+  revalidatePath("/dashboard/users");
+  return { success: true, data: result.rows[0] };
 }
 
 export async function createUser(data: Omit<User, "id">) {
+  await requireAdmin();
+  const sessionEmpresaId = await requireEmpresaId();
   let { name, email, password, type, token, id_empresa, css, image_url } = data;
 
   if (!id_empresa) {
-    id_empresa = await requireEmpresaId();
+    id_empresa = sessionEmpresaId;
+  } else if (id_empresa !== sessionEmpresaId) {
+    throw new Error("No autorizado.");
   }
 
   // Si no se proporciona un CSS, usamos el del usuario actual o el por defecto
@@ -982,18 +1064,17 @@ export async function createUser(data: Omit<User, "id">) {
     throw new Error("La contraseña es obligatoria.");
   }
 
-  // Encriptar la contraseña
-  const saltRounds = 5; // nivel de encriptacion (más alto = más seguro, pero más lento)
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
   const result = await sql`
     INSERT INTO users (name, email, password, type, token, id_empresa, css, image_url)
     VALUES (${name}, ${email}, ${hashedPassword}, ${type}, ${token}, ${id_empresa}, ${css}, ${image_url})
-    RETURNING id, name, email, password, type, token, id_empresa, css, image_url;
+    RETURNING id, id_empresa, name, email, type, token, css, image_url;
   `;
 
   // Devolver el usuario creado
-  return result.rows[0];
+  revalidatePath("/dashboard/users");
+  return { success: true, data: result.rows[0] };
 }
 
 export async function signOutAction() {
@@ -1001,12 +1082,22 @@ export async function signOutAction() {
 }
 
 export async function deleteEmpresa(id: string) {
+  await requireAdmin();
+  const idEmpresa = await requireEmpresaId();
+  if (Number(id) !== idEmpresa) {
+    throw new Error("No autorizado.");
+  }
   await sql`DELETE FROM empresas WHERE id = ${id}`;
   revalidatePath("/dashboard/empresas");
 }
 
 // Función para actualizar una empresa
 export async function updateEmpresa(id: string, data: Omit<Empresas, "id">) {
+  await requireAdmin();
+  const idEmpresa = await requireEmpresaId();
+  if (Number(id) !== idEmpresa) {
+    throw new Error("No autorizado.");
+  }
   const { nombre, direccion, c_postal, poblacion, provincia, telefono, cif, email, logotipo, activa } = data;
 
   const result = await sql`
@@ -1015,7 +1106,7 @@ export async function updateEmpresa(id: string, data: Omit<Empresas, "id">) {
     WHERE id = ${id}
     RETURNING id, nombre, logotipo;
   `;
-  
+
   revalidatePath("/dashboard/empresas");
   return result.rows[0];
 }
@@ -1026,6 +1117,24 @@ export async function createEmpresa(
   data: Omit<Empresas, "id">,
   initialUser?: Omit<User, "id" | "id_empresa">,
 ) {
+  const empresaValidation = CreateEmpresaSchema.safeParse(data);
+  if (!empresaValidation.success) {
+    throw new Error("Datos de empresa inválidos.");
+  }
+
+  if (initialUser) {  
+    const userValidation = CreateEmpresaUserSchema.safeParse(initialUser);
+    if (!userValidation.success) { 
+      throw new Error("Datos del administrador inválidos.");
+    }
+
+    // Comprobar si el correo del usuario ya existe en la base de datos si existe lanza error y se detiene el proceso de creación de la empresa
+    const existingUser = await sql`SELECT id FROM users WHERE email = ${initialUser.email}`;
+    if (existingUser.rows.length > 0) {
+      throw new Error("El correo electrónico ya ha sido registrado anteriormente.");
+    }
+  }
+
   const {
     nombre,
     direccion,
@@ -1037,7 +1146,7 @@ export async function createEmpresa(
     email,
     logotipo,
     activa,
-  } = data;
+  } = empresaValidation.data;
 
   // Insertar la empresa
   const result = await sql`
@@ -1059,13 +1168,13 @@ export async function createEmpresa(
 
   // Si se ha pasado un usuario inicial, crearlo y asociarlo a la nueva empresa
   if (initialUser) {
+    const userData = CreateEmpresaUserSchema.parse(initialUser);
     try {
-      // we merge the newly-created empresa id here before delegating to
-      // createUser, satisfying its expectation for `id_empresa`.
-      await createUser({
-        ...initialUser,
-        id_empresa: empresa.id,
-      });
+      const hashedPassword = await bcrypt.hash(userData.password, BCRYPT_ROUNDS);
+      await sql`
+        INSERT INTO users (name, email, password, type, token, id_empresa, css, image_url)
+        VALUES (${userData.name}, ${userData.email}, ${hashedPassword}, ${"admin"}, ${userData.token}, ${empresa.id}, ${userData.css}, ${userData.image_url})
+      `;
     } catch (err) {
       // opcional: puedes manejar errores de usuario aquí o propagarlos
       console.error("Failed to create initial user for empresa", err);
@@ -1097,24 +1206,33 @@ export async function updateUserCss(css: string) {
   }
 }
 
-export async function uploadImage(formData: FormData, fieldName: string = 'file') {
+export async function uploadImage(formData: FormData, fieldName: string = "file") {
+  await requireSession();
   const file = formData.get(fieldName) as File | null;
   if (!file || !file.name || file.name === "undefined") {
     return null;
   }
 
   try {
-    // Sube la imagen a Vercel Blob usando put
-    const blob = await put(file.name, file, { 
-      access: 'public',
-      // Esto hace que si subes archivos con el mismo nombre, les añade caracteres random al final para que no se sobreescriban
-      addRandomSuffix: true 
-    });
+    return await putValidatedImage(file);
+  } catch (error) {
+    console.error("Error al guardar la imagen en Blob:", error);
+    return null;
+  }
+}
 
-    console.log(`Imagen guardada correctamente en Vercel Blob: ${blob.url}`);
+/** Solo para el registro público de empresa (sin sesión). */
+export async function uploadRegistrationImage(
+  formData: FormData,
+  fieldName: string = "file",
+) {
+  const file = formData.get(fieldName) as File | null;
+  if (!file || !file.name || file.name === "undefined") {
+    return null;
+  }
 
-    // Devolvemos SOLAMENTE el nombre de guardado (pathname) para la BD
-    return blob.pathname;
+  try {
+    return await putValidatedImage(file);
   } catch (error) {
     console.error("Error al guardar la imagen en Blob:", error);
     return null;
@@ -1122,6 +1240,7 @@ export async function uploadImage(formData: FormData, fieldName: string = 'file'
 }
 
 export async function getArticulosForInvoice(query: string) {
+  await requireEmpresaId();
   const { fetchFilteredArticulos } = await import("./data");
   return await fetchFilteredArticulos(query);
 }

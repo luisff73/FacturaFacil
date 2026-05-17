@@ -48,8 +48,13 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
     };
 
     try {
-      await updateCustomer(customer.id, data);
-      router.push('/dashboard/customers');
+      const result = await updateCustomer(customer.id, data);
+      if (result.success) {
+        // router.push('/dashboard/customers');
+        setState({ errors: {}, message: 'Cliente actualizado correctamente' });
+      } else {
+        setState(result as any);
+      }
     } catch (error) {
       if (error instanceof Error) {
         setState({ errors: (error as any).errors || {}, message: error.message });
@@ -61,7 +66,7 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
     if (e.key === 'Enter') {
       const target = e.target as HTMLElement;
       if (
-        target.tagName === 'TEXTAREA' || 
+        target.tagName === 'TEXTAREA' ||
         (target.tagName === 'BUTTON' && (target as HTMLButtonElement).type === 'submit')
       ) {
         return;
@@ -72,7 +77,7 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
       const focusableElements = Array.from(
         form.querySelectorAll('input:not([type="hidden"]), select, textarea, button:not([disabled])')
       ) as HTMLElement[];
-      
+
       const index = focusableElements.indexOf(target);
       if (index > -1 && index < focusableElements.length - 1) {
         focusableElements[index + 1].focus();
@@ -185,46 +190,48 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
           </div>
         </div>
 
-        {/* Customer Codigo Postal */}
-        <div className="mb-4">
-          <label htmlFor="c_postal" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            Código Postal
-          </label>
-          <div className="relative">
-            <input
-              id="c_postal"
-              name="c_postal"
-              type="text"
-              defaultValue={customer.c_postal}
-              placeholder="Introduce el código postal del cliente"
-              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-              aria-describedby="c_postal-error"
-            />
+        < div className="grid grid-cols-[1fr_6fr] gap-4">
+          {/* Customer Codigo Postal */}
+          <div>
+            <label htmlFor="c_postal" className="mb-2 block text-sm font-medium dark:text-gray-200">
+              Código Postal
+            </label>
+            <div className="relative">
+              <input
+                id="c_postal"
+                name="c_postal"
+                type="text"
+                defaultValue={customer.c_postal}
+                placeholder="Introduce el código postal del cliente"
+                className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+                aria-describedby="c_postal-error"
+              />
+            </div>
+            <div id="c_postal-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.c_postal?.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
+                  {error}
+                </p>
+              ))}
+            </div>
           </div>
-          <div id="c_postal-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.c_postal?.map((error: string) => (
-              <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
-                {error}
-              </p>
-            ))}
-          </div>
-        </div>
 
-        {/* Customer Poblacion */}
-        <div className="mb-4">
-          <label htmlFor="poblacion" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            Población
-          </label>
-          <div className="relative">
-            <input
-              id="poblacion"
-              name="poblacion"
-              type="text"
-              defaultValue={customer.poblacion}
-              placeholder="Introduce la población del cliente"
-              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-              aria-describedby="poblacion-error"
-            />
+          {/* Customer Poblacion */}
+          <div>
+            <label htmlFor="poblacion" className="mb-2 block text-sm font-medium dark:text-gray-200">
+              Población
+            </label>
+            <div className="relative">
+              <input
+                id="poblacion"
+                name="poblacion"
+                type="text"
+                defaultValue={customer.poblacion}
+                placeholder="Introduce la población del cliente"
+                className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+                aria-describedby="poblacion-error"
+              />
+            </div>
           </div>
           <div id="poblacion-error" aria-live="polite" aria-atomic="true">
             {state.errors?.poblacion?.map((error: string) => (
@@ -235,147 +242,165 @@ const EditCustomerForm: React.FC<EditFormProps> = ({ customer }) => {
           </div>
         </div>
 
-        {/* Customer Provincia */}
-        <div className="mb-4">
-          <label htmlFor="provincia" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            Provincia
-          </label>
-          <div className="relative">
-            <input
-              id="provincia"
-              name="provincia"
-              type="text"
-              defaultValue={customer.provincia}
-              placeholder="Introduce la provincia del cliente"
-              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-              aria-describedby="provincia-error"
-            />
-          </div>
-          <div id="provincia-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.provincia?.map((error: string) => (
-              <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
-                {error}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        {/* Customer Pais */}
-        <div className="mb-4">
-          <label htmlFor="pais" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            País
-          </label>
-          <div className="relative">
-            <input
-              id="pais"
-              name="pais"
-              type="text"
-              defaultValue={customer.pais}
-              placeholder="Introduce el país del cliente"
-              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-              aria-describedby="pais-error"
-            />
-          </div>
-          <div id="pais-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.pais?.map((error: string) => (
-              <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
-                {error}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        {/* Customer Telefono */}
-        <div className="mb-4">
-          <label htmlFor="telefono" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            Teléfono
-          </label>
-          <div className="relative">
-            <input
-              id="telefono"
-              name="telefono"
-              type="text"
-              defaultValue={customer.telefono}
-              placeholder="Introduce el teléfono del cliente"
-              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-              aria-describedby="telefono-error"
-            />
-          </div>
-          <div id="telefono-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.telefono?.map((error: string) => (
-              <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
-                {error}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        {/* Customer CIF */}
-        <div className="mb-4">
-          <label htmlFor="cif" className="mb-2 block text-sm font-medium dark:text-gray-200">
-            CIF
-          </label>
-          <div className="relative">
-            <input
-              id="cif"
-              name="cif"
-              type="text"
-              defaultValue={customer.cif}
-              placeholder="Introduce el CIF del cliente"
-              className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
-              aria-describedby="cif-error"
-            />
-          </div>
-          <div id="cif-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.cif?.map((error: string) => (
-              <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
-                {error}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        {/* tax_iva Options */}
-        <fieldset className="mb-4">
-          <legend className="mb-2 block text-sm font-medium dark:text-gray-400">
-            Opciones de Impuestos
-          </legend>
-          <div className="flex gap-6 rounded-md border border-color-user-400 dark:border-color-user-700 bg-color-user-100 dark:bg-color-user-700/20 px-4 py-2">
-            <div className="flex items-center">
+        < div className="grid grid-cols-[5fr_2fr] gap-4">
+          {/* Customer Provincia */}
+          <div className="mb-4">
+            <label htmlFor="provincia" className="mb-2 block text-sm font-medium dark:text-gray-200">
+              Provincia
+            </label>
+            <div className="relative">
               <input
-                id="tiene_iva"
-                name="tiene_iva"
-                type="checkbox"
-                defaultChecked={customer.tiene_iva}
-                className="h-4 w-4 cursor-pointer border-gray-300 bg-white text-gray-700 focus:ring-2"
+                id="provincia"
+                name="provincia"
+                type="text"
+                defaultValue={customer.provincia}
+                placeholder="Introduce la provincia del cliente"
+                className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+                aria-describedby="provincia-error"
               />
-              <label htmlFor="tiene_iva" className="ml-2 text-sm font-medium text-color-user-700 dark:text-color-user-300 cursor-pointer">
-                IVA
-              </label>
             </div>
-            <div className="flex items-center">
-              <input
-                id="tiene_re"
-                name="tiene_re"
-                type="checkbox"
-                defaultChecked={customer.tiene_re}
-                className="h-4 w-4 cursor-pointer border-gray-300 bg-white text-gray-700 focus:ring-2"
-              />
-              <label htmlFor="tiene_re" className="ml-2 text-sm font-medium text-color-user-700 dark:text-color-user-300 cursor-pointer">
-                RE
-              </label>
-            </div>  
+            <div id="provincia-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.provincia?.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
+                  {error}
+                </p>
+              ))}
+            </div>
           </div>
-        </fieldset>
+
+          {/* Customer Pais */}
+          <div className="mb-4">
+            <label htmlFor="pais" className="mb-2 block text-sm font-medium dark:text-gray-200">
+              País
+            </label>
+            <div className="relative">
+              <input
+                id="pais"
+                name="pais"
+                type="text"
+                defaultValue={customer.pais}
+                placeholder="Introduce el país del cliente"
+                className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+                aria-describedby="pais-error"
+              />
+            </div>
+            <div id="pais-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.pais?.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
+                  {error}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        < div className="grid grid-cols-[1fr_1fr_2fr] gap-4">
+          {/* Customer Telefono */}
+          <div className="mb-4">
+            <label htmlFor="telefono" className="mb-2 block text-sm font-medium dark:text-gray-200">
+              Teléfono
+            </label>
+            <div className="relative">
+              <input
+                id="telefono"
+                name="telefono"
+                type="text"
+                defaultValue={customer.telefono}
+                placeholder="Introduce el teléfono del cliente"
+                className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+                aria-describedby="telefono-error"
+              />
+            </div>
+            <div id="telefono-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.telefono?.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
+                  {error}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          {/* Customer CIF */}
+          <div className="mb-4">
+            <label htmlFor="cif" className="mb-2 block text-sm font-medium dark:text-gray-200">
+              CIF
+            </label>
+            <div className="relative">
+              <input
+                id="cif"
+                name="cif"
+                type="text"
+                defaultValue={customer.cif}
+                placeholder="Introduce el CIF del cliente"
+                className="peer block w-full rounded-md border border-gray-200 dark:border-gray-700 py-1 pl-2 text-sm outline-2 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-900 dark:text-gray-200"
+                aria-describedby="cif-error"
+              />
+            </div>
+            <div id="cif-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.cif?.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400" key={error}>
+                  {error}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          {/* tax_iva Options */}
+          <fieldset className="ml-20">
+            <legend className="mb-2 block text-sm font-medium dark:text-gray-400">
+              Opciones de Impuestos
+            </legend>
+            <div className="flex gap-6 rounded-md border border-color-user-400 dark:border-color-user-700 bg-color-user-100 dark:bg-color-user-700/20 px-4 py-2">
+              <div className="flex items-center">
+                <input
+                  id="tiene_iva"
+                  name="tiene_iva"
+                  type="checkbox"
+                  defaultChecked={customer.tiene_iva}
+                  className="h-4 w-4 cursor-pointer border-gray-300 bg-white text-gray-700 focus:ring-2"
+                />
+                <label htmlFor="tiene_iva" className="ml-2 text-sm font-medium text-color-user-700 dark:text-color-user-300 cursor-pointer">
+                  IVA
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  id="tiene_re"
+                  name="tiene_re"
+                  type="checkbox"
+                  defaultChecked={customer.tiene_re}
+                  className="h-4 w-4 cursor-pointer border-gray-300 bg-white text-gray-700 focus:ring-2"
+                />
+                <label htmlFor="tiene_re" className="ml-2 text-sm font-medium text-color-user-700 dark:text-color-user-300 cursor-pointer">
+                  RE
+                </label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
 
         <div aria-live="polite" aria-atomic="true">
           {state.message && (
-            <p className="mt-2 text-sm text-red-500 dark:text-red-400">{state.message}</p>
+            <div
+              className={`mt-4 p-4 text-sm rounded-md ${state.message === 'Cliente actualizado correctamente'
+                ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-100'
+                : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100'
+                }`}
+            >
+              <p>{state.message}</p>
+            </div>
           )}
         </div>
       </div>
 
-      <div className="mt-6 flex justify-end gap-4">
+      <div className="mt-6 flex flex-wrap justify-end gap-4">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-800 px-4 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
+        >
+          Volver
+        </button>
         <Link
           href="/dashboard/customers"
           className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-800 px-4 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"

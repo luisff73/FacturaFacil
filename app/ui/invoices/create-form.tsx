@@ -5,14 +5,13 @@ import Link from 'next/link';
 import {
   CheckIcon,
   ClockIcon,
-  CloudIcon,
   CurrencyEuroIcon,
   UserCircleIcon,
   CalendarIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
 import { createInvoice, State } from '@/app/lib/actions';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState } from 'react'; // usamos el hook useActionState para manejar el estado de la acción
 import InvoiceLinesForm from '@/app/ui/invoices/invoice-lines-form';
 import QRCodePreview from '@/app/ui/invoices/qrcode-preview';
 import React from 'react';
@@ -257,7 +256,7 @@ export default function Form({ customers, series, empresaCif }: { customers: Cus
       </div>
       <div className="mt-6 flex justify-end gap-4">
         <Link href="/dashboard/invoices" className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 hover:bg-gray-200">Cancelar</Link>
-        <Button type="submit">Crear Factura</Button>
+        <Button type="submit">Crear Documento</Button>
       </div>
     </form>
   );

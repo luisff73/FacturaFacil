@@ -232,10 +232,10 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
         <InvoiceLinesForm initialLines={lines} customer={selectedCustomer} invoice={invoice} />
 
         <div className="mt-6 flex flex-col md:flex-row gap-6 justify-between items-start md:items-end">
-          {/* Estado de la factura */}
+          {/* Estado del documento */}
           <fieldset className="w-full md:w-auto">
             <legend className="mb-2 block text-sm font-medium">
-              Estado de la factura
+              Estado del documento
             </legend>
             <div className="rounded-md border border-gray-200 bg-white px-4 py-3 shadow-sm">
               <div className="flex flex-wrap gap-4">
@@ -268,7 +268,7 @@ export default function EditInvoiceForm({ invoice, customers, lines }: {
                     htmlFor="Pagada"
                     className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-color-user-500 px-3 py-1.5 text-xs font-medium text-white"
                   >
-                    Pagada <CheckIcon className="h-4 w-4" />
+                    Pagado <CheckIcon className="h-4 w-4" />
                   </label>
                 </div>
               </div>

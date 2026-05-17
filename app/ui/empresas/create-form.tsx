@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { createEmpresa, uploadImage } from '@/app/lib/actions';
+import { createEmpresa, uploadRegistrationImage } from '@/app/lib/actions';
 import Cookies from 'js-cookie';
 import { Empresas, User } from '@/app/lib/definitions';
 import Link from 'next/link';
@@ -129,7 +129,7 @@ const CreateEmpresaForm: React.FC = () => {
     if (logotipoFile && logotipoFile.size > 0) {
       const uploadData = new FormData();
       uploadData.append('logotipo', logotipoFile);
-      const uploadedPath = await uploadImage(uploadData, 'logotipo');
+      const uploadedPath = await uploadRegistrationImage(uploadData, 'logotipo');
       if (uploadedPath) {
         logotipoUrl = uploadedPath;
       }
@@ -154,7 +154,7 @@ const CreateEmpresaForm: React.FC = () => {
       const uploadData = new FormData();
       uploadData.append('file', fileInput);
 
-      const uploadedPath = await uploadImage(uploadData);
+      const uploadedPath = await uploadRegistrationImage(uploadData);
       if (uploadedPath) {
         initialUser.image_url = uploadedPath;
       }
@@ -222,11 +222,7 @@ const CreateEmpresaForm: React.FC = () => {
           <ErrorMessages field="activa" errors={errors.activa} />
         </div>
 
-        {message && (
-          <p className="mt-2 text-sm text-red-500 dark:text-red-400" aria-live="polite">
-            {message}
-          </p>
-        )}
+
         {/* Sección de usuario inicial */}
         <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
           <h3 className="mb-4 text-lg font-medium dark:text-gray-200">Usuario administrador inicial</h3>
@@ -322,6 +318,11 @@ const CreateEmpresaForm: React.FC = () => {
         </div>
       </div>
 
+      {message && (
+        <p className="mt-2 ml-10 text-sm text-red-500 dark:text-red-400" aria-live="polite">
+          {message}
+        </p>
+      )}
       <div className="mt-6 flex justify-end gap-4">
         <Link
           //href="/dashboard/empresas"

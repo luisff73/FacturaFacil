@@ -70,7 +70,8 @@ export const sendInvoiceEmail = async (
       },
     ]
   );
-};export const sendPasswordResetEmail = async (email: string, token: string, name: string) => {
+};
+export const sendPasswordResetEmail = async (email: string, token: string, name: string) => {
   const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/new-password?token=${token}`;
   
   // Renderizamos el componente React a HTML

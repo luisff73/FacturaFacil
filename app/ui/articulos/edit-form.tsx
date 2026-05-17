@@ -48,8 +48,12 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
     };
 
     try {
-      await updateArticulo(articulo.id, data);
-      router.push('/dashboard/articulos');
+      const result = await updateArticulo(articulo.id, data);
+      if (result.success) {
+        setState({ errors: {}, message: 'Artículo actualizado correctamente' });
+      } else {
+        setState(result as any);
+      }
     } catch (error) {
       if (error instanceof Error) {
         setState({ errors: (error as any).errors || {}, message: error.message });
@@ -213,7 +217,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
             <label className="mb-2 block text-sm font-medium dark:text-gray-200">Imágenes del artículo</label>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
               {images.map((img, index) => (
-                <div key={index} className="relative w-full h-32 flex dark:bg-gray-900 rounded-md">
+                <div key={index} className="relative w-full h-32 dark:bg-gray-900 rounded-md overflow-hidden">
                   <button
                     type="button"
                     onClick={() => handleDeleteImage(img.id, index)}
@@ -224,9 +228,9 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
                   <Image
                     src={img.ruta.startsWith('http') ? img.ruta : (img.ruta.startsWith('/') ? img.ruta : `${BLOB_URL}/${img.ruta}`)}
                     alt={`Imagen ${index + 1}`}
-                    width={100}
-                    height={100}
-                    className="rounded-md object-center md:object-left"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 20vw"
+                    className="rounded-md object-cover object-center md:object-left"
                   />
                 </div>
               ))}
@@ -246,7 +250,7 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
               ref={inputFileRef}
               type="file"
               accept="image/jpeg, image/png, image/webp"
-              capture="environment" // solo sirve para moviles, obliga a usar la camara
+              //capture="environment" // solo sirve para moviles, obliga a usar la camara
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file && file.size > 3 * 1024 * 1024) {
@@ -274,12 +278,27 @@ const EditArticulosForm: React.FC<EditFormProps> = ({ articulo }) => {
         </div>
 
         <div aria-live="polite" aria-atomic="true">
-          {state.message ? (
-            <p className="mt-2 text-sm text-red-500 dark:text-red-400">{state.message}</p>
-          ) : null}
+          {state.message && (
+            <div 
+              className={`mt-4 p-4 text-sm rounded-md ${
+                state.message === 'Artículo actualizado correctamente' 
+                  ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-100'
+                  : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100'
+              }`}
+            >
+              <p>{state.message}</p>
+            </div>
+          )}
         </div>
       </div>
-      <div className="mt-6 flex justify-end gap-4">
+      <div className="mt-6 flex flex-wrap justify-end gap-4">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-800 px-4 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
+        >
+          Volver
+        </button>
         <Link
           href="/dashboard/articulos"
           className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-800 px-4 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"

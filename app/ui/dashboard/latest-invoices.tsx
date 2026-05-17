@@ -33,7 +33,7 @@ export default async function LatestInvoices() {
                     className="mr-4 rounded-full object-cover"
                     width={32}
                     height={32}
-                    style={{ width: '32px', height: '32px' }}
+                    style={{ width: "auto", height: "auto" }}
                   />
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold md:text-base dark:text-white">

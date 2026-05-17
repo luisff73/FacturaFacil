@@ -32,12 +32,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const { email, password } = parsedCredentials.data;
 
           const user = await getUser(email);
-          if (!user) {
-            console.log("Usuario no encontrado:", email);
+          if (!user?.password) {
             return null;
           }
           const passwordsMatch = await bcrypt.compare(password, user.password);
-          console.log("¿Contraseña coincide?:", passwordsMatch);
           if (passwordsMatch) {
             await saveAuditLog({
               id_empresa: user.id_empresa,
@@ -58,7 +56,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
         }
 
-        console.log("Invalid credentials");
         return null;
       },
     }),

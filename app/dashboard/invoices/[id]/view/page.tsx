@@ -8,7 +8,7 @@ import { roboto } from '@/app/ui/fonts';
 import { invoices_lines } from '@/app/lib/definitions';
 import QRCodePreview from '@/app/ui/invoices/qrcode-preview';
 
-import SendInvoiceEmailButton from '@/app/ui/invoices/send-email-button';
+import { SendInvoiceEmailButton } from '@/app/ui/invoices/buttons';
 
 const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || '';
 
@@ -51,12 +51,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                 customer={customer}
                 empresa={empresa}
               />
-              <SendInvoiceEmailButton
-                invoice={invoice}
-                lines={lines}
-                customer={customer}
-                empresa={empresa}
-              />
+              <SendInvoiceEmailButton invoiceId={invoice.id} />
             </>
           )}
         </div>

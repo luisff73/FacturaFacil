@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useId } from 'react';
 import { PlusIcon, TrashIcon, MagnifyingGlassIcon, ChatBubbleLeftEllipsisIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { invoices_lines, ArticulosTableType, Customer } from '@/app/lib/definitions';
 import { getArticulosForInvoice } from '@/app/lib/actions';
@@ -25,14 +25,15 @@ function getReRate(iva: number, hasRe: boolean): number {
 }
 
 export default function InvoiceLinesForm({ initialLines = [], customer, invoice, onTotalChange }: InvoiceLinesFormProps) {
+  const idPrefix = useId();
   const [lines, setLines] = useState<Partial<invoices_lines>[]>(
     initialLines.length > 0
       ? initialLines.map(line => ({
-          ...line,
-          cantidad: line.cantidad / 100,
-          precio: line.precio / 100,
-          total: line.total / 100,
-        }))
+        ...line,
+        cantidad: line.cantidad / 100,
+        precio: line.precio / 100,
+        total: line.total / 100,
+      }))
       : [{
         linea: 1,
         descripcion: '',
@@ -145,7 +146,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       }
     ]);
     setTimeout(() => {
-      document.getElementById(`descripcion-${lines.length}`)?.focus();
+      document.getElementById(`${idPrefix}-descripcion-${lines.length}`)?.focus();
     }, 50);
   };
 
@@ -182,18 +183,18 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       ...newLines[index],
       id_articulo: article.id,
       descripcion: article.descripcion,
-      precio: Number(article.precio) / 100,
+      precio: Number(article.precio),
       iva: iva,
       re: re,
       cantidad: 1,
-      total: Number(article.precio) / 100
+      total: Number(article.precio)
     };
 
     setLines(newLines);
     setSearchResults([]);
     setActiveSearchIndex(null);
     setTimeout(() => {
-      const qtyInput = document.getElementById(`cantidad-${index}`) as HTMLInputElement;
+      const qtyInput = document.getElementById(`${idPrefix}-cantidad-${index}`) as HTMLInputElement;
       if (qtyInput) {
         qtyInput.focus();
         qtyInput.select();
@@ -224,7 +225,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                 <label className="block text-xs font-medium text-gray-500 mb-1 leading-none md:hidden">Artículo / Descripción</label>
                 <div className="relative">
                   <input
-                    id={`descripcion-${index}`}
+                    id={`${idPrefix}-descripcion-${index}`}
                     type="text"
                     value={line.descripcion || ''}
                     onFocus={(e) => e.target.select()}
@@ -237,7 +238,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                         e.preventDefault();
                         e.stopPropagation();
                         if (searchResults.length === 0) {
-                          document.getElementById(`cantidad-${index}`)?.focus();
+                          document.getElementById(`${idPrefix}-cantidad-${index}`)?.focus();
                         }
                       }
                     }}
@@ -277,7 +278,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                                 {art.codigo}
                               </span>
                               <span className="text-[10px] text-color-user-600 font-medium">
-                                {(art.precio / 100).toFixed(2)}€
+                                {Number(art.precio).toFixed(2)}€
                               </span>
                             </div>
                           </div>
@@ -322,7 +323,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
               <div className="md:col-span-1 flex flex-col">
                 <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">Cant.</label>
                 <input
-                  id={`cantidad-${index}`}
+                  id={`${idPrefix}-cantidad-${index}`}
                   type="text"
                   inputMode="decimal"
                   value={line.cantidad || 1}
@@ -337,7 +338,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       e.stopPropagation();
-                      document.getElementById(`precio-${index}`)?.focus();
+                      document.getElementById(`${idPrefix}-precio-${index}`)?.focus();
                     }
                   }}
                   className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-color-user-500 py-1 text-center font-mono"
@@ -347,7 +348,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
               <div className="md:col-span-1 flex flex-col">
                 <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">Precio</label>
                 <input
-                  id={`precio-${index}`}
+                  id={`${idPrefix}-precio-${index}`}
                   type="text"
                   inputMode="decimal"
                   value={line.precio || 0}
@@ -363,7 +364,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       e.stopPropagation();
-                      document.getElementById(`iva-${index}`)?.focus();
+                      document.getElementById(`${idPrefix}-iva-${index}`)?.focus();
                     }
                   }}
                   className="w-full text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-color-user-500 py-1 text-center font-mono"
@@ -382,14 +383,14 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
               <div className="md:col-span-1 flex flex-col">
                 <label className="block text-[10px] font-medium text-gray-400 mb-1 text-center md:hidden uppercase">IVA</label>
                 <select
-                  id={`iva-${index}`}
+                  id={`${idPrefix}-iva-${index}`}
                   value={line.iva || 21}
                   onChange={(e) => updateLine(index, 'iva', Number(e.target.value))}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       e.stopPropagation();
-                      document.getElementById('btn-add-line')?.focus();
+                      document.getElementById(`${idPrefix}-btn-add-line`)?.focus();
                     }
                   }}
                   className="w-full text-xs border-gray-300 rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-color-user-500 py-1 px-1 text-center"
@@ -421,7 +422,7 @@ export default function InvoiceLinesForm({ initialLines = [], customer, invoice,
       </div>
 
       <button
-        id="btn-add-line"
+        id={`${idPrefix}-btn-add-line`}
         type="button"
         onClick={addLine}
         onKeyDown={(e) => {

@@ -53,7 +53,8 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
     try {
       const result = await createCustomer(data);
       if (result.success) {
-        router.push(redirectPath);
+        setState({ errors: {}, message: 'Cliente creado correctamente', success: true });
+        // router.push(redirectPath);
       } else {
         setState(result);
       }
@@ -379,8 +380,28 @@ const CreateCustomerForm: React.FC<FormProps> = () => {
             </div>
           </div>
         </fieldset>
+        <div aria-live="polite" aria-atomic="true">
+          {state.message && (
+            <div 
+              className={`mt-4 p-4 text-sm rounded-md ${
+                state.message === 'Cliente creado correctamente' 
+                  ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-100'
+                  : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100'
+              }`}
+            >
+              <p>{state.message}</p>
+            </div>
+          )}
+        </div>
       </div>
       <div className="mt-6 flex flex-wrap justify-end gap-4">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-700 px-4 text-sm font-medium text-gray-600 dark:text-gray-200 transition-colors hover:bg-gray-200 dark:hover:bg-gray-600"
+        >
+          Volver
+        </button>
         <Link
           href="/dashboard/customers"
           className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-700 px-4 text-sm font-medium text-gray-600 dark:text-gray-200 transition-colors hover:bg-gray-200 dark:hover:bg-gray-600"

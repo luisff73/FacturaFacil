@@ -7,7 +7,7 @@ export type User = {
   id_empresa: number;
   name: string;
   email: string;
-  password: string;
+  password?: string;
   token: string;
   type: "admin" | "user";
   css: string;

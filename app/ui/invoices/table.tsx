@@ -1,19 +1,13 @@
 import Image from 'next/image';
-import { UpdateInvoice, DeleteInvoice, PrintInvoice, AnnulInvoice } from '@/app/ui/invoices/buttons';
-import SendInvoiceEmailButton from '@/app/ui/invoices/send-email-button';
+import { UpdateInvoice, DeleteInvoice, PrintInvoice, AnnulInvoice, SendInvoiceEmailButton } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredInvoices } from '@/app/lib/data';
 
 const BLOB_URL = process.env.NEXT_PUBLIC_BLOB_URL || '';
 
-export default async function InvoicesTable({
-  query,
-  currentPage,
-}: {
-  query: string;
-  currentPage: number;
-}) {
+export default async function InvoicesTable({query,currentPage,}: {query: string;currentPage: number;}) {
+
   const invoices = await fetchFilteredInvoices(query, currentPage);
 
   return (
@@ -25,11 +19,19 @@ export default async function InvoicesTable({
               <div key={invoice.id} className="mb-4 w-full rounded-md bg-white dark:bg-gray-900 p-2">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="flex items-center">
-                      <p className="text-sm dark:text-white">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`flex items-center justify-center min-w-[28px] h-7 rounded-full text-xs font-bold text-white ${
+                          invoice.tipo === 'Factura' ? 'bg-color-user-500' : 'bg-gray-400'
+                        }`}
+                        title={invoice.tipo}
+                      >
+                        {invoice.tipo === 'Factura' ? 'VF' : 'VP'}
+                      </div>
+                      <p className="text-sm font-bold dark:text-white">
                         {new Date(invoice.date).getFullYear()}/{invoice.invoice_serie}/{invoice.invoice_number}
                       </p>
-                      <p className="dark:text-white ml-2">{invoice.name}</p>
+                      <p className="dark:text-white ml-2 truncate">{invoice.name}</p>
                     </div>
                   </div>
                   {/* <InvoiceStatus status={invoice.status} tipo={invoice.tipo} bloqueada={invoice.bloqueada} /> */}
@@ -59,19 +61,19 @@ export default async function InvoicesTable({
           <table className="hidden min-w-full text-gray-900 dark:text-white md:table"><thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-4 py-5 font-medium dark:text-gray-200 sm:pl-6">
-                  Nº Documento
+                  Documento
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
                   Fecha
                 </th>
-                <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
+                <th scope="col" className="w-[40%] px-3 py-5 font-medium dark:text-gray-200">
                   Cliente
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
                   Total
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium dark:text-gray-200">
-                  Tipo
+                  Estado
                 </th>
                 <th scope="col" className="relative py-3 pl-6 pr-3">
                   <span className="sr-only">Edit</span>
@@ -85,31 +87,26 @@ export default async function InvoicesTable({
                   className="w-full border-b dark:border-gray-700 py-1 text-sm last-of-type:border-none hover:bg-gray-100 dark:hover:bg-gray-800 [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
                   <td className="whitespace-nowrap py-1 pl-6 pr-3">
-                    <span className="font-bold">
-                      {new Date(invoice.date).getFullYear()}/{invoice.invoice_serie}/{invoice.invoice_number}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`flex items-center justify-center w-9 h-7 rounded-full text-xs font-bold text-white ${
+                          invoice.tipo === 'Factura' ? 'bg-color-user-500' : 'bg-gray-400'
+                        }`}
+                        title={invoice.tipo}
+                      >
+                        {invoice.tipo === 'Factura' ? 'VF' : 'VP'}
+                      </div>
+                      <span className="font-bold">
+                        {new Date(invoice.date).getFullYear()}/{invoice.invoice_serie}/{invoice.invoice_number}
+                      </span>
+                    </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-1">
                     {formatDateToLocal(invoice.date)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-1">
                     <div className="flex items-center gap-3">
-                      <Image
-                        src={
-                          invoice.image_url && invoice.image_url.startsWith('http')
-                            ? invoice.image_url
-                            : invoice.image_url && invoice.image_url.startsWith('/')
-                              ? invoice.image_url
-                            : invoice.image_url
-                                ? `${BLOB_URL}/${invoice.image_url}`
-                              : `https://ui-avatars.com/api/?name=${invoice.name}&background=random`
-                        }
-                        className="rounded-full object-cover"
-                        width={28}
-                        height={28}
-                        style={{ width: '28px', height: '28px' }}
-                        alt={`${invoice.name}'s profile picture`}
-                      />
+
                       <p className="dark:text-white">{invoice.name}</p>
                     </div>
                   </td>

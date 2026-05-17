@@ -4,6 +4,9 @@
 // Permite ejecutar consultas SQL de manera segura y eficiente.
 import { sql } from "@vercel/postgres";
 import { auth } from "../../auth";
+import { requireEmpresaId } from "./auth-utils";
+
+export { requireEmpresaId };
 
 // Importación de tipos y definiciones desde ./definitions:
 import {
@@ -22,17 +25,6 @@ import {
 } from "./definitions";
 
 import { formatCurrency } from "./utils";
-
-// Extrae id_empresa del usuario autenticado
-export async function requireEmpresaId(): Promise<number> {
-  const session = await auth();
-  if (!session || !session.user || !session.user.id_empresa) {
-    // si no hay usuario retornara un id ficticio (0) que los queries de SQL
-    // buscarán sin romper el build en vez de forzar una intercepción por código.
-    return 0;
-  }
-  return Number(session.user.id_empresa);
-}
 
 export async function fetchArticulosMostWanted(){
   const idEmpresa = await requireEmpresaId();
@@ -453,6 +445,8 @@ export async function fetchFilteredArticulos(query: string) {
 
     const articulos = data.rows.map((articulo) => ({
       ...articulo,
+      precio: parseFloat(articulo.precio as unknown as string) / 100,
+      stock: parseFloat(articulo.stock as unknown as string) / 100,
     }));
 
     return articulos;
@@ -493,9 +487,9 @@ export async function fetchArticulosById(
 
     const articulos = data.rows.map((articulo) => ({
       ...articulo,
-      precio: parseFloat(articulo.precio as unknown as string),
+      precio: parseFloat(articulo.precio as unknown as string) / 100,
       iva: parseFloat(articulo.iva as unknown as string),
-      stock: parseFloat(articulo.stock as unknown as string),
+      stock: parseFloat(articulo.stock as unknown as string) / 100,
       imagen: articulo.imagen,
     }));
 
@@ -515,7 +509,11 @@ export async function fetchArticulos() {
       ORDER BY codigo ASC
     `;
 
-    const articulos = data.rows;
+    const articulos = data.rows.map(articulo => ({
+      ...articulo,
+      precio: parseFloat(articulo.precio as unknown as string) / 100,
+      stock: parseFloat(articulo.stock as unknown as string) / 100
+    }));
     return articulos;
   } catch (err) {
     console.error("Database Error:", err);
@@ -526,7 +524,7 @@ export async function fetchUsers() {
   const idEmpresa = await requireEmpresaId();
   try {
     const data = await sql<User>`
-      SELECT *
+      SELECT id, id_empresa, name, email, type, token, css, image_url
       FROM users where users.id_empresa = ${idEmpresa}
       ORDER BY name ASC
     `;
@@ -544,9 +542,9 @@ export async function fetchFilteredUsers(query: string) {
     const data = await sql<User>`
       SELECT
         id,
+        id_empresa,
         name,
         email,
-        password,
         type,
         token,
         css,
@@ -575,9 +573,9 @@ export async function fetchUsersById(id: string): Promise<User | null> {
     const data = await sql<User>`
       SELECT
         id,
+        id_empresa,
         name,
         email,
-        password,
         type,
         token,
         css,
@@ -598,6 +596,18 @@ export async function fetchUsersById(id: string): Promise<User | null> {
 }
 
 export async function fetchEmpresaById(id: string): Promise<Empresas | null> {
+  const session = await auth();
+  const sessionEmpresaId = session?.user?.id_empresa;
+  const isAdmin = session?.user?.type === "admin";
+
+  if (
+    sessionEmpresaId &&
+    Number(id) !== Number(sessionEmpresaId) &&
+    !isAdmin
+  ) {
+    return null;
+  }
+
   try {
     const data = await sql<Empresas>`
       SELECT

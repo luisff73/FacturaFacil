@@ -68,8 +68,12 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
     };
 
     try {
-      await createUser(data);
-      router.push('/dashboard/users');
+      const result = await createUser(data);
+      if (result && result.success) {
+        setState({ errors: {}, message: 'Usuario creado correctamente' });
+      } else {
+        setState(result as any);
+      }
     } catch (error) {
       if (error instanceof Error) {
         setState({ errors: (error as any).errors || {}, message: error.message });
@@ -247,13 +251,28 @@ const CreateUserForm: React.FC<CreateUserFormProps> = () => {
         </div>
 
         <div aria-live="polite" aria-atomic="true">
-          {state.message ? (
-            <p className="mt-2 text-sm text-red-500 dark:text-red-400">{state.message}</p>
-          ) : null}
+          {state.message && (
+            <div 
+              className={`mt-4 p-4 text-sm rounded-md ${
+                state.message === 'Usuario creado correctamente' 
+                  ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-100'
+                  : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100'
+              }`}
+            >
+              <p>{state.message}</p>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="mt-6 flex justify-end gap-4">
+      <div className="mt-6 flex flex-wrap justify-end gap-4">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-800 px-4 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
+        >
+          Volver
+        </button>
         <Link
           href="/dashboard/users"
           className="flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-800 px-4 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"

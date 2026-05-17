@@ -30,8 +30,8 @@ export default async function FacturaFacilLogo({ size = 'large' }: { size?: 'sma
         width={160}
         height={140}
         alt="Logo Factura Fácil"
-        className={`${isSmall ? 'h-14 w-14' : 'h-20 w-20 self-top'}  md:h-36 md:w-36 self-start transition-all`}
-        style={{ height: 'auto' }}
+        className={`${isSmall ? 'h-14 w-14' : 'h-20 w-20 self-top'}  md:h-36 md:w-36 self-start transition-all object-contain`}
+        style={{ width: "auto", height: "auto" }}
         priority={true}
       />
       <div className="flex flex-col ml-4 items-start">
@@ -87,8 +87,8 @@ export async function FacturaFacilUser() {
         width={60}
         height={60}
         alt="Logo Usuario"
-        className="h-5 w-5 md:h-10 md:w-10 self-start"
-        style={{ height: 'auto' }}
+        className="h-5 w-5 md:h-10 md:w-10 self-start rounded-full object-cover"
+        style={{ width: "auto", height: "auto" }}
         priority={true}
       />
       <div className="flex flex-col ml-3 items-center">

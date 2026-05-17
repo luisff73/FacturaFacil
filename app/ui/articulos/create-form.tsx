@@ -44,8 +44,12 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
     };
 
     try {
-      await createArticulo(data);
-      router.push('/dashboard/articulos');
+      const result = await createArticulo(data);
+      if (result.success) {
+        setState({ errors: {}, message: 'Artículo creado correctamente' });
+      } else {
+        setState(result as any);
+      }
     } catch (error) {
       if (error instanceof Error) {
         setState({ errors: (error as any).errors || {}, message: error.message }); // actualiza el estado del formulario y muestra los errores
@@ -200,7 +204,7 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
               ref={inputFileRef} // referencia al input file para poder acceder a el
               type="file" // tipo de input file para poder subir archivos
               accept="image/jpeg, image/png, image/webp"
-              capture="environment" // solo sirve para moviles, obliga a usar la camara
+              //capture="environment" // solo sirve para moviles, obliga a usar la camara
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file && file.size > 3 * 1024 * 1024) {
@@ -227,12 +231,27 @@ const CreateArticulosForm: React.FC<FormProps> = () => {
         </div>
 
         <div aria-live="polite" aria-atomic="true">
-          {state.message ? (
-            <p className="mt-2 text-sm text-red-500">{state.message}</p>
-          ) : null}
+          {state.message && (
+            <div 
+              className={`mt-4 p-4 text-sm rounded-md ${
+                state.message === 'Artículo creado correctamente' 
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-red-100 text-red-700'
+              }`}
+            >
+              <p>{state.message}</p>
+            </div>
+          )}
         </div>
       </div>
-      <div className="mt-6 flex justify-end gap-4">
+      <div className="mt-6 flex flex-wrap justify-end gap-4">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+        >
+          Volver
+        </button>
         <Link
           href="/dashboard/articulos"
           className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"

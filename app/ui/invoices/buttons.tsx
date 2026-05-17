@@ -1,9 +1,10 @@
 'use client';
 
-import { PencilIcon, PlusIcon, TrashIcon, PrinterIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, PlusIcon, TrashIcon, PrinterIcon, XCircleIcon, EnvelopeIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { deleteInvoice } from '@/app/lib/actions';
+import { deleteInvoice, sendInvoiceEmailByIdAction } from '@/app/lib/actions';
 import { useState, useActionState } from 'react';
+import clsx from 'clsx';
 
 export function CreateInvoice() {
   return (
@@ -143,5 +144,100 @@ export function AnnulInvoice({ id }: { id: string }) {
         </div>
       )}
     </>
+  );
+}
+
+interface SendInvoiceEmailButtonProps {
+  invoiceId: string;
+  showText?: boolean;
+}
+
+export function SendInvoiceEmailButton({
+  invoiceId,
+  showText = true,
+}: SendInvoiceEmailButtonProps) {
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
+
+  const handleSendEmail = async () => {
+    if (status === 'sending') return;
+
+    setStatus('sending');
+    try {
+      const result = await sendInvoiceEmailByIdAction(invoiceId);
+
+      if (result.success) {
+        setStatus('success');
+        setMessage(result.message);
+        setTimeout(() => setStatus('idle'), 3000);
+      } else {
+        setStatus('error');
+        setMessage(result.message);
+        setTimeout(() => setStatus('idle'), 3000);
+      }
+    } catch {
+      setStatus('error');
+      setMessage('Error al conectar con el servidor');
+      setTimeout(() => setStatus('idle'), 3000);
+    }
+  };
+
+  return (
+    <div className="relative flex items-center gap-2">
+      <button
+        onClick={handleSendEmail}
+        disabled={status === 'sending'}
+        className={clsx(
+          'flex items-center justify-center gap-2 rounded-md transition-all active:scale-95 border',
+          showText ? 'h-10 px-4 text-sm font-medium shadow-sm' : 'p-2',
+          {
+            'bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700': status === 'idle',
+            'bg-gray-400 text-white cursor-not-allowed border-transparent': status === 'sending',
+            'bg-color-user-600 text-white border-transparent': status === 'success',
+            'bg-red-600 text-white border-transparent': status === 'error',
+          }
+        )}
+        title="Enviar factura por email al cliente"
+      >
+        {status === 'idle' && (
+          <>
+            <EnvelopeIcon className="w-5" />
+            {showText && <span>Enviar Email</span>}
+          </>
+        )}
+        {status === 'sending' && (
+          <>
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            {showText && <span>Enviando...</span>}
+          </>
+        )}
+        {status === 'success' && (
+          <>
+            <CheckIcon className="h-5 w-5" />
+            {showText && <span>¡Enviado!</span>}
+          </>
+        )}
+        {status === 'error' && (
+          <>
+            <XMarkIcon className="h-5 w-5" />
+            {showText && <span>Error</span>}
+          </>
+        )}
+      </button>
+
+      {status !== 'idle' && status !== 'sending' && (
+        <div
+          className={clsx(
+            'absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-3 py-1 rounded text-xs font-bold animate-bounce shadow-lg z-50',
+            {
+              'bg-color-user-100 text-color-user-800 border border-color-user-200': status === 'success',
+              'bg-red-100 text-red-800 border border-red-200': status === 'error',
+            }
+          )}
+        >
+          {message}
+        </div>
+      )}
+    </div>
   );
 }
