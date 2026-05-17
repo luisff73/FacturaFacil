@@ -41,7 +41,6 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
                               width={28}
                               height={28}
                               style={{ width: "auto", height: "auto" }}
-                              style={{ width: "auto", height: "auto" }}
                             />
                             <p className="dark:text-white">{customer.name}</p>
                           </div>
