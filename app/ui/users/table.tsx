@@ -28,7 +28,6 @@ export default function UsersTable({ users }: UsersTableProps) {
                         height={40}
                         className="rounded-full object-cover"
                         style={{ width: "auto", height: "auto" }}
-                        style={{ height: 'auto' }}
                       />
                       <p className="dark:text-gray-200">{user.name}</p>
                     </div>
