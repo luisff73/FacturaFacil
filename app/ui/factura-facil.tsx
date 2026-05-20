@@ -28,23 +28,22 @@ export default async function FacturaFacilLogo({ size = 'large' }: { size?: 'sma
       <Image
         src="/facturafacil_logo.png" // Ruta pública
         width={160}
-        height={140}
+        height={160}
         alt="Logo Factura Fácil"
-        className={`${isSmall ? 'h-14 w-14' : 'h-20 w-20 self-top'}  md:h-36 md:w-36 self-start transition-all object-contain`}
-        style={{ width: "auto", height: "auto" }}
+        className={`${isSmall ? 'h-10 w-10' : 'h-14 w-14'} md:h-32 md:w-32 self-start transition-all object-contain`}
         priority={true}
       />
-      <div className="flex flex-col ml-4 items-start">
-        <div className="flex flex-col items-start">
-          <p className={`${isSmall ? 'text-[11px]' : 'w-full text-[15px]'} md:text-[30px] self-start mr-4`}>
+      <div className="flex flex-col ml-4 items-start flex-1 min-w-0">
+        <div className="flex flex-col items-start w-full mt-4">
+          <p className={`${isSmall ? 'text-[11px]' : 'text-[15px]'} md:text-[30px] w-full mr-4 break-words whitespace-normal`}>
             Tu programa de gestión
           </p>
-          <p className={`${isSmall ? 'text-[15px]' : 'w-full text-[15px] font-bold'} md:text-[30px] self-start mr-4 mt-2`}>
+          <p className={`${isSmall ? 'text-[15px]' : 'text-[15px] font-bold'} md:text-[30px] w-full mr-4 mt-1 break-words whitespace-normal`}>
             AUTONOMO
           </p>
         </div>
         {nombreEmpresa && (
-          <p className={`${isSmall ? 'text-[8px]' : 'w-full text-[14px]'} md:text-[24px] mt-1 md:mt-2 text-color-user-100 font-medium uppercase tracking-wide`}>
+          <p className={`${isSmall ? 'text-[8px]' : 'text-[14px]'} md:text-[18px] mt-1 md:mt-2 text-color-user-100 font-medium uppercase tracking-wide break-words whitespace-normal`}>
             {nombreEmpresa}
           </p>
         )}

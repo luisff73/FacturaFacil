@@ -6,7 +6,11 @@ const config: CapacitorConfig = {
   webDir: 'out', // Capacitor lo ignora si usas server.url
   server: {
     url: 'https://facturafacil.pro', // <--- Ponemos la url real aquí
-    cleartext: true
+    cleartext: false,
+    allowNavigation: [
+      '*.vercel-storage.com',
+      'ui-avatars.com'
+    ]
   }
 };
 
