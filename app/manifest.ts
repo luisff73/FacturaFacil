@@ -19,13 +19,25 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/facturafacil_logo.png",
         sizes: "192x192",
         type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/facturafacil_logo.png",
+        sizes: "192x192",
+        type: "image/png",
         purpose: "maskable",
       },
       {
-        src: "/grafico_movil.png",
+        src: "/facturafacil_logo.png",
         sizes: "512x512",
         type: "image/png",
-
+        purpose: "any",
+      },
+      {
+        src: "/facturafacil_logo.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
       },
     ],
   };

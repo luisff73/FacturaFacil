@@ -11,8 +11,7 @@ export const metadata: Metadata = {
     default: "Panel FacturaFacil",
   },
   description: "Tu programa de gestión autónomo FacturaFacil.",
-  metadataBase: new URL("https://proyecto-next-git-vercel-react-server-c-1c3ef9-jvrluis-projects.vercel.app/"), // Actualizar esto con el dominio real
-  manifest: "/manifest.json", // Añadir esto para el manifiesto de la PWA
+  metadataBase: new URL("https://facturafacil.pro"), // Actualizar esto con el dominio real
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
